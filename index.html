@@ -1,0 +1,3563 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project SELENA | SELE Quiz Mastery</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#11101d">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SELENA">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f6f5fb; --surface: #ffffff; --bd: #e3e0ee; --bdh: #c8c3da;
+  --text: #1c1a2e; --muted: #6c6880; --hint: #9d98b3;
+  --blue: #46399b; --blue-bg: #ece9fa; --blue-text: #392e84;
+  --gold: #c08a1f; --gold-bg: #faf1da; --gold-glow: #f0c040;
+  --green-bg: #e1f5ee; --green-text: #085041; --green-bd: #0f6e56;
+  --red-bg: #fcebeb; --red-text: #791f1f; --red-bd: #a32d2d;
+  --amber-bg: #faeeda; --amber-text: #633806;
+  --r: 10px; --rs: 6px;
+}
+html.dark {
+  --bg: #11101d; --surface: #1b1930; --bd: #2c2a48; --bdh: #3a3760;
+  --text: #ebe8f7; --muted: #9590ad; --hint: #6e6890;
+  --blue: #9c8ce0; --blue-bg: #261f49; --blue-text: #c3b6f0;
+  --gold: #f0c040; --gold-bg: #2b2308; --gold-glow: #f0c040;
+  --green-bg: #0d2b22; --green-text: #4caf8a; --green-bd: #1a5c42;
+  --red-bg: #2b1212; --red-text: #e07070; --red-bd: #5c2020;
+  --amber-bg: #2b1f08; --amber-text: #d4a052;
+}
+html.dark .btn:hover { background: #272442; }
+html.dark .cbtn:hover:not(:disabled) { background: #272442; }
+html.dark .icon-btn:hover { background: #272442; color: var(--text); }
+html.dark .sc { background: #221f3d; }
+html.dark .pbar { background: #2a2748; }
+html.dark .iron-card { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%) !important; border-color: #e94560 !important; }
+html.dark .iron-card .subj-num { background: rgba(233,69,96,0.2) !important; color: #ff6b8a !important; }
+html.dark .iron-card:hover { background: linear-gradient(135deg, #1f1f38 0%, #1a2545 50%, #123a70 100%) !important; }
+
+/* Dark mode toggle */
+.dm-btn {
+  width: 34px; height: 34px; border: 0.5px solid var(--bdh);
+  border-radius: var(--rs); background: var(--surface); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0; color: var(--muted);
+  transition: background .1s;
+}
+.dm-btn:hover { background: var(--blue-bg); color: var(--blue-text); }
+
+/* Project SELENA brand wordmark */
+.selena-brand { margin-bottom: 4px; }
+.selena-logo {
+  font-family: 'Bebas Neue', -apple-system, sans-serif; font-size: 36px; line-height: 1;
+  letter-spacing: .03em; color: var(--text); display: flex; align-items: center; gap: 9px;
+}
+.selena-logo .moon { font-size: 28px; filter: drop-shadow(0 0 10px rgba(240,192,64,0.45)); }
+.selena-logo .accent {
+  background: linear-gradient(120deg, var(--blue) 0%, var(--gold-glow) 100%);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent;
+}
+.selena-tagline { font-size: 12.5px; color: var(--muted); margin-top: 3px; letter-spacing: .01em; }
+
+/* Iron Man card */
+.iron-card {
+  background: linear-gradient(135deg, #1a0a0a 0%, #2d1010 50%, #1a0a2a 100%) !important;
+  border-color: #c0392b !important;
+}
+.iron-card .subj-num { background: rgba(192,57,43,0.2) !important; color: #e74c3c !important; }
+.iron-card .subj-name { color: #f0c040 !important; }
+.iron-card .subj-count { color: #c0a060 !important; }
+.iron-card:hover { background: linear-gradient(135deg, #220d0d 0%, #381414 50%, #220d33 100%) !important; border-color: #e74c3c !important; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; justify-content: center; padding: 2rem 1rem 4rem; }
+#app { width: 100%; max-width: 680px; }
+h1 { font-size: 18px; font-weight: 500; margin-bottom: 4px; }
+.sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+.card { background: var(--surface); border: 0.5px solid var(--bd); border-radius: var(--r); padding: 1.25rem; margin-bottom: 12px; }
+.slbl { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .06em; color: var(--hint); margin-bottom: 10px; }
+
+/* Subject picker */
+.subj-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+.subj-card {
+  background: var(--surface); border: 0.5px solid var(--bd); border-radius: var(--r);
+  padding: 1rem; cursor: pointer; transition: border-color .15s, background .15s;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.subj-card:hover { border-color: var(--blue); background: var(--blue-bg); }
+.subj-card.loading-card { opacity: .6; cursor: default; pointer-events: none; }
+.subj-num { font-size: 11px; font-weight: 500; color: var(--blue-text); background: var(--blue-bg); display: inline-block; padding: 2px 8px; border-radius: 20px; width: fit-content; }
+.subj-name { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.4; }
+.subj-count { font-size: 12px; color: var(--muted); }
+
+/* Topic checklist */
+.topic-check { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 0.5px solid var(--bd); cursor: pointer; }
+.topic-check:last-child { border-bottom: none; }
+.topic-check input[type=checkbox] { width: 16px; height: 16px; margin-top: 2px; flex-shrink: 0; accent-color: var(--blue); cursor: pointer; }
+.topic-check-lbl { flex: 1; }
+.topic-name { font-size: 14px; color: var(--text); line-height: 1.4; }
+.topic-cnt { font-size: 12px; color: var(--muted); margin-top: 1px; }
+.check-all-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 8px; }
+.check-all-btns { display: flex; gap: 6px; }
+.check-all-btn { padding: 5px 12px; border: 0.5px solid var(--bdh); border-radius: var(--rs); background: var(--surface); color: var(--blue-text); cursor: pointer; font-size: 12px; font-weight: 500; font-family: inherit; transition: background .1s, border-color .1s; }
+.check-all-btn:hover { background: var(--blue-bg); border-color: var(--blue); }
+.sel-count { font-size: 12px; color: var(--muted); }
+
+/* Buttons */
+.btn { padding: 9px 16px; border: 0.5px solid var(--bdh); border-radius: var(--rs); background: var(--surface); color: var(--text); cursor: pointer; font-size: 14px; font-family: inherit; transition: background .1s; }
+.btn:hover { background: #eeecf7; }
+.btn.pri { background: var(--blue); border-color: var(--blue); color: white; }
+.btn.pri:hover { opacity: .9; }
+.btn.pri:disabled { opacity: .4; cursor: not-allowed; }
+.btn.ghost { background: none; border: none; color: var(--muted); font-size: 13px; padding: 6px 0; }
+.btn.ghost:hover { color: var(--text); background: none; }
+.brow { display: flex; gap: 8px; margin-top: 14px; }
+.brow .btn { flex: 1; }
+.brow .btn.pri { flex: 2; }
+
+/* Quiz */
+.pbar { height: 4px; background: #e6e3f2; border-radius: 2px; margin-bottom: 14px; overflow: hidden; }
+.pfill { height: 100%; background: var(--blue); border-radius: 2px; transition: width .3s; }
+.qmeta { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+.qsubj { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .05em; color: var(--blue-text); background: var(--blue-bg); padding: 2px 8px; border-radius: 20px; display: inline-block; margin-bottom: 4px; }
+.qtopic { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+.qtxt { font-size: 15px; font-weight: 500; line-height: 1.65; margin-bottom: 1.25rem; }
+.cbtn { width: 100%; text-align: left; padding: 11px 14px; margin-bottom: 8px; border: 0.5px solid var(--bdh); border-radius: var(--rs); background: var(--surface); color: var(--text); cursor: pointer; font-size: 14px; line-height: 1.5; display: flex; align-items: flex-start; gap: 10px; font-family: inherit; }
+.cbtn:hover:not(:disabled) { background: #f4f2fb; }
+.cbtn:disabled { cursor: default; }
+.cbtn.correct { background: var(--green-bg); border-color: var(--green-bd); color: var(--green-text); }
+.cbtn.wrong { background: var(--red-bg); border-color: var(--red-bd); color: var(--red-text); }
+.cltr { font-weight: 500; min-width: 18px; flex-shrink: 0; }
+.fb { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: var(--rs); font-size: 13px; font-weight: 500; margin-bottom: 12px; }
+.fb.ok { background: var(--green-bg); color: var(--green-text); }
+.fb.no { background: var(--red-bg); color: var(--red-text); }
+
+/* Results */
+.rcirc { width: 88px; height: 88px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 20px; }
+.rpct { font-size: 26px; font-weight: 500; }
+.rgrd { font-size: 12px; margin-top: 1px; }
+.sgrid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 4px; }
+.sc { background: #f2f0fa; border-radius: var(--rs); padding: 12px; text-align: center; }
+.sv { font-size: 22px; font-weight: 500; }
+.sl { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.mi { padding: 10px 0; border-bottom: 0.5px solid var(--bd); }
+.mi:last-child { border-bottom: none; }
+.mq { font-size: 13px; margin-bottom: 3px; line-height: 1.5; }
+.mmeta { font-size: 11px; color: var(--hint); margin-bottom: 4px; }
+.mok { font-size: 12px; color: var(--green-text); margin-bottom: 2px; }
+.mbad { font-size: 12px; color: var(--red-text); }
+
+/* Breadcrumb */
+.breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 18px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.breadcrumb span { cursor: pointer; color: var(--blue-text); }
+.breadcrumb span:hover { text-decoration: underline; }
+.breadcrumb .sep { cursor: default; color: var(--hint); }
+.breadcrumb .cur { cursor: default; color: var(--muted); }
+
+/* Status / error */
+.status-row { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+.err-box { background: var(--red-bg); border: 0.5px solid var(--red-bd); border-radius: var(--rs); padding: 10px 14px; font-size: 13px; color: var(--red-text); margin-top: 8px; }
+.ok-box  { background: var(--green-bg); border: 0.5px solid var(--green-bd); border-radius: var(--rs); padding: 10px 14px; font-size: 13px; color: var(--green-text); margin-top: 8px; }
+
+/* Spinner */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--bdh); border-top-color: var(--blue); border-radius: 50%; animation: spin .6s linear infinite; }
+
+/* Sheet tag */
+.sheet-tag { font-size: 11px; background: var(--blue-bg); color: var(--blue-text); border-radius: 4px; padding: 1px 6px; display: inline-block; }
+
+/* ── Iron Man Mode UI ── */
+@keyframes ironFlicker { 0%,100%{opacity:1} 50%{opacity:.85} }
+@keyframes ironPulse { 0%,100%{box-shadow:0 0 0 0 rgba(231,76,60,0)} 50%{box-shadow:0 0 24px 4px rgba(231,76,60,0.35)} }
+@keyframes ironShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+@keyframes timerTick { 0%{transform:scaleX(1)} 100%{transform:scaleX(0)} }
+@keyframes ironDeath { 0%{opacity:1;transform:scale(1)} 100%{opacity:0;transform:scale(1.08)} }
+
+.iron-confirm-wrap {
+  min-height: 80vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem 1rem;
+}
+.iron-confirm-badge {
+  font-size: 64px; margin-bottom: 12px; animation: ironFlicker 2.2s ease-in-out infinite;
+}
+.iron-confirm-title {
+  font-size: 28px; font-weight: 700; color: #e74c3c; letter-spacing: .04em; margin-bottom: 6px;
+  text-shadow: 0 0 20px rgba(231,76,60,0.5);
+}
+.iron-confirm-sub {
+  font-size: 14px; color: #c0a060; margin-bottom: 28px; line-height: 1.7; max-width: 420px;
+}
+.iron-rule-box {
+  background: linear-gradient(135deg,#1a0a0a,#2d1010); border: 1px solid #c0392b;
+  border-radius: var(--r); padding: 1.25rem 1.5rem; margin-bottom: 28px; text-align: left; max-width: 420px; width: 100%;
+  animation: ironPulse 3s ease-in-out infinite;
+}
+.iron-rule-title { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #e74c3c; margin-bottom: 12px; }
+.iron-rule { display: flex; align-items: flex-start; gap: 10px; font-size: 13.5px; color: #d4a052; margin-bottom: 8px; line-height: 1.5; }
+.iron-rule:last-child { margin-bottom: 0; }
+.iron-rule-icon { flex-shrink: 0; font-size: 16px; margin-top: -1px; }
+.iron-confirm-btn {
+  background: linear-gradient(135deg,#c0392b,#922b21); border: 1px solid #e74c3c;
+  color: #fff; font-size: 16px; font-weight: 700; letter-spacing: .06em;
+  padding: 14px 36px; border-radius: var(--rs); cursor: pointer; font-family: inherit;
+  text-transform: uppercase; transition: opacity .15s; margin-bottom: 12px; display: block; width: 100%; max-width: 420px;
+}
+.iron-confirm-btn:hover { opacity: .88; }
+.iron-back-btn {
+  background: none; border: none; color: #6b6b67; font-size: 13px; cursor: pointer;
+  font-family: inherit; padding: 4px 0;
+}
+.iron-back-btn:hover { color: #9b9b96; }
+
+/* Timer bar */
+.iron-timer-wrap { margin-bottom: 10px; }
+.iron-timer-bar-bg { height: 5px; background: #2e2e2e; border-radius: 3px; overflow: hidden; }
+.iron-timer-bar { height: 100%; background: #e74c3c; border-radius: 3px; transform-origin: left; }
+.iron-timer-label { font-size: 12px; color: #e74c3c; font-weight: 600; text-align: right; margin-top: 3px; font-variant-numeric: tabular-nums; }
+
+/* Lives display */
+.iron-lives { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+.iron-heart { font-size: 16px; }
+.iron-heart.dead { opacity: .2; filter: grayscale(1); }
+.iron-shield-badge {
+  font-size: 11px; font-weight: 700; color: #4a9edd; background: rgba(74,158,221,0.15);
+  border: 0.5px solid #2a4a6a; border-radius: 20px; padding: 1px 8px; margin-left: 6px;
+}
+
+/* Consumables row */
+.iron-consumable-row { display: flex; gap: 8px; margin-bottom: 12px; }
+.iron-cbtn {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px;
+  padding: 8px 6px; border: 0.5px solid #5c2020; border-radius: var(--rs);
+  background: linear-gradient(135deg,#1a0a0a,#241010); color: #d4a052;
+  font-size: 12.5px; font-weight: 600; font-family: inherit; cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.iron-cbtn:hover:not(:disabled) { border-color: #e74c3c; background: linear-gradient(135deg,#220d0d,#2d1313); }
+.iron-cbtn:disabled { opacity: .35; cursor: not-allowed; }
+.iron-cbtn-count {
+  font-size: 11px; font-weight: 700; background: rgba(231,76,60,0.25); color: #f08080;
+  border-radius: 20px; padding: 0px 6px; min-width: 16px; text-align: center;
+}
+
+/* Bombed-out choice */
+.cbtn.removed { opacity: .4; text-decoration: line-through; cursor: not-allowed; }
+
+/* Skill button */
+.iron-skill-row { margin-bottom: 10px; }
+.iron-skill-btn {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 14px; border: 0.5px solid #4a2a7a; border-radius: var(--rs);
+  background: linear-gradient(135deg,#0e0a1a,#1a1030); color: #c89ef0;
+  font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer;
+  transition: border-color .15s, background .15s; position: relative; overflow: hidden;
+}
+.iron-skill-btn:hover:not(:disabled) { border-color: #9b59b6; background: linear-gradient(135deg,#140d22,#20153a); }
+.iron-skill-btn:disabled { opacity: .35; cursor: not-allowed; }
+.iron-skill-btn-left { display: flex; align-items: center; gap: 4px; flex: 1; min-width: 0; }
+.iron-skill-name { font-size: 13px; font-weight: 700; color: #d4a0ff; }
+.iron-skill-desc { font-size: 11px; color: #9b7ac8; font-weight: 400; margin-top: 1px; }
+.iron-skill-cd {
+  font-size: 11px; font-weight: 700; background: rgba(155,89,182,0.3); color: #d4a0ff;
+  border-radius: 20px; padding: 2px 10px; min-width: 40px; text-align: center; flex-shrink: 0;
+}
+.iron-skill-cd.ready { background: rgba(39,174,96,0.25); color: #6fcf97; border: 0.5px solid #1a5c42; }
+.iron-skill-cd.inactive { background: rgba(90,90,90,0.2); color: #6b6b67; }
+.iron-skill-event {
+  display: inline-block; margin-top: 4px; padding: 3px 10px; border-radius: 20px;
+  font-size: 11.5px; font-weight: 600; background: rgba(155,89,182,0.2); color: #c89ef0;
+  border: 0.5px solid #6a3a9a;
+}
+
+/* Reward screen */
+.iron-reward-grid { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; max-width: 440px; }
+.iron-reward-card {
+  flex: 1; min-width: 150px; background: linear-gradient(135deg,#1a0a0a,#2d1010);
+  border: 1px solid #c0392b; border-radius: var(--r); padding: 1.1rem 1rem;
+  cursor: pointer; font-family: inherit; color: #d4a052; text-align: center;
+  transition: border-color .15s, transform .15s;
+}
+.iron-reward-card:hover { border-color: #e74c3c; transform: translateY(-2px); }
+.iron-reward-icon { font-size: 32px; margin-bottom: 8px; }
+.iron-reward-name { font-size: 14px; font-weight: 700; color: #f0c040; margin-bottom: 6px; }
+.iron-reward-desc { font-size: 12px; color: #c0a060; line-height: 1.5; }
+
+/* Game Over screen */
+.iron-gameover-wrap {
+  min-height: 80vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem 1rem;
+}
+.iron-gameover-icon { font-size: 72px; margin-bottom: 16px; }
+.iron-gameover-title { font-size: 32px; font-weight: 900; color: #e74c3c; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 8px; text-shadow: 0 0 30px rgba(231,76,60,0.6); }
+.iron-gameover-score { font-size: 18px; color: #c0a060; margin-bottom: 24px; }
+.iron-gameover-msg { font-size: 14px; color: #6b6b67; margin-bottom: 32px; max-width: 360px; line-height: 1.7; }
+.iron-gameover-btn {
+  background: linear-gradient(135deg,#1a0a0a,#2d1010); border: 1px solid #c0392b;
+  color: #e74c3c; font-size: 15px; font-weight: 700; letter-spacing: .04em;
+  padding: 13px 32px; border-radius: var(--rs); cursor: pointer; font-family: inherit;
+  text-transform: uppercase; transition: border-color .15s, color .15s;
+}
+.iron-gameover-btn:hover { border-color: #e74c3c; color: #f08080; }
+
+/* ── Mastery Award Screen ── */
+@keyframes masteryReveal { 0%{opacity:0;transform:scale(0.7) translateY(30px)} 60%{transform:scale(1.04) translateY(-4px)} 100%{opacity:1;transform:scale(1) translateY(0)} }
+@keyframes masteryGlow   { 0%,100%{box-shadow:0 0 20px 4px rgba(240,192,64,0.25)} 50%{box-shadow:0 0 50px 12px rgba(240,192,64,0.55)} }
+@keyframes masteryFloat  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+@keyframes masteryStars  { 0%{opacity:0;transform:scale(0) rotate(-30deg)} 100%{opacity:1;transform:scale(1) rotate(0deg)} }
+@keyframes confettiFall  { 0%{transform:translateY(-20px) rotate(0deg);opacity:1} 100%{transform:translateY(120px) rotate(720deg);opacity:0} }
+
+.mastery-wrap {
+  min-height: 90vh; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; text-align: center; padding: 2rem 1rem; position: relative; overflow: hidden;
+}
+.mastery-confetti-piece {
+  position: absolute; width: 8px; height: 8px; border-radius: 2px;
+  animation: confettiFall 1.8s ease-in forwards;
+  pointer-events: none;
+}
+.mastery-badge-wrap {
+  position: relative; margin-bottom: 20px;
+  animation: masteryFloat 3.5s ease-in-out infinite;
+}
+.mastery-badge {
+  width: 120px; height: 120px; border-radius: 50%;
+  background: linear-gradient(135deg, #f0c040, #e8a020, #f0c040);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 56px; border: 3px solid #f0c040;
+  animation: masteryGlow 2.5s ease-in-out infinite;
+  box-shadow: 0 0 40px rgba(240,192,64,0.4);
+}
+.mastery-stars {
+  position: absolute; top: -10px; left: -10px; right: -10px; bottom: -10px;
+  pointer-events: none;
+}
+.mastery-star {
+  position: absolute; font-size: 20px;
+  animation: masteryStars 0.6s ease-out forwards;
+}
+.mastery-banner {
+  font-size: 11px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase;
+  color: #f0c040; background: rgba(240,192,64,0.12); border: 1px solid rgba(240,192,64,0.35);
+  border-radius: 20px; padding: 4px 16px; margin-bottom: 12px;
+  text-shadow: 0 0 12px rgba(240,192,64,0.6);
+}
+.mastery-title {
+  font-size: 30px; font-weight: 900; color: #f0c040; letter-spacing: .03em;
+  margin-bottom: 4px; text-shadow: 0 0 30px rgba(240,192,64,0.5);
+  animation: masteryReveal 0.7s cubic-bezier(.34,1.56,.64,1) both;
+}
+.mastery-sub {
+  font-size: 14px; color: #c0a060; margin-bottom: 28px; line-height: 1.7;
+}
+.mastery-class-card {
+  background: linear-gradient(135deg, #0e0a1a, #1a1030);
+  border: 1.5px solid #9b59b6; border-radius: var(--r);
+  padding: 1.5rem 1.75rem; margin-bottom: 20px;
+  max-width: 420px; width: 100%; text-align: left;
+  animation: masteryReveal 0.8s 0.2s cubic-bezier(.34,1.56,.64,1) both;
+  box-shadow: 0 0 30px rgba(155,89,182,0.2);
+}
+.mastery-class-header {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 14px;
+}
+.mastery-class-icon { font-size: 44px; }
+.mastery-class-name { font-size: 22px; font-weight: 800; color: #d4a0ff; }
+.mastery-class-tag {
+  font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  color: #f0c040; background: rgba(240,192,64,0.15); border: 0.5px solid rgba(240,192,64,0.4);
+  border-radius: 20px; padding: 2px 10px; display: inline-block; margin-top: 3px;
+}
+.mastery-divider {
+  height: 1px; background: linear-gradient(to right, transparent, #4a2a7a, transparent);
+  margin: 14px 0;
+}
+.mastery-ability-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  color: #9b59b6; margin-bottom: 8px;
+}
+.mastery-ability-name {
+  font-size: 16px; font-weight: 800; color: #f0c040; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;
+}
+.mastery-ability-name::before { content: '✦'; font-size: 12px; color: #f0c040; opacity: .7; }
+.mastery-ability-desc {
+  font-size: 13.5px; color: #c89ef0; line-height: 1.65;
+}
+.mastery-score-row {
+  display: flex; gap: 10px; justify-content: center; margin-bottom: 24px;
+  animation: masteryReveal 0.7s 0.35s both;
+}
+.mastery-score-pill {
+  background: rgba(240,192,64,0.1); border: 1px solid rgba(240,192,64,0.3);
+  border-radius: 20px; padding: 6px 18px; font-size: 13px; font-weight: 600; color: #f0c040;
+}
+.mastery-continue-btn {
+  background: linear-gradient(135deg, #9b59b6, #6c3483);
+  border: 1px solid #d4a0ff; color: #fff; font-size: 15px; font-weight: 800;
+  letter-spacing: .06em; padding: 14px 36px; border-radius: var(--rs);
+  cursor: pointer; font-family: inherit; text-transform: uppercase;
+  transition: opacity .15s; display: block; width: 100%; max-width: 420px;
+  animation: masteryReveal 0.7s 0.5s both;
+  box-shadow: 0 4px 20px rgba(155,89,182,0.35);
+}
+.mastery-continue-btn:hover { opacity: .88; }
+.mastery-back-btn {
+  background: none; border: none; color: #6b6b67; font-size: 13px; cursor: pointer;
+  font-family: inherit; padding: 10px 0; animation: masteryReveal 0.7s 0.6s both;
+}
+.mastery-back-btn:hover { color: #9b9b96; }
+
+/* ── Offline banner ── */
+#offlineBanner {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999;
+  padding: 9px 16px; font-size: 12.5px; font-weight: 500;
+  display: none; align-items: center; justify-content: space-between; gap: 10px;
+  transition: opacity .3s;
+}
+#offlineBanner.offline { background:#2b1212; color:#e07070; border-top:1px solid #5c2020; }
+#offlineBanner.syncing { background:#1a2a3a; color:#7ec4f0; border-top:1px solid #2a4a6a; }
+#offlineBanner.synced  { background:#0d2b22; color:#4caf8a; border-top:1px solid #1a5c42; }
+#offlineBanner .bclose { background:none;border:none;color:inherit;cursor:pointer;font-size:15px;opacity:.7;flex-shrink:0; }
+#offlineBanner .bclose:hover { opacity:1; }
+.bspin { display:inline-block;width:8px;height:8px;border-radius:50%;border:2px solid currentColor;border-top-color:transparent;animation:spin .7s linear infinite;margin-right:6px;vertical-align:middle; }
+.bdot  { display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor;margin-right:6px;vertical-align:middle; }
+
+/* Offline cache badge on subject cards */
+.cache-badge {
+  font-size:10px;background:#0d2b22;color:#4caf8a;border:0.5px solid #1a5c42;
+  border-radius:3px;padding:1px 5px;display:inline-block;margin-left:5px;vertical-align:middle;
+}
+html.dark .cache-badge { background:#0a2018; }
+
+/* ── Personal Records Screen ── */
+.pr-section-title {
+  font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--hint);margin:20px 0 10px;padding-bottom:6px;
+  border-bottom:0.5px solid var(--bd);
+}
+.pr-grid {
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:8px;margin-bottom:4px;
+}
+.pr-stat {
+  background:var(--surface);border:0.5px solid var(--bd);border-radius:var(--rs);
+  padding:10px 12px;display:flex;flex-direction:column;gap:3px;
+}
+.pr-stat-icon { font-size:18px;line-height:1; }
+.pr-stat-val  { font-size:22px;font-weight:700;color:var(--text);line-height:1.1; }
+.pr-stat-lbl  { font-size:11px;color:var(--muted);line-height:1.4; }
+.pr-class-row {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 0;border-bottom:0.5px solid var(--bd);
+}
+.pr-class-row:last-child { border-bottom:none; }
+.pr-class-left { display:flex;align-items:center;gap:10px; }
+.pr-class-icon { font-size:22px; }
+.pr-class-name { font-size:14px;font-weight:500;color:var(--text); }
+.pr-class-runs { font-size:12px;color:var(--muted); }
+.pr-class-right { display:flex;flex-direction:column;align-items:flex-end;gap:2px; }
+.pr-class-best { font-size:14px;font-weight:700;color:var(--gold); }
+.pr-class-mastery { font-size:11px;color:#9b59b6; }
+.pr-class-untried { font-size:12px;color:var(--hint);font-style:italic; }
+.pr-flavour-row {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 0;border-bottom:0.5px solid var(--bd);
+}
+.pr-flavour-row:last-child { border-bottom:none; }
+.pr-flavour-lbl { font-size:13px;color:var(--text); }
+.pr-flavour-val { font-size:14px;font-weight:700;color:var(--text); }
+.pr-reset-btn {
+  background:none;border:0.5px solid var(--bd);border-radius:var(--rs);
+  color:var(--muted);font-size:12px;font-family:inherit;padding:6px 14px;
+  cursor:pointer;margin-top:16px;transition:border-color .15s,color .15s;
+}
+.pr-reset-btn:hover { border-color:var(--red-bd);color:var(--red-text); }
+
+/* ── Graveyard Question Palettes ── */
+.gy-card-ghost   { background:#12102a !important; border-color:#4a3f8f !important; }
+.gy-card-zombie  { background:#0f1f0f !important; border-color:#2e5e2e !important; }
+.gy-card-vampire { background:#1a0808 !important; border-color:#8b1a1a !important; }
+.gy-card-mummy   { background:#1e1a08 !important; border-color:#8a7020 !important; }
+
+.gy-cbtn-ghost   { border-color:#4a3f8f !important; color:#c0b8f0 !important; }
+.gy-cbtn-zombie  { border-color:#2e5e2e !important; color:#90d090 !important; }
+.gy-cbtn-vampire { border-color:#8b1a1a !important; color:#ffaaaa !important; }
+.gy-cbtn-mummy   { border-color:#8a7020 !important; color:#e8d080 !important; }
+
+.gy-cbtn-ghost.correct,   .gy-cbtn-zombie.correct,
+.gy-cbtn-vampire.correct,
+.gy-cbtn-mummy.correct    { background:var(--green-bg)  !important; border-color:var(--green-bd)  !important; color:var(--green-text)  !important; }
+.gy-cbtn-ghost.wrong,     .gy-cbtn-zombie.wrong,
+.gy-cbtn-vampire.wrong,
+.gy-cbtn-mummy.wrong      { background:var(--red-bg)    !important; border-color:var(--red-bd)    !important; color:var(--red-text)    !important; }
+
+/* ── Study Mode Settings & Redemption ── */
+.nm-settings-wrap { display:flex; flex-direction:column; gap:10px; margin-bottom:16px; }
+.nm-toggle-row {
+  display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+  padding:10px 0; border-bottom:0.5px solid var(--bd);
+}
+.nm-toggle-row:last-child { border-bottom:none; }
+.nm-toggle-info { flex:1; }
+.nm-toggle-title { font-size:14px; font-weight:500; color:var(--text); margin-bottom:2px; }
+.nm-toggle-desc  { font-size:12px; color:var(--muted); line-height:1.5; }
+.nm-toggle { position:relative; width:40px; height:22px; flex-shrink:0; margin-top:2px; }
+.nm-toggle input { opacity:0; width:0; height:0; }
+.nm-slider {
+  position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0;
+  background:var(--bdh); border-radius:22px; transition:.2s;
+}
+.nm-slider:before {
+  content:''; position:absolute; height:16px; width:16px; left:3px; bottom:3px;
+  background:white; border-radius:50%; transition:.2s;
+}
+.nm-toggle input:checked + .nm-slider { background:var(--blue); }
+.nm-toggle input:checked + .nm-slider:before { transform:translateX(18px); }
+
+.nm-redemption-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.nm-redemption-card {
+  border:0.5px solid var(--bd); border-radius:var(--rs); padding:10px 12px;
+  cursor:pointer; transition:border-color .15s, background .15s; background:var(--surface);
+  text-align:left; font-family:inherit;
+}
+.nm-redemption-card:hover { border-color:var(--blue); background:var(--blue-bg); }
+.nm-redemption-card.selected { border-color:var(--blue); background:var(--blue-bg); }
+.nm-redemption-card.none-card { grid-column:1/-1; }
+.nm-rcard-icon { font-size:22px; margin-bottom:4px; }
+.nm-rcard-name { font-size:13px; font-weight:600; color:var(--text); margin-bottom:2px; }
+.nm-rcard-desc { font-size:11px; color:var(--muted); line-height:1.5; }
+
+/* Graveyard HUD badge */
+.nm-graveyard-badge {
+  display:inline-flex; align-items:center; gap:4px;
+  font-size:11px; font-weight:600; color:var(--red-text);
+  background:var(--red-bg); border:0.5px solid var(--red-bd);
+  border-radius:20px; padding:2px 8px;
+}
+/* Mindful Mode overlay */
+.nm-mindful-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:999;
+  display:flex; align-items:center; justify-content:center; flex-direction:column;
+  gap:10px;
+}
+.nm-mindful-box {
+  background:var(--surface); border:0.5px solid var(--red-bd); border-radius:var(--r);
+  padding:1.5rem 2rem; text-align:center; max-width:320px;
+}
+.nm-mindful-title { font-size:16px; font-weight:700; color:var(--red-text); margin-bottom:6px; }
+.nm-mindful-sub   { font-size:13px; color:var(--muted); margin-bottom:10px; line-height:1.6; }
+.nm-mindful-count { font-size:32px; font-weight:900; color:var(--red-text); }
+
+/* Checkpoint screen */
+.nm-checkpoint-wrap {
+  min-height:60vh; display:flex; flex-direction:column; align-items:center;
+  justify-content:center; text-align:center; padding:2rem 1rem;
+}
+.nm-checkpoint-badge { font-size:56px; margin-bottom:10px; }
+.nm-checkpoint-title { font-size:24px; font-weight:800; color:var(--blue-text); margin-bottom:6px; }
+.nm-checkpoint-sub   { font-size:14px; color:var(--muted); margin-bottom:20px; line-height:1.7; }
+.nm-checkpoint-stat-row { display:flex; gap:10px; justify-content:center; margin-bottom:24px; flex-wrap:wrap; }
+.nm-checkpoint-pill {
+  background:var(--blue-bg); border:0.5px solid var(--bdh); border-radius:20px;
+  padding:6px 16px; font-size:13px; font-weight:600; color:var(--blue-text);
+}
+.nm-checkpoint-btns { display:flex; flex-direction:column; gap:10px; width:100%; max-width:380px; }
+
+/* Eraser button */
+.nm-eraser-btn {
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:12px; color:var(--muted); background:none;
+  border:0.5px solid var(--bd); border-radius:var(--rs);
+  padding:4px 10px; cursor:pointer; font-family:inherit;
+  transition:border-color .15s, color .15s;
+}
+.nm-eraser-btn:hover { border-color:var(--bdh); color:var(--text); }
+
+/* Graveyard return banner */
+.nm-graveyard-return-banner {
+  background:var(--red-bg); border:0.5px solid var(--red-bd); border-radius:var(--rs);
+  padding:7px 12px; font-size:12px; color:var(--red-text); margin-bottom:10px;
+  line-height:1.5;
+}
+/* Pity banner (Vampire) */
+.nm-pity-banner {
+  background:var(--green-bg); border:0.5px solid var(--green-bd); border-radius:var(--rs);
+  padding:7px 12px; font-size:12px; color:var(--green-text); margin-bottom:10px; line-height:1.6;
+}
+.nm-ghost-banner {
+  background:#1a1a2e; border:0.5px solid #3a3a6e; border-radius:var(--rs);
+  padding:8px 12px; font-size:12px; color:#b0aee0; margin-bottom:10px; line-height:1.6;
+}
+.nm-zombie-banner {
+  background:#1a2a1a; border:0.5px solid #2e5e2e; border-radius:var(--rs);
+  padding:8px 12px; font-size:12px; color:#7dbf7d; margin-bottom:10px; line-height:1.6;
+}
+.nm-vampire-banner {
+  background:#2a0a0a; border:0.5px solid #7a1a1a; border-radius:var(--rs);
+  padding:8px 12px; font-size:12px; color:#f87171; margin-bottom:10px; line-height:1.6;
+}
+.nm-mummy-banner {
+  background:#2a2410; border:0.5px solid #7a6a2a; border-radius:var(--rs);
+  padding:8px 12px; font-size:13px; color:#d4b96a; margin-bottom:10px; line-height:1.7;
+  font-style:normal;
+}
+
+
+/* ── Save State ── */
+.nm-save-btn {
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:12px; color:var(--blue-text); background:none;
+  border:0.5px solid var(--blue); border-radius:var(--rs);
+  padding:4px 10px; cursor:pointer; font-family:inherit;
+  transition:border-color .15s, background .15s;
+}
+.nm-save-btn:hover { background:var(--blue-bg); }
+.nm-save-banner {
+  background:var(--blue-bg); border:0.5px solid var(--blue);
+  border-radius:var(--rs); padding:7px 12px;
+  font-size:12px; color:var(--blue-text); margin-bottom:10px;
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+}
+.nm-resume-card {
+  background:var(--blue-bg); border:0.5px solid var(--blue);
+  border-radius:var(--rs); padding:10px 14px; margin-bottom:10px;
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+.nm-resume-info { font-size:12px; color:var(--blue-text); line-height:1.6; }
+.nm-resume-info strong { font-size:13px; color:var(--text); display:block; }
+.nm-resume-btns { display:flex; gap:6px; flex-shrink:0; }
+.nm-resume-btn {
+  padding:5px 12px; border-radius:var(--rs); font-size:12px; font-weight:600;
+  font-family:inherit; cursor:pointer; border:0.5px solid var(--blue);
+  background:var(--blue); color:#fff; transition:opacity .15s;
+}
+.nm-resume-btn:hover { opacity:.88; }
+.nm-resume-discard {
+  padding:5px 10px; border-radius:var(--rs); font-size:12px;
+  font-family:inherit; cursor:pointer; border:0.5px solid var(--bdh);
+  background:none; color:var(--muted); transition:border-color .15s, color .15s;
+}
+.nm-resume-discard:hover { border-color:var(--red-bd); color:var(--red-text); }
+
+/* ── Custom confirm modal ── */
+#selena-modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0,0,0,0.55); backdrop-filter: blur(2px);
+  align-items: center; justify-content: center;
+}
+#selena-modal-overlay.active { display: flex; }
+#selena-modal-box {
+  background: var(--surface); border: 0.5px solid var(--bdh);
+  border-radius: var(--r); padding: 1.5rem 1.5rem 1.25rem;
+  max-width: 320px; width: 90%; box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+}
+#selena-modal-msg {
+  font-size: 15px; color: var(--text); line-height: 1.5;
+  margin-bottom: 1.25rem; text-align: center;
+}
+#selena-modal-btns {
+  display: flex; gap: 8px; justify-content: flex-end;
+}
+#selena-modal-btns button {
+  padding: 7px 18px; border-radius: var(--rs); border: 0.5px solid var(--bd);
+  font-size: 14px; cursor: pointer; font-family: inherit;
+  transition: background .1s;
+}
+#selena-modal-cancel {
+  background: var(--surface); color: var(--muted);
+}
+#selena-modal-cancel:hover { background: var(--blue-bg); color: var(--blue-text); }
+#selena-modal-ok {
+  background: var(--blue); color: #fff; border-color: transparent;
+  font-weight: 500;
+}
+#selena-modal-ok:hover { opacity: .88; }
+</style>
+</head>
+<body>
+<div id="offlineBanner"></div>
+<div id="app"></div>
+
+<!-- Custom confirm modal (replaces window.confirm for in-app WebView compatibility) -->
+<div id="selena-modal-overlay">
+  <div id="selena-modal-box">
+    <div id="selena-modal-msg"></div>
+    <div id="selena-modal-btns">
+      <button id="selena-modal-cancel">Cancel</button>
+      <button id="selena-modal-ok">OK</button>
+    </div>
+  </div>
+</div>
+<script>
+/* ─────────────────────────────────────────────
+   STATE
+───────────────────────────────────────────── */
+var S = {
+  screen: 'subjects',
+  // config: array of { name: string, sheets: [url, ...] }
+  subjects: [],
+  // loaded questions per subject name: { [name]: [{topic,question,choices,answer,subj}] }
+  loadedQ: {},
+  loadErrors: {},
+  loadingSubject: null,
+
+  curSubject: '',
+  dark: true,
+  topics: [],
+  checkedTopics: {},
+  scramble: true,
+  shuffled: [],
+  cur: 0, score: 0, done: false, chosen: null, missed: [],
+
+  // Iron Man Mode
+  ironMode: false,
+  ironLives: 3,
+  ironMaxLives: 3,
+  ironWrong: 0,
+  ironTimerInterval: null,
+  ironTimeLeft: 30,
+  ironRound: 0,
+  ironStreak: 0,
+  ironShielded: false,
+  ironShieldRounds: 0,
+  ironConsumables: { shield: 0, skip: 0, bomb: 0 },
+  ironBombsUsedThisQ: 0,
+  ironRemoved: {},
+  ironRewardOptions: [],
+  ironRewardCadence: 10,
+  ironClass: null,
+  ironClassOptions: [],
+  ironPaladinUsed: false,
+  ironPaladinSaved: false,
+  ironRogueBonus: false,
+  ironMonkHeal: false,
+  ironThiefGrantType: null,
+  skipped: false,
+  ironSkillCooldown: 0,       // rounds remaining until skill is usable again
+  ironSkillUsedThisQ: false,  // prevent double-use per question
+  ironSkillEvent: null,       // last skill outcome message to display
+  ironMasteryTriggered: false,// tracks if mastery screen has been shown this run
+  ironMasteryActive: false,   // true once mastery is unlocked for this run
+
+  // Mastery state per class
+  ironPaladinBlessings: 0,    // Paladin: stacks of blessing gained each round
+  ironMonkConcentration: 0,   // Monk: concentration stacks (each +1.5% heal chance)
+  ironAlchemistAdrenaline: 0, // Alchemist: adrenaline stacks toward 10
+  ironRogueSpeedBonus: false, // Rogue: true if this answer earned speed bonus
+  ironTimeAtPick: 30,          // Rogue: time remaining when player picked
+
+  // ── Study Mode Settings ──
+  nmMindful: false,        // Mindful Mode: 5s delay after wrong answer
+  nmCheckpoint: false,     // Checkpoint Mode: report every 15q
+  nmEraser: false,         // Eraser Mode: undo answers
+  nmRedemption: 'none',    // 'none'|'ghost'|'zombie'|'vampire'|'mummy'
+
+  // Mindful mode timer
+  nmMindfulTimer: null,
+  nmMindfulCount: 0,
+
+  // Checkpoint
+  nmCheckpointAt: 0,       // question index of last checkpoint start
+  nmCheckpointHistory: [], // array of {score,missed,shuffledSnapshot,cur} for undo
+  nmCheckpointReturnAt: -1, // S.cur index of the first post-checkpoint question; undo from this position returns to checkpoint screen
+  nmBlockStartSnap: null,  // full state snapshot taken at the START of the current checkpoint block (used by Retry)
+
+  // Eraser: history stack — each entry is a full snapshot of quiz state
+  nmHistory: [],
+
+  // Graveyard (all redemption modes share this)
+  nmGraveyard: [],         // array of graveyard entries (see addToGraveyard)
+  nmGraveyardSeq: 0,       // monotonically increasing id source for graveyard entries (see nmAddToGraveyard / nmRestore)
+  nmQueuedGraveyard: [],   // graveyard questions queued to be injected into future positions
+
+  // Graveyard injection tracking
+  nmGraveyardReturnInfo: null,  // {prevAnswer} for display when a GY question returns
+  nmIsGraveyardQ: false,        // true if current question is a graveyard return
+
+};
+
+
+var IRON_CONSUMABLE_INFO = {
+  shield: { icon: '\ud83d\udee1', name: 'Shield', qty: 1, desc: 'Nullifies damage for 2 consecutive rounds.' },
+  skip:   { icon: '\u23ed',       name: 'Skip',   qty: 2, desc: 'Skip the current question. Breaks your streak.' },
+  bomb:   { icon: '\ud83d\udca3', name: 'Bomb',   qty: 2, desc: 'Removes a wrong answer. Use up to 3 per question.' }
+};
+
+var IRON_CLASSES = {
+  knight:    { name: 'Knight',    icon: '\u2694\ufe0f',     desc: 'Start with +1 Max Life.', skillName: 'Raise Shield',        skillCooldown: 15 },
+  bomber:    { name: 'Bomber',    icon: '\ud83d\udca3',     desc: 'Get a free Bomb every 10 questions.', skillName: 'Absolute Destruction', skillCooldown: 25 },
+  thief:     { name: 'Thief',     icon: '\ud83d\udddd\ufe0f', desc: 'Get a random consumable every 7-streak.', skillName: 'Snatch',             skillCooldown: 20 },
+  rogue:     { name: 'Rogue',     icon: '\ud83c\udfb2',     desc: '15% chance for +1 bonus point on correct answers.', skillName: 'Risky Escape',        skillCooldown: 5 },
+  paladin:   { name: 'Paladin',   icon: '\ud83d\udee1\ufe0f', desc: 'Survive one fatal mistake.', skillName: 'Pray',               skillCooldown: 5 },
+  monk:      { name: 'Monk',      icon: '\ud83e\uddd8',     desc: '3% chance to heal a missing life on correct answers.', skillName: 'Focus',              skillCooldown: 30 },
+  alchemist: { name: 'Alchemist', icon: '\u2697\ufe0f',     desc: 'Get a consumable choice every 8 rounds instead of 10.', skillName: 'Transmutation',      skillCooldown: 8 }
+};
+var L = ['A','B','C','D'];
+
+var API_KEY = 'AIzaSyBfViUDonSzMfdhL08_LCMrQFU_4XmVQkA';
+
+/* ─────────────────────────────────────────────
+   PERSONAL RECORDS — localStorage persistence
+   Key: SELENA_records  (survives HTML file updates)
+───────────────────────────────────────────── */
+var PR_KEY = 'SELENA_records';
+
+var PR_DEFAULTS = {
+  // Study Mode
+  normalQuestionsReviewed: 0,
+  normalSessionsStarted: 0,
+  normalLongestSession: 0,
+  topicsExplored: [],        // array of unique topic names (Study Mode only)
+
+  // Iron Man — General
+  ironRoundsSurvivedAllTime: 0,
+  ironSessionsPlayed: 0,
+  ironHighestScore: 0,
+  ironLongestStreakEver: 0,
+  ironTotalMasteryEarned: 0,
+
+  // Iron Man — Consumables
+  ironTotalShieldsUsed: 0,
+  ironTotalSkipsUsed: 0,
+  ironTotalBombsUsed: 0,
+
+  // Iron Man — Per Class
+  ironClassRuns:    { knight:0, bomber:0, thief:0, rogue:0, paladin:0, monk:0, alchemist:0 },
+  ironClassBest:    { knight:0, bomber:0, thief:0, rogue:0, paladin:0, monk:0, alchemist:0 },
+  ironClassMastery: { knight:false, bomber:false, thief:false, rogue:false, paladin:false, monk:false, alchemist:false },
+
+  // Iron Man — Class Gameplay Stats
+  knightRoundsShieldActive: 0,
+  bomberFreeGrants: 0,
+  thiefConsumablesStolen: 0,
+  rogueBonus: 0,
+  paladinSaves: 0,
+  monkLivesHealed: 0,
+  alchemistAdrenalinePoints: 0,
+  alchemistTransmutationLivesGained: 0,
+};
+
+function prLoad() {
+  try {
+    var raw = localStorage.getItem(PR_KEY);
+    if (!raw) return JSON.parse(JSON.stringify(PR_DEFAULTS));
+    var saved = JSON.parse(raw);
+    // Merge with defaults so new fields appear after updates
+    var result = JSON.parse(JSON.stringify(PR_DEFAULTS));
+    for (var k in saved) {
+      if (k in result) {
+        if (k === 'ironClassRuns' || k === 'ironClassBest' || k === 'ironClassMastery') {
+          for (var cls in saved[k]) { if (cls in result[k]) result[k][cls] = saved[k][cls]; }
+        } else {
+          result[k] = saved[k];
+        }
+      }
+    }
+    return result;
+  } catch(e) { return JSON.parse(JSON.stringify(PR_DEFAULTS)); }
+}
+
+function prSave(pr) {
+  try { localStorage.setItem(PR_KEY, JSON.stringify(pr)); } catch(e) {}
+}
+
+function prRecord(fn) {
+  var pr = prLoad();
+  fn(pr);
+  prSave(pr);
+}
+
+// Helper: add to a unique-array field
+function prAddUnique(arr, val) {
+  if (arr.indexOf(val) === -1) arr.push(val);
+  return arr;
+}
+
+/* ─────────────────────────────────────────────
+   SAVE STATE — single global slot in localStorage
+   Key: SELENA_save
+   Stores: score, graveyard, shuffled queue, current position.
+   Intentionally excludes: checkpoint history, eraser history.
+───────────────────────────────────────────── */
+var SAVE_KEY = 'SELENA_save';
+
+function saveStateExists() {
+  try { return !!localStorage.getItem(SAVE_KEY); } catch(e) { return false; }
+}
+
+function saveStateLoad() {
+  try {
+    var raw = localStorage.getItem(SAVE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) { return null; }
+}
+
+function saveStateClear() {
+  try { localStorage.removeItem(SAVE_KEY); } catch(e) {}
+}
+
+function _doSave() {
+  if (S.ironMode) return;
+  if (!S.shuffled || !S.shuffled.length) return;
+  var shuffledSnap = S.shuffled.map(function(q) {
+    var copy = {};
+    for (var k in q) {
+      if (k === '_gyEntry') continue;
+      copy[k] = q[k];
+    }
+    if (q._gyEntry) copy._gyId = q._gyEntry._id;
+    return copy;
+  });
+  var snap = {
+    subject:           S.curSubject,
+    redemption:        S.nmRedemption,
+    score:             S.score,
+    cur:               S.cur,
+    done:              S.done,
+    chosen:            S.chosen,
+    missed:            JSON.parse(JSON.stringify(S.missed)),
+    nmGraveyard:       JSON.parse(JSON.stringify(S.nmGraveyard)),
+    nmGraveyardSeq:    S.nmGraveyardSeq,
+    nmQueuedGraveyard: JSON.parse(JSON.stringify(S.nmQueuedGraveyard)),
+    shuffled:          shuffledSnap,
+    nmMindful:         S.nmMindful,
+    nmCheckpoint:      S.nmCheckpoint,
+    nmEraser:          S.nmEraser,
+    scramble:          S.scramble,
+    savedAt:           Date.now(),
+  };
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(snap)); } catch(e) {}
+  showBanner('synced', '💾 Progress saved — resume from the subjects screen.', 3000);
+}
+
+function saveStateSave() {
+  if (S.ironMode) return;
+  var existing = saveStateLoad();
+  // If a save exists for a DIFFERENT subject, ask before overwriting
+  if (existing && existing.subject && existing.subject !== S.curSubject) {
+    var savedDate = existing.savedAt ? new Date(existing.savedAt).toLocaleString() : 'previously';
+    selenaConfirm(
+      'You have a saved session for "' + existing.subject + '" (saved ' + savedDate + '). Overwrite it with this session?',
+      function() { _doSave(); }
+    );
+  } else {
+    _doSave();
+  }
+}
+
+function saveStateResume() {
+  var snap = saveStateLoad();
+  if (!snap) return;
+
+  S.nmRedemption  = snap.redemption  || 'none';
+  S.nmMindful     = snap.nmMindful   || false;
+  S.nmCheckpoint  = snap.nmCheckpoint|| false;
+  S.nmEraser      = snap.nmEraser    || false;
+  S.scramble      = snap.scramble !== undefined ? snap.scramble : true;
+
+  S.score         = snap.score || 0;
+  S.cur           = snap.cur   || 0;
+  S.done          = snap.done  || false;
+  S.chosen        = snap.chosen !== undefined ? snap.chosen : null;
+  S.missed        = snap.missed ? JSON.parse(JSON.stringify(snap.missed)) : [];
+
+  S.nmGraveyard         = snap.nmGraveyard       ? JSON.parse(JSON.stringify(snap.nmGraveyard))       : [];
+  S.nmGraveyardSeq      = snap.nmGraveyardSeq    || 0;
+  S.nmQueuedGraveyard   = snap.nmQueuedGraveyard  ? JSON.parse(JSON.stringify(snap.nmQueuedGraveyard)) : [];
+
+  S.shuffled = snap.shuffled ? JSON.parse(JSON.stringify(snap.shuffled)) : [];
+  var gyById = {};
+  for (var gi = 0; gi < S.nmGraveyard.length; gi++) gyById[S.nmGraveyard[gi]._id] = S.nmGraveyard[gi];
+  for (var si = 0; si < S.shuffled.length; si++) {
+    var sq = S.shuffled[si];
+    if (sq && sq._gyId !== undefined) {
+      var linked = gyById[sq._gyId];
+      if (linked) sq._gyEntry = linked;
+      delete sq._gyId;
+    }
+  }
+
+  var curQ = S.shuffled[S.cur];
+  S.nmIsGraveyardQ        = !!(curQ && curQ._gyEntry);
+  S.nmGraveyardReturnInfo = S.nmIsGraveyardQ
+    ? { prevAnswer: curQ._gyPrevAnswer, returnNum: curQ._gyReturnNum || 1 }
+    : null;
+
+  S.nmHistory            = [];
+  S.nmCheckpointAt       = S.cur;
+  S.nmCheckpointHistory  = [];
+  S.nmCheckpointReturnAt = -1;
+  S.nmBlockStartSnap     = nmSnapshot();
+  S._resumeScoreBase     = S.score;
+
+  if (S.nmMindfulTimer) { clearInterval(S.nmMindfulTimer); S.nmMindfulTimer = null; }
+  S.nmMindfulCount = 0;
+
+  S.ironMode   = false;
+  S.curSubject = snap.subject;
+
+  // Clear save slot — consumed on resume
+  saveStateClear();
+
+  S.screen = 'quiz';
+  render();
+}
+
+var IRON_MAN = { name: '\u26a1 Iron Man Mode', sheets: ['ALL'] };
+
+var DEFAULT_SUBJECTS = [
+  { name: 'Civil Engineering',                        sheets: ['17Lejr8fMOOvHXnp7U6kTHDU5CquWgjMZDhrMHhPDIbs'] },
+  { name: 'Environmental Engineering',                sheets: ['1eTIyjeWz9uPH9dtxnC6uCOK9jZlYK7-XkvGefW_5UMo'] },
+  { name: 'Public Health Engineering',                sheets: ['1xSs7XftZCAm-TR_7m9QQbw2Oy55DkdtVWJFDf9ca3uY'] },
+  { name: 'Sanitary Science as Applied to Buildings', sheets: ['1YR7AI4u2Bkwcwh0fH_PMy6cp9gO4VqNoUlcuZP_sR7A'] },
+  { name: 'Wastewater Engineering',                   sheets: ['1GEm4KVp9ZaXonBH1yvJWiGoz3j6hdnJhMOPGmUQS0N4'] },
+  { name: 'Water Supply Engineering',                 sheets: ['1zbDyMxihtyhLQAH2Kq8z5pgEPzbMZSxWT7NuSrg4fCM'] },
+  IRON_MAN
+];
+
+function toggleDark() {
+  var html = document.documentElement;
+  html.classList.toggle('dark');
+  S.dark = html.classList.contains('dark');
+  // update all toggle buttons in the page
+  var btns = document.querySelectorAll('.dm-btn');
+  for (var i = 0; i < btns.length; i++) {
+    if (btns[i].classList.contains('quit-btn')) continue;
+    btns[i].textContent = S.dark ? '\u2600\ufe0f' : '\ud83c\udf19';
+  }
+}
+
+function loadConfig() {
+  S.subjects = DEFAULT_SUBJECTS.filter(function(s) { return s.name !== IRON_MAN.name; }).map(function(s) {
+    return { name: s.name, sheets: s.sheets.slice() };
+  });
+}
+
+/* ─────────────────────────────────────────────
+   HELPERS
+───────────────────────────────────────────── */
+function shuf(arr) {
+  var a = arr.slice();
+  for (var i = a.length-1; i > 0; i--) {
+    var j = Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t;
+  }
+  return a;
+}
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function goTo(sc) {
+  stopIronTimer();
+  if (sc === 'subjects') S.ironMode = false;
+  S.screen = sc; render();
+}
+
+/* ─────────────────────────────────────────────
+   SHEETS API v4 — fetch all rows from a spreadsheet
+   sheets[] contains spreadsheet IDs (not URLs)
+───────────────────────────────────────────── */
+
+/* Extract spreadsheet ID from a full URL or bare ID */
+function toSheetId(raw) {
+  raw = raw.trim();
+  var m = raw.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+  if (m) return m[1];
+  if (/^[a-zA-Z0-9_-]{20,}$/.test(raw)) return raw;
+  return null;
+}
+
+/* Fetch all rows from one spreadsheet (first sheet tab) via Sheets API v4 */
+function fetchSpreadsheet(spreadsheetId) {
+  var url = 'https://sheets.googleapis.com/v4/spreadsheets/' + spreadsheetId +
+            '/values/A:F?key=' + API_KEY;
+  var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  var timer = controller ? setTimeout(function(){ controller.abort(); }, 8000) : null;
+  var opts = controller ? { signal: controller.signal } : {};
+  return fetch(url, opts)
+    .then(function(res) {
+      if (timer) clearTimeout(timer);
+      return res.json();
+    })
+    .then(function(json) {
+      if (json.error) throw new Error('Sheets API: ' + json.error.message);
+      return json.values || [];
+    })
+    .catch(function(err) {
+      if (timer) clearTimeout(timer);
+      throw err;
+    });
+}
+
+/* Convert raw 2D array rows to question objects */
+function rowsToQuestions(rows, subjName) {
+  var qs = [];
+  for (var i = 0; i < rows.length; i++) {
+    var row = rows[i];
+    var topic   = String(row[0]||'').trim();
+    var qtext   = String(row[1]||'').trim();
+    var correct = String(row[2]||'').trim();
+    var w1      = String(row[3]||'').trim();
+    var w2      = String(row[4]||'').trim();
+    var w3      = String(row[5]||'').trim();
+    if (!topic || !qtext || !correct) continue;
+    if (topic.toLowerCase()==='topic' || topic.toLowerCase()==='subject topic') continue;
+    var choices = [correct];
+    if (w1) choices.push(w1);
+    if (w2) choices.push(w2);
+    if (w3) choices.push(w3);
+    qs.push({ subj: subjName, topic: topic, question: qtext, choices: choices, answer: 0, rowIndex: qs.length });
+  }
+  return qs;
+}
+
+
+/* ─────────────────────────────────────────────
+   SUBJECT SELECTION — LOAD & NAVIGATE
+───────────────────────────────────────────── */
+function selectSubject(subjName) {
+  // Iron Man Mode: load all regular subjects then merge
+  if (subjName === IRON_MAN.name) {
+    var regularSubjects = DEFAULT_SUBJECTS.filter(function(s) { return s.name !== IRON_MAN.name; });
+    S.loadingSubject = IRON_MAN.name;
+    S.loadErrors[IRON_MAN.name] = null;
+    S.screen = 'subjects'; render();
+    var remaining = regularSubjects.length;
+    regularSubjects.forEach(function(subj) {
+      fetchSubject(subj.name, function(err, qs) {
+        if (!err && qs.length) S.loadedQ[subj.name] = qs;
+        else delete S.loadedQ[subj.name];
+        remaining--;
+        if (remaining === 0) { S.loadingSubject = null; _buildIronMan(); }
+      });
+    });
+    return;
+  }
+  if (S.loadedQ[subjName] && S.loadedQ[subjName].length) { _enterSubject(subjName); return; }
+  S.loadingSubject = subjName;
+  S.loadErrors[subjName] = null;
+  S.screen = 'subjects'; render();
+  fetchSubject(subjName, function(err, qs) {
+    S.loadingSubject = null;
+    if (err) { S.loadErrors[subjName] = err; render(); return; }
+    if (!qs.length) { S.loadErrors[subjName] = 'No valid questions found. Check that columns A\u2013C are filled (Topic, Question, Correct Answer).'; render(); return; }
+    S.loadedQ[subjName] = qs;
+    S.loadErrors[subjName] = null;
+    _enterSubject(subjName);
+  });
+}
+
+function _buildIronMan() {
+  var all = [];
+  DEFAULT_SUBJECTS.forEach(function(s) {
+    if (s.name !== IRON_MAN.name && S.loadedQ[s.name]) all = all.concat(S.loadedQ[s.name]);
+  });
+  if (!all.length) { S.loadErrors[IRON_MAN.name] = 'Could not load any subjects. Make sure each sheet is shared publicly.'; render(); return; }
+  S.loadedQ[IRON_MAN.name] = all;
+  _enterSubject(IRON_MAN.name);
+}
+
+function _enterSubject(subjName) {
+  var qs = S.loadedQ[subjName] || [];
+  S.curSubject = subjName;
+  var seen = {};
+  S.topics = [];
+  for (var i = 0; i < qs.length; i++) {
+    if (!seen[qs[i].topic]) { seen[qs[i].topic]=true; S.topics.push(qs[i].topic); }
+  }
+  S.checkedTopics = {};
+  for (var i = 0; i < S.topics.length; i++) S.checkedTopics[S.topics[i]] = true;
+
+  if (subjName === IRON_MAN.name) {
+    S.ironMode = true;
+    S.screen = 'ironconfirm';
+  } else {
+    S.ironMode = false;
+    S.screen = 'topics';
+  }
+  render();
+}
+
+function reloadSubject(subjName) {
+  delete S.loadedQ[subjName];
+  S.loadErrors[subjName] = null;
+  // Purge IDB cache for this subject so we re-download fresh
+  idbDeleteSubject(subjName).then(function() { selectSubject(subjName); }).catch(function() { selectSubject(subjName); });
+}
+
+/* ─────────────────────────────────────────────
+   TOPIC / QUIZ HELPERS (unchanged logic)
+───────────────────────────────────────────── */
+function topicCount(topic) {
+  var qs = S.loadedQ[S.curSubject] || [];
+  var c = 0;
+  for (var i = 0; i < qs.length; i++) if (qs[i].topic === topic) c++;
+  return c;
+}
+function checkedCount() {
+  var c = 0; for (var k in S.checkedTopics) if (S.checkedTopics[k]) c++; return c;
+}
+function totalSelected() {
+  var qs = S.loadedQ[S.curSubject] || [];
+  var c = 0;
+  for (var i = 0; i < qs.length; i++) if (S.checkedTopics[qs[i].topic]) c++;
+  return c;
+}
+function toggleAll(val) {
+  for (var i = 0; i < S.topics.length; i++) S.checkedTopics[S.topics[i]] = val;
+  var checkboxes = document.querySelectorAll('#topicList input[type=checkbox]');
+  for (var i = 0; i < checkboxes.length; i++) checkboxes[i].checked = val;
+  renderTopicCounts();
+}
+function renderTopicCounts() {
+  var selQ = totalSelected();
+  var el = document.getElementById('selCount');
+  if (el) el.textContent = selQ + ' question' + (selQ !== 1 ? 's' : '') + ' selected';
+  var btn = document.getElementById('startBtn');
+  if (btn) { btn.textContent = 'Start quiz (' + selQ + ' q) ▶'; btn.disabled = (selQ === 0); }
+}
+function startQuiz() {
+  var qs = S.loadedQ[S.curSubject] || [];
+  var pool = [];
+  for (var i = 0; i < qs.length; i++) if (S.checkedTopics[qs[i].topic]) pool.push(qs[i]);
+  if (!pool.length) { alert('No questions match your selection.'); return; }
+  // Iron Man always scrambles; normal mode respects S.scramble
+  S.shuffled = S.ironMode || S.scramble ? shuf(pool) : pool.slice();
+  for (var j = 0; j < S.shuffled.length; j++) {
+    var order = [];
+    for (var k = 0; k < S.shuffled[j].choices.length; k++) order.push(k);
+    // Always scramble answer choices regardless of scramble setting
+    S.shuffled[j]._order = shuf(order);
+  }
+  S.cur = 0; S.score = 0; S.missed = [];
+  S.done = false; S.chosen = null;
+  // ── Study Mode resets ──
+  if (!S.ironMode) {
+    S.nmHistory = [];
+    S.nmGraveyard = [];
+    S.nmGraveyardSeq = 0;
+    S.nmQueuedGraveyard = [];
+    S.nmGraveyardReturnInfo = null;
+    S.nmIsGraveyardQ = false;
+    S.nmCheckpointAt = 0;
+    S.nmCheckpointHistory = [];
+    S.nmCheckpointReturnAt = -1;
+    if (S.nmMindfulTimer) { clearInterval(S.nmMindfulTimer); S.nmMindfulTimer = null; }
+    S.nmMindfulCount = 0;
+    S._resumeScoreBase = undefined;
+    // Snapshot of the very start of block 1 — Retry restores TO this, not to the
+    // end-of-block state, so any graveyard returns triggered mid-block get
+    // cleanly rolled back instead of leaving duplicate/orphaned copies behind.
+    S.nmBlockStartSnap = nmSnapshot();
+  }
+  if (S.ironMode) {
+    S.ironMaxLives = (S.ironClass === 'knight') ? 4 : 3;
+    S.ironLives = S.ironMaxLives; S.ironWrong = 0;
+    S.ironRound = 0; S.ironStreak = 0; S.ironShielded = false;
+    S.ironShieldRounds = 0; S.ironBombsUsedThisQ = 0; S.ironRemoved = {};
+    S.ironConsumables = { shield: 0, skip: 0, bomb: 0 };
+    S.ironRewardCadence = (S.ironClass === 'alchemist') ? 8 : 10;
+    S.ironPaladinUsed = false; S.ironPaladinSaved = false;
+    S.ironRogueBonus = false; S.ironMonkHeal = false; S.ironThiefGrantType = null;
+    S.ironSkillCooldown = 0; S.ironSkillUsedThisQ = false; S.ironSkillEvent = null;
+    S.ironMonkFocusActive = false;
+    S.ironMasteryTriggered = false;
+    S.ironMasteryActive = false;
+    S.ironPaladinBlessings = 0;
+    S.ironMonkConcentration = 0;
+    S.ironAlchemistAdrenaline = 0;
+    S.ironRogueSpeedBonus = false;
+    S.ironTimeAtPick = 30;
+    // Run statistics
+    S.ironHighStreak = 0;
+    S.ironTotalWrong = 0;
+    S.ironTotalShieldBlocks = 0;
+    S.ironTotalSkipped = 0;
+    S.ironTotalBombsRemoved = 0;
+    S.ironTotalCorrect = 0;
+    S.ironTotalRounds = 0;
+    S.ironRunSaved = false; // guard: prevent double-saving PRs
+  }
+  S.skipped = false;
+
+  // ── Personal Records: session started ──
+  prRecord(function(pr) {
+    if (S.ironMode) {
+      pr.ironSessionsPlayed++;
+      if (S.ironClass) pr.ironClassRuns[S.ironClass]++;
+    } else {
+      pr.normalSessionsStarted++;
+    }
+  });
+
+  S.screen = 'quiz'; render();
+  if (S.ironMode) setTimeout(startIronTimer, 50);
+}
+
+/* ─────────────────────────────────────────────
+   NORMAL MODE — SETTINGS & REDEMPTION HELPERS
+───────────────────────────────────────────── */
+
+// Deep-clone current quiz state for history/undo
+function nmSnapshot() {
+  return {
+    cur: S.cur,
+    score: S.score,
+    done: S.done,
+    chosen: S.chosen,
+    missed: S.missed.slice(),
+    shuffled: S.shuffled.slice(), // shallow — question objects are immutable
+    nmGraveyard: JSON.parse(JSON.stringify(S.nmGraveyard)),
+    nmGraveyardSeq: S.nmGraveyardSeq,
+    nmQueuedGraveyard: JSON.parse(JSON.stringify(S.nmQueuedGraveyard)),
+    nmCheckpointAt: S.nmCheckpointAt,
+    nmCheckpointHistory: S.nmCheckpointHistory.map(function(s){ return JSON.parse(JSON.stringify(s)); }),
+    nmCheckpointReturnAt: S.nmCheckpointReturnAt,
+    nmIsGraveyardQ: S.nmIsGraveyardQ,
+    nmGraveyardReturnInfo: S.nmGraveyardReturnInfo ? JSON.parse(JSON.stringify(S.nmGraveyardReturnInfo)) : null,
+  };
+}
+
+// Restore quiz state from a snapshot
+function nmRestore(snap) {
+  S.cur = snap.cur;
+  S.score = snap.score;
+  S.done = snap.done;
+  S.chosen = snap.chosen;
+  S.missed = snap.missed.slice();
+  S.shuffled = snap.shuffled.slice();
+  S.nmGraveyard = JSON.parse(JSON.stringify(snap.nmGraveyard));
+  S.nmGraveyardSeq = snap.nmGraveyardSeq || 0;
+  S.nmQueuedGraveyard = JSON.parse(JSON.stringify(snap.nmQueuedGraveyard));
+  // S.nmGraveyard above is a fresh JSON clone — its entry objects are NOT the
+  // same references that S.shuffled's already-injected graveyard-return
+  // questions point to via _gyEntry (those still point at the pre-restore
+  // objects). Re-link every _gyEntry in the restored S.shuffled to the new
+  // canonical entry (matched by stable _id), so reference equality (===)
+  // keeps working for resolving, re-queuing, and undoing graveyard returns.
+  var gyById = {};
+  for (var gi = 0; gi < S.nmGraveyard.length; gi++) gyById[S.nmGraveyard[gi]._id] = S.nmGraveyard[gi];
+  for (var si = 0; si < S.shuffled.length; si++) {
+    var sq = S.shuffled[si];
+    if (sq && sq._gyEntry && sq._gyEntry._id !== undefined) {
+      var relinked = gyById[sq._gyEntry._id];
+      if (relinked) sq._gyEntry = relinked;
+    }
+  }
+  S.nmCheckpointAt = snap.nmCheckpointAt;
+  if (snap.nmCheckpointHistory) S.nmCheckpointHistory = snap.nmCheckpointHistory.map(function(s){ return JSON.parse(JSON.stringify(s)); });
+  if (snap.nmCheckpointReturnAt !== undefined) S.nmCheckpointReturnAt = snap.nmCheckpointReturnAt;
+  S.nmIsGraveyardQ = snap.nmIsGraveyardQ;
+  S.nmGraveyardReturnInfo = snap.nmGraveyardReturnInfo ? JSON.parse(JSON.stringify(snap.nmGraveyardReturnInfo)) : null;
+}
+
+// Add a question to the graveyard (called on wrong answer in redemption mode)
+function nmAddToGraveyard(q, prevAnswerText) {
+  var mode = S.nmRedemption;
+  if (mode === 'none') return;
+  // Build graveyard entry
+  var entry = {
+    _id: ++S.nmGraveyardSeq,    // stable identity — used to re-link _gyEntry refs in S.shuffled after nmRestore
+    q: q,                       // original question object
+    prevAnswer: prevAnswerText,  // text of the wrong answer (first wrong answer)
+    returnCount: 0,             // how many times it has returned
+    removed: false,             // true when fully cleared from graveyard
+    // Vampire: track each wrong answer's actual choice index so we can eliminate it next return
+    vampireWrongAnswers: [],    // array of choice indices (q.choices[i]) picked wrong each time
+  };
+  if (mode === 'mummy') entry.mummyReturnsLeft = 10;
+  S.nmGraveyard.push(entry);
+}
+
+// For a given graveyard entry, build a question object with vampire choice reduction
+// Each previously-chosen wrong answer index gets removed from the display order
+function nmBuildVampireQ(entry) {
+  var q = entry.q;
+  var copy = {};
+  for (var k in q) copy[k] = q[k];
+  var fullOrder = q._order ? q._order.slice() : [];
+  // Remove any choice index that was previously answered wrong
+  var eliminated = entry.vampireWrongAnswers || [];
+  var remaining = fullOrder.filter(function(choiceIdx) {
+    return eliminated.indexOf(choiceIdx) === -1;
+  });
+  // Safety: always keep the correct answer
+  if (remaining.indexOf(q.answer) === -1) remaining.push(q.answer);
+  copy._order = remaining;
+  return copy;
+}
+
+// Queue graveyard questions into future positions of S.shuffled
+function nmQueueGraveyardReturn(entry, preLen) {
+  var mode = S.nmRedemption;
+  // Use preLen (pre-injection length) for fair distribution across multiple entries
+  var baseLen = preLen || S.shuffled.length;
+  var remaining = baseLen - S.cur - 1;
+  var insertAt;
+  if (remaining <= 0) {
+    // No future slot left in the current run (e.g. wrong answer on the final
+    // question) — extend the run by appending to the very end instead of
+    // silently dropping the entry.
+    insertAt = S.shuffled.length;
+  } else {
+    // Insert at a random position in the ORIGINAL future range (not skewed by prior injections)
+    insertAt = S.cur + 1 + Math.floor(Math.random() * remaining);
+  }
+  // Build the question to inject
+  var qToInject;
+  if (mode === 'vampire') {
+    // Build question with all previously-wrong answers eliminated
+    // (vampireWrongAnswers is already updated in pick() when wrong answer was given)
+    qToInject = nmBuildVampireQ(entry);
+  } else {
+    // For ghost/zombie/mummy: return the original question
+    qToInject = entry.q;
+  }
+  // Tag the question with graveyard metadata
+  entry.returnCount++; // track how many times this entry has been queued to return
+  var tagged = {};
+  for (var k in qToInject) tagged[k] = qToInject[k];
+  tagged._gyEntry = entry; // reference back to graveyard entry
+  tagged._gyPrevAnswer = entry.prevAnswer;
+  tagged._gyReturnNum = entry.returnCount; // which return this is (1-based)
+  S.shuffled.splice(insertAt, 0, tagged);
+}
+
+// Called after every correct/wrong answer — inject pending GY returns
+function nmProcessGraveyard() {
+  var mode = S.nmRedemption;
+  if (mode === 'none') return;
+  // Snapshot the pre-injection length so multi-entry inserts don't skew toward the back
+  var preLen = S.shuffled.length;
+  // Process queued returns
+  for (var i = 0; i < S.nmGraveyard.length; i++) {
+    var entry = S.nmGraveyard[i];
+    if (entry.removed) continue;
+    // Determine if this entry needs to be queued
+    var needsQueue = false;
+    if (mode === 'ghost' && entry.returnCount === 0) needsQueue = true;
+    if (mode === 'zombie') needsQueue = true; // always until answered correctly
+    if (mode === 'vampire') needsQueue = true; // returns until answered correctly (removed flag handles termination)
+    if (mode === 'mummy' && entry.mummyReturnsLeft > 0) needsQueue = true;
+    // Only queue if not already queued in shuffled
+    if (needsQueue) {
+      var alreadyQueued = false;
+      for (var j = S.cur + 1; j < S.shuffled.length; j++) {
+        if (S.shuffled[j]._gyEntry === entry) { alreadyQueued = true; break; }
+      }
+      if (!alreadyQueued) nmQueueGraveyardReturn(entry, preLen);
+    }
+  }
+}
+
+// Eraser: undo last answer
+// Case 1: question not yet answered (S.done === false) → go back to previous question unanswered
+// Case 2: question already answered (S.done === true)  → reset current question to unanswered
+function nmEraseOne() {
+  if (!S.nmEraser) return;
+
+  // Cancel any mindful timer
+  if (S.nmMindfulTimer) { clearInterval(S.nmMindfulTimer); S.nmMindfulTimer = null; S.nmMindfulCount = 0; }
+
+  if (S.done) {
+    // ── Case 2: current question is answered — unregister its effects, reset to unanswered ──
+    var q = S.shuffled[S.cur];
+    var wasCorrect = (S.chosen === q.answer);
+
+    if (wasCorrect) {
+      // Unregister score
+      S.score--;
+      // Unregister GY resolution and returnCount if this was a graveyard return
+      if (S.nmRedemption !== 'none' && q._gyEntry) {
+        q._gyEntry.removed = false;
+        if (q._gyEntry.returnCount > 0) q._gyEntry.returnCount--;
+      }
+    } else {
+      // Unregister missed entry
+      S.missed.pop();
+      // Unregister graveyard entry if redemption active
+      if (S.nmRedemption !== 'none' && S.nmGraveyard.length > 0) {
+        if (!q._gyEntry) {
+          // Was a fresh wrong answer — pop the graveyard entry and remove its injection from S.shuffled
+          S.nmGraveyard.pop();
+          // Remove any future injected copy whose _gyEntry is no longer in nmGraveyard
+          S.shuffled = S.shuffled.filter(function(sq, idx) {
+            if (idx <= S.cur) return true;
+            if (!sq._gyEntry) return true;
+            return S.nmGraveyard.indexOf(sq._gyEntry) !== -1;
+          });
+        } else {
+          // Was a graveyard return question — undo the effect applied on wrong answer
+          var gyE = q._gyEntry;
+          var mode = S.nmRedemption;
+          if (mode === 'vampire' && gyE.vampireWrongAnswers.length > 0) {
+            gyE.vampireWrongAnswers.pop();
+          } else if (mode === 'mummy') {
+            gyE.mummyReturnsLeft++;
+            gyE.removed = false;
+          } else if (mode === 'ghost') {
+            // Ghost marks removed=true on ANY answer (right or wrong) since it
+            // only returns once — undoing the answer must clear that flag too.
+            gyE.removed = false;
+          }
+          // Decrement returnCount — this return is being undone (restores narrative line accuracy)
+          if (gyE.returnCount > 0) gyE.returnCount--;
+        }
+        // Remove any future injection of this question that was queued as a result
+        // (find injected GY returns added after S.cur and remove the most recently added)
+        if (!q._gyEntry) {
+          // Fresh wrong answer: remove the queued return for the entry we just popped
+          // Since we popped nmGraveyard, find the entry that would have been queued
+          // The simplest safe approach: scan shuffled for a _gyEntry that no longer exists in nmGraveyard
+          S.shuffled = S.shuffled.filter(function(sq, idx) {
+            if (idx <= S.cur) return true;
+            if (!sq._gyEntry) return true;
+            // Keep if the entry is still in nmGraveyard
+            return S.nmGraveyard.indexOf(sq._gyEntry) !== -1;
+          });
+        } else {
+          // GY return wrong answer: remove the re-queued return for this entry from future positions
+          // Remove the LAST occurrence of this _gyEntry in future shuffled slots
+          for (var ri = S.shuffled.length - 1; ri > S.cur; ri--) {
+            if (S.shuffled[ri]._gyEntry === q._gyEntry) {
+              S.shuffled.splice(ri, 1);
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    // Reset current question to unanswered
+    S.done = false;
+    S.chosen = null;
+    S.nmIsGraveyardQ = !!(q._gyEntry);
+    S.nmGraveyardReturnInfo = q._gyEntry ? { prevAnswer: q._gyPrevAnswer, returnNum: q._gyReturnNum || 1 } : null;
+
+  } else {
+    // ── Case 1: current question not yet answered — go back one, or back to checkpoint ──
+    if (S.cur === 0) return; // nothing to go back to
+
+    // If current position is at or past the first post-checkpoint question,
+    // and we're stepping back TO that boundary, return to the checkpoint screen
+    if (S.nmCheckpoint && S.nmCheckpointReturnAt >= 0 && S.cur === S.nmCheckpointReturnAt) {
+      // Undo the Continue: step back to last question of the completed block
+      S.cur--;
+      S.done = true;  // that question was answered (it triggered the checkpoint)
+      S.chosen = null;
+      S.nmCheckpointAt = S.nmCheckpointHistory.length > 0
+        ? S.nmCheckpointHistory[S.nmCheckpointHistory.length - 1].blockStart
+        : 0;
+      // nmCheckpointReturnAt stays set — if they Continue again and undo again, it still works
+      S.screen = 'nmcheckpoint';
+      render(); return;
+    }
+
+    S.cur--;
+    var prevQ = S.shuffled[S.cur];
+    var prevWasCorrect = (S.chosen !== null && S.chosen === prevQ.answer);
+    // Note: S.chosen/done reflect the PREVIOUS answer state since we haven't answered current yet
+    // Actually we need to check what the previous answer WAS — it's stored in S.chosen from last pick()
+    // But S.chosen was reset when we advanced. We need to detect from score/missed what happened.
+    // Reliable approach: check if prevQ._gyEntry and graveyard state, or use missed array end.
+
+    // Unregister previous question's effects:
+    // Check missed array — if last missed entry matches prevQ, it was wrong
+    var lastMissed = S.missed.length > 0 ? S.missed[S.missed.length - 1] : null;
+    var prevWasWrong = lastMissed && lastMissed.q === prevQ.question;
+
+    if (prevWasWrong) {
+      S.missed.pop();
+      if (S.nmRedemption !== 'none' && S.nmGraveyard.length > 0) {
+        if (!prevQ._gyEntry) {
+          S.nmGraveyard.pop();
+          S.shuffled = S.shuffled.filter(function(sq, idx) {
+            if (idx <= S.cur) return true;
+            if (!sq._gyEntry) return true;
+            return S.nmGraveyard.indexOf(sq._gyEntry) !== -1;
+          });
+        } else {
+          var gyE2 = prevQ._gyEntry;
+          var mode2 = S.nmRedemption;
+          if (mode2 === 'vampire' && gyE2.vampireWrongAnswers.length > 0) {
+            gyE2.vampireWrongAnswers.pop();
+          } else if (mode2 === 'mummy') {
+            gyE2.mummyReturnsLeft++;
+            gyE2.removed = false;
+          } else if (mode2 === 'ghost') {
+            gyE2.removed = false;
+          }
+          // Decrement returnCount — this return is being undone
+          if (gyE2.returnCount > 0) gyE2.returnCount--;
+          for (var ri2 = S.shuffled.length - 1; ri2 > S.cur; ri2--) {
+            if (S.shuffled[ri2]._gyEntry === prevQ._gyEntry) {
+              S.shuffled.splice(ri2, 1);
+              break;
+            }
+          }
+        }
+      }
+    } else {
+      // Was correct — unregister score
+      // Also unregister correct-answer graveyard resolution if it was a GY return
+      S.score--;
+      if (S.nmRedemption !== 'none' && prevQ._gyEntry) {
+        prevQ._gyEntry.removed = false;
+      }
+    }
+
+    // Remove the current (unanswered) question if it was a GY injection added after prev
+    // (i.e. don't remove it — it's still S.cur+1 and should remain for the player to answer)
+
+    S.done = false;
+    S.chosen = null;
+    S.nmIsGraveyardQ = !!(prevQ._gyEntry);
+    S.nmGraveyardReturnInfo = prevQ._gyEntry ? { prevAnswer: prevQ._gyPrevAnswer, returnNum: prevQ._gyReturnNum || 1 } : null;
+  }
+
+  S.screen = 'quiz';
+  render();
+}
+
+// Start mindful mode countdown (5s) after a wrong answer
+function nmStartMindful() {
+  if (!S.nmMindful) return;
+  S.nmMindfulCount = 5;
+  render(); // show overlay
+  if (S.nmMindfulTimer) clearInterval(S.nmMindfulTimer);
+  S.nmMindfulTimer = setInterval(function() {
+    S.nmMindfulCount--;
+    var el = document.getElementById('nmMindfulCount');
+    if (el) el.textContent = S.nmMindfulCount;
+    if (S.nmMindfulCount <= 0) {
+      clearInterval(S.nmMindfulTimer);
+      S.nmMindfulTimer = null;
+      S.nmMindfulCount = 0;
+      render();
+    }
+  }, 1000);
+}
+
+function pick(displayIdx) {
+  if (S.done) return;
+  if (S.ironMode && S.ironRemoved[displayIdx]) return;
+  S.done = true;
+  stopIronTimer();
+  S.ironTimeAtPick = S.ironTimeLeft; // capture for Rogue Speedy Slingshot mastery
+  S.ironRogueSpeedBonus = false;
+  var q = S.shuffled[S.cur];
+  var origIdx = q._order[displayIdx];
+  S.chosen = origIdx;
+
+  // ── Personal Records: question reviewed + topic tracking (Study Mode only) ──
+  prRecord(function(pr) {
+    if (!S.ironMode) {
+      pr.normalQuestionsReviewed++;
+      prAddUnique(pr.topicsExplored, q.topic);
+    }
+  });
+  if (origIdx === q.answer) {
+    S.score++;
+    // ── Resolve graveyard entry on correct answer ──
+    if (!S.ironMode && q._gyEntry) {
+      var gyEntry = q._gyEntry;
+      var mode = S.nmRedemption;
+      if (mode === 'ghost' || mode === 'vampire') {
+        gyEntry.removed = true;
+      } else if (mode === 'zombie') {
+        gyEntry.removed = true;
+      } else if (mode === 'mummy') {
+        gyEntry.mummyReturnsLeft--;
+        if (gyEntry.mummyReturnsLeft <= 0) gyEntry.removed = true;
+      }
+    }
+    if (S.ironMode) {
+      S.ironStreak++;
+      if (S.ironStreak > S.ironHighStreak) S.ironHighStreak = S.ironStreak;
+      S.ironTotalCorrect++;
+      // Rogue passive: 15% bonus point
+      if (S.ironClass === 'rogue' && Math.random() < 0.15) { S.score++; S.ironRogueBonus = true; prRecord(function(pr){ pr.rogueBonus++; }); }
+      // Rogue Mastery — Speedy Slingshot: +1 point for answering within 3 seconds (27s+ remaining)
+      if (S.ironClass === 'rogue' && S.ironMasteryActive && S.ironTimeAtPick >= 27) {
+        S.score++; S.ironRogueSpeedBonus = true;
+      }
+      // Monk passive: 5% chance to heal, OR mastery concentration-based chance
+      if (S.ironClass === 'monk' && S.ironWrong > 0) {
+        var healChance = S.ironMasteryActive
+          ? Math.min(0.015 * S.ironMonkConcentration, 1) // 1.5% per stack, stacks consumed on heal
+          : 0.03;
+        if (Math.random() < healChance) {
+          S.ironWrong--; S.ironLives = S.ironMaxLives - S.ironWrong; S.ironMonkHeal = true;
+          if (S.ironMasteryActive) S.ironMonkConcentration = 0; // consume all stacks
+          prRecord(function(pr){ pr.monkLivesHealed++; });
+        }
+      }
+      // Monk Mastery — Lock In: gain a concentration stack on every correct answer (always stacks; healing just won't activate if HP is full)
+      if (S.ironClass === 'monk' && S.ironMasteryActive && !S.ironMonkHeal) {
+        S.ironMonkConcentration++;
+      }
+      // Monk Focus skill: guaranteed heal on next correct answer
+      if (checkMonkFocus()) { S.ironMonkHeal = true; prRecord(function(pr){ pr.monkLivesHealed++; }); }
+      if (S.ironClass === 'thief' && S.ironStreak % 7 === 0) { grantRandomConsumable(); prRecord(function(pr){ pr.thiefConsumablesStolen++; }); }
+      // Check for mastery milestone (15 points)
+      if (S.score >= 15 && !S.ironMasteryTriggered) {
+        S.ironMasteryTriggered = true;
+        S.ironMasteryActive = true;
+        prRecord(function(pr){
+          pr.ironTotalMasteryEarned++;
+          if (S.ironClass) pr.ironClassMastery[S.ironClass] = true;
+        });
+        render();
+        setTimeout(function() { S.screen = 'ironmastery'; render(); }, 700);
+        return;
+      }
+    }
+  } else {
+    S.missed.push({ subj: q.subj, topic: q.topic, q: q.question, ok: q.choices[q.answer], bad: q.choices[origIdx] });
+    // ── Study Mode: add to graveyard if redemption active ──
+    if (!S.ironMode && S.nmRedemption !== 'none') {
+      if (q._gyEntry) {
+        // Already a GY return — update entry state
+        var gyE = q._gyEntry;
+        var mode2 = S.nmRedemption;
+        if (mode2 === 'vampire') {
+          // Record this wrong answer index so it gets eliminated on the next return
+          if (gyE.vampireWrongAnswers.indexOf(origIdx) === -1) {
+            gyE.vampireWrongAnswers.push(origIdx);
+          }
+          // stays in graveyard — nmProcessGraveyard will re-queue it
+        } else if (mode2 === 'mummy') {
+          gyE.mummyReturnsLeft--;
+          if (gyE.mummyReturnsLeft <= 0) gyE.removed = true;
+        }
+        // zombie: stays in graveyard — re-queued by nmProcessGraveyard
+        if (mode2 === 'ghost') gyE.removed = true; // ghost: one return only, remove regardless of correct/wrong
+      } else {
+        // First wrong answer — add to graveyard
+        nmAddToGraveyard(q, q.choices[origIdx]);
+        if (S.nmRedemption === 'vampire') {
+          // Record the first wrong answer index immediately for elimination on first return
+          S.nmGraveyard[S.nmGraveyard.length - 1].vampireWrongAnswers.push(origIdx);
+        }
+      }
+    }
+    // ── Mindful Mode: start countdown on wrong answer (non-iron) ──
+    if (!S.ironMode && S.nmMindful) nmStartMindful();
+    if (S.ironMode) {
+      S.ironStreak = 0;
+      S.ironTotalWrong++;
+      if (S.ironShieldRounds > 0) {
+        S.ironShielded = true;
+        S.ironTotalShieldBlocks++;
+        if (S.ironClass === 'knight') prRecord(function(pr){ pr.knightRoundsShieldActive++; });
+      } else {
+        applyIronDamage();
+      }
+    }
+  }
+  render();
+  // In Iron Man mode, if all lives lost, show game over after brief delay
+  if (S.ironMode && S.ironWrong >= S.ironMaxLives) {
+    setTimeout(function() { S.screen = 'ironover'; render(); }, 900);
+  }
+}
+function next() {
+  if (S.ironMode) {
+    S.ironRound++;
+    S.ironTotalRounds++;
+    if (S.ironShieldRounds > 0) S.ironShieldRounds--;
+    if (S.ironSkillCooldown > 0) S.ironSkillCooldown--;
+    if (S.ironClass === 'bomber' && S.ironRound % 10 === 0) {
+      S.ironConsumables.bomb += 1;
+      prRecord(function(pr){ pr.bomberFreeGrants++; });
+      showBanner('synced', '💣 Bomber instinct triggers — +1 Bomb!', 2500);
+    }
+
+    if (S.ironMasteryActive) {
+      // Paladin Mastery — Call for Karma: gain 1 blessing stack per round
+      if (S.ironClass === 'paladin') {
+        S.ironPaladinBlessings++;
+        // When passive has been used up, consume ALL blessing stacks; each gives 2% chance to recover passive
+        if (S.ironPaladinUsed && S.ironPaladinBlessings > 0) {
+          var recoveryChance = Math.min(S.ironPaladinBlessings * 0.02, 1);
+          var stacks = S.ironPaladinBlessings;
+          S.ironPaladinBlessings = 0; // consume all stacks
+          if (Math.random() < recoveryChance) {
+            S.ironPaladinUsed = false;
+            showBanner('synced', '✨ Call for Karma — '+stacks+' blessings consumed! Paladin passive RESTORED!', 3000);
+          } else {
+            showBanner('synced', '🙏 Call for Karma — '+stacks+' blessings consumed ('+Math.round(recoveryChance*100)+'% chance). No recovery this round.', 2800);
+          }
+        } else if (!S.ironPaladinUsed) {
+          showBanner('synced', '✨ Blessing stack gained! ('+S.ironPaladinBlessings+' total)', 1800);
+        }
+      }
+
+      // Alchemist Mastery — Complete Ingredients: +1 adrenaline per consumable TYPE owned
+      if (S.ironClass === 'alchemist') {
+        var types = 0;
+        if (S.ironConsumables.shield > 0) types++;
+        if (S.ironConsumables.skip   > 0) types++;
+        if (S.ironConsumables.bomb   > 0) types++;
+        if (types > 0) {
+          S.ironAlchemistAdrenaline += types;
+          if (S.ironAlchemistAdrenaline >= 10) {
+            S.ironAlchemistAdrenaline -= 10;
+            S.score++;
+            showBanner('synced', '⚗️ Complete Ingredients — 10 stacks consumed! +1 Point! (Score: '+S.score+')', 3000);
+          } else {
+            showBanner('synced', '⚗️ Adrenaline: +'+types+' stacks ('+S.ironAlchemistAdrenaline+'/10)', 1800);
+          }
+        }
+      }
+    }
+
+    var cadence = S.ironRewardCadence || 10;
+    if (S.ironRound % cadence === 0 && S.cur + 1 < S.shuffled.length) {
+      S.ironRewardOptions = pickIronRewardOptions();
+      S.screen = 'ironreward';
+      render();
+      return;
+    }
+  }
+  advanceQuestion();
+}
+function advanceQuestion() {
+  // ── Study Mode: process graveyard queuing FIRST ──
+  // This must happen before the end-of-run check below. Otherwise a wrong
+  // answer on the very last question has no "future slot" to queue into and
+  // the run ends immediately, silently dropping the graveyard entry.
+  if (!S.ironMode) nmProcessGraveyard();
+  if (S.cur + 1 >= S.shuffled.length) {
+    S.screen = 'results';
+    // ── Personal Records: session finished ──
+    if (S.ironMode) {
+      if (!S.ironRunSaved) {
+        S.ironRunSaved = true;
+        prRecord(function(pr) {
+          pr.ironRoundsSurvivedAllTime += (S.ironTotalRounds || 0);
+          if (S.ironHighStreak > pr.ironLongestStreakEver) pr.ironLongestStreakEver = S.ironHighStreak;
+          if (S.score > pr.ironHighestScore) pr.ironHighestScore = S.score;
+          if (S.ironClass && S.score > pr.ironClassBest[S.ironClass]) pr.ironClassBest[S.ironClass] = S.score;
+        });
+      }
+    } else {
+      var sessionLen = S.shuffled.length;
+      prRecord(function(pr) {
+        if (sessionLen > pr.normalLongestSession) pr.normalLongestSession = sessionLen;
+      });
+    }
+  } else {
+    // ── Study Mode: checkpoint check ──
+    if (!S.ironMode) {
+      // Checkpoint: count only non-GY questions since last checkpoint (GY injections inflate S.cur)
+      if (S.nmCheckpoint && S.shuffled.length >= 30) {
+        var nonGyDone = 0;
+        for (var cpi = S.nmCheckpointAt; cpi <= S.cur; cpi++) {
+          if (S.shuffled[cpi] && !S.shuffled[cpi]._gyEntry) nonGyDone++;
+        }
+        if (nonGyDone > 0 && nonGyDone % 15 === 0) {
+          S.screen = 'nmcheckpoint';
+          render(); return;
+        }
+      }
+    }
+    S.screen = 'quiz';
+    S.cur++; S.done = false; S.chosen = null;
+    if (!S.ironMode && S.nmMindfulTimer) { clearInterval(S.nmMindfulTimer); S.nmMindfulTimer = null; S.nmMindfulCount = 0; }
+    S.nmIsGraveyardQ = !!(S.shuffled[S.cur] && S.shuffled[S.cur]._gyEntry);
+    S.nmGraveyardReturnInfo = S.nmIsGraveyardQ ? { prevAnswer: S.shuffled[S.cur]._gyPrevAnswer, returnNum: (S.shuffled[S.cur] && S.shuffled[S.cur]._gyReturnNum) || 1 } : null;
+    S.skipped = false; S.ironShielded = false; S.ironPaladinSaved = false;
+    S.ironRogueBonus = false; S.ironMonkHeal = false; S.ironThiefGrantType = null;
+    S.ironBombsUsedThisQ = 0; S.ironRemoved = {};
+    S.ironSkillUsedThisQ = false; S.ironSkillEvent = null;
+    S.ironRogueSpeedBonus = false; S.ironTimeAtPick = 30;
+    // Note: ironMonkFocusActive persists until triggered in pick()
+  }
+  render();
+  if (S.ironMode && S.screen === 'quiz') setTimeout(startIronTimer, 50);
+}
+
+/* ─────────────────────────────────────────────
+   IRON MAN CONSUMABLES
+───────────────────────────────────────────── */
+function useIronShield() {
+  if (!S.ironMode || S.done) return;
+  if (S.ironConsumables.shield <= 0) return;
+  if (S.ironShieldRounds > 0) return;
+  S.ironConsumables.shield--;
+  prRecord(function(pr){ pr.ironTotalShieldsUsed++; });
+  // Knight Mastery — Brace for Impact: shield lasts 3 rounds instead of 2
+  S.ironShieldRounds = (S.ironClass === 'knight' && S.ironMasteryActive) ? 3 : 2;
+  render();
+}
+function useIronSkip() {
+  if (!S.ironMode || S.done) return;
+  if (S.ironConsumables.skip <= 0) return;
+  S.ironConsumables.skip--;
+  prRecord(function(pr){ pr.ironTotalSkipsUsed++; });
+  if (!(S.ironClass === 'thief' && S.ironMasteryActive)) {
+    S.ironStreak = 0;
+  }
+  S.done = true;
+  S.skipped = true;
+  S.chosen = null;
+  S.ironTotalSkipped++;
+  stopIronTimer();
+  render();
+}
+function ironBombCandidatesLeft(q) {
+  if (!q) return 0;
+  var c = 0;
+  for (var pos = 0; pos < q._order.length; pos++) {
+    if (q._order[pos] !== q.answer && !S.ironRemoved[pos]) c++;
+  }
+  return c;
+}
+function useIronBomb() {
+  if (!S.ironMode || S.done) return;
+  if (S.ironConsumables.bomb <= 0) return;
+  // Bomber Mastery — Calculated Detonation: only 1 use per question (no multi-bomb)
+  var maxUses = (S.ironClass === 'bomber' && S.ironMasteryActive) ? 1 : 3;
+  if (S.ironBombsUsedThisQ >= maxUses) return;
+  var q = S.shuffled[S.cur];
+  var candidates = [];
+  for (var pos = 0; pos < q._order.length; pos++) {
+    if (q._order[pos] !== q.answer && !S.ironRemoved[pos]) candidates.push(pos);
+  }
+  if (!candidates.length) return;
+  // Bomber Mastery: remove 2 wrong answers with one bomb
+  var removeCount = (S.ironClass === 'bomber' && S.ironMasteryActive) ? 2 : 1;
+  var toRemove = shuf(candidates).slice(0, removeCount);
+  for (var ri = 0; ri < toRemove.length; ri++) S.ironRemoved[toRemove[ri]] = true;
+  S.ironTotalBombsRemoved += toRemove.length;
+  S.ironBombsUsedThisQ++;
+  S.ironConsumables.bomb--;
+  prRecord(function(pr){ pr.ironTotalBombsUsed++; });
+  render();
+}
+function pickIronRewardOptions() {
+  return shuf(['shield','skip','bomb']).slice(0, 2);
+}
+function claimIronReward(type) {
+  var info = IRON_CONSUMABLE_INFO[type];
+  if (!info) return;
+  S.ironConsumables[type] += info.qty;
+  advanceQuestion();
+}
+function grantRandomConsumable() {
+  var type = shuf(['shield','skip','bomb'])[0];
+  S.ironConsumables[type] += IRON_CONSUMABLE_INFO[type].qty;
+  S.ironThiefGrantType = type;
+}
+function applyIronDamage() {
+  var wouldBeWrong = S.ironWrong + 1;
+  if (wouldBeWrong >= S.ironMaxLives && S.ironClass === 'paladin' && !S.ironPaladinUsed) {
+    S.ironPaladinUsed = true;
+    S.ironPaladinSaved = true;
+    S.ironWrong = S.ironMaxLives - 1;
+    S.ironLives = 1;
+    prRecord(function(pr){ pr.paladinSaves++; });
+    return;
+  }
+  S.ironWrong = wouldBeWrong;
+  S.ironLives = S.ironMaxLives - S.ironWrong;
+}
+
+/* ─────────────────────────────────────────────
+   IRON MAN CLASS SKILLS
+───────────────────────────────────────────── */
+function useClassSkill() {
+  if (!S.ironMode || !S.ironClass) return;
+  if (S.ironSkillUsedThisQ) return;
+  if (S.ironSkillCooldown > 0) return;
+  var cls = S.ironClass;
+  var cd = IRON_CLASSES[cls].skillCooldown;
+
+  if (cls === 'knight') {
+    // Raise Shield: Nullify damage for 1 round (2 with mastery)
+    if (S.done) return;
+    var knightShieldDuration = (S.ironMasteryActive) ? 2 : 1;
+    S.ironShieldRounds = Math.max(S.ironShieldRounds, knightShieldDuration);
+    S.ironSkillEvent = S.ironMasteryActive
+      ? '🛡 Brace for Impact — shield raised for 2 rounds!'
+      : '🛡 Shield raised — damage nullified this round!';
+  } else if (cls === 'bomber') {
+    // Absolute Destruction: Remove ALL wrong answers
+    if (S.done) return;
+    var q = S.shuffled[S.cur];
+    var removed = 0;
+    for (var pos = 0; pos < q._order.length; pos++) {
+      if (q._order[pos] !== q.answer && !S.ironRemoved[pos]) {
+        S.ironRemoved[pos] = true;
+        removed++;
+      }
+    }
+    if (!removed) return; // nothing to bomb
+    S.ironSkillEvent = '💣 Absolute Destruction — all wrong answers eliminated!';
+  } else if (cls === 'thief') {
+    // Snatch: trigger a random consumable effect
+    if (S.done) return;
+    var types = ['shield','skip','bomb'];
+    var type = types[Math.floor(Math.random()*types.length)];
+    S.ironConsumables[type] += IRON_CONSUMABLE_INFO[type].qty;
+    S.ironSkillEvent = '🗝️ Snatch — pilfered ×'+IRON_CONSUMABLE_INFO[type].qty+' '+IRON_CONSUMABLE_INFO[type].name+'!';
+  } else if (cls === 'rogue') {
+    // Risky Escape: Skip + 50/50 chance to get the point or lose a life
+    if (S.done) return;
+    S.ironSkillUsedThisQ = true; // set early so skip doesn't double-count
+    S.ironSkillCooldown = cd;
+    S.done = true;
+    S.skipped = true;
+    S.chosen = null;
+    S.ironStreak = 0;
+    S.ironTotalSkipped++;
+    stopIronTimer();
+    var lucky = Math.random() < 0.5;
+    if (lucky) {
+      S.score++;
+      S.ironSkillEvent = '🎲 Risky Escape — Lucky! Skipped and claimed the point!';
+    } else {
+      applyIronDamage();
+      S.ironSkillEvent = '🎲 Risky Escape — Unlucky! Skipped but lost a life!';
+    }
+    render();
+    if (S.ironWrong >= S.ironMaxLives) setTimeout(function(){ S.screen='ironover'; render(); }, 900);
+    return;
+  } else if (cls === 'paladin') {
+    // Pray: 5% heal 1 HP, 15% get a random consumable, otherwise nothing special
+    var roll = Math.random();
+    if (roll < 0.05 && S.ironWrong > 0) {
+      S.ironWrong--;
+      S.ironLives = S.ironMaxLives - S.ironWrong;
+      S.ironSkillEvent = '✨ Pray — Miracle! Healed 1 life!';
+    } else if (roll < 0.20) {
+      var t2 = shuf(['shield','skip','bomb'])[0];
+      S.ironConsumables[t2] += IRON_CONSUMABLE_INFO[t2].qty;
+      S.ironSkillEvent = '🙏 Pray — Blessed! Received ×'+IRON_CONSUMABLE_INFO[t2].qty+' '+IRON_CONSUMABLE_INFO[t2].name+'!';
+    } else {
+      S.ironSkillEvent = '🙏 Pray — The heavens are silent this time…';
+    }
+  } else if (cls === 'monk') {
+    // Focus: next round guaranteed to heal a missing life; inactive when full
+    if (S.ironWrong === 0) return; // full life, inactive
+    S.ironMonkFocusActive = true;
+    S.ironSkillEvent = '🧘 Focus — Centered. Next correct answer will restore a life.';
+  } else if (cls === 'alchemist') {
+    // Transmutation: randomize consumable types; if ≥3 gain life lose 3; if <3 lose life gain 3
+    var total = S.ironConsumables.shield + S.ironConsumables.skip + S.ironConsumables.bomb;
+    // Randomize all current consumables into random types
+    var newPool = { shield: 0, skip: 0, bomb: 0 };
+    var typeKeys = ['shield','skip','bomb'];
+    var allUnits = [];
+    for (var ti = 0; ti < S.ironConsumables.shield; ti++) allUnits.push('shield');
+    for (var ti = 0; ti < S.ironConsumables.skip; ti++) allUnits.push('skip');
+    for (var ti = 0; ti < S.ironConsumables.bomb; ti++) allUnits.push('bomb');
+    allUnits = shuf(allUnits);
+    // Re-assign shuffled
+    var reshuffled = shuf(allUnits.map(function(_){ return shuf(typeKeys)[0]; }));
+    for (var ri = 0; ri < reshuffled.length; ri++) newPool[reshuffled[ri]]++;
+    S.ironConsumables = newPool;
+    if (total >= 3) {
+      // Gain a life, lose 3 consumables
+      var lost = 3;
+      var order2 = shuf(typeKeys);
+      for (var oi = 0; oi < order2.length && lost > 0; oi++) {
+        var take = Math.min(S.ironConsumables[order2[oi]], lost);
+        S.ironConsumables[order2[oi]] -= take;
+        lost -= take;
+      }
+      if (S.ironWrong > 0) { S.ironWrong--; S.ironLives = S.ironMaxLives - S.ironWrong; }
+      S.ironAlchemistSacrificeForLife = true;
+      S.ironSkillEvent = '⚗️ Transmutation — Sacrificed 3 consumables, gained 1 life!';
+    } else {
+      // Lose a life, get 3 consumables
+      applyIronDamage();
+      var bonus3 = shuf(['shield','skip','bomb','shield','skip','bomb','shield','skip','bomb']).slice(0,3);
+      for (var bi = 0; bi < bonus3.length; bi++) S.ironConsumables[bonus3[bi]]++;
+      S.ironSkillEvent = '⚗️ Transmutation — Sacrificed 1 life, gained 3 consumables!';
+    }
+    if (S.ironAlchemistSacrificeForLife) prRecord(function(pr){ pr.alchemistTransmutationLivesGained++; });
+    S.ironAlchemistSacrificeForLife = false;
+    if (S.ironWrong >= S.ironMaxLives) {
+      S.ironSkillUsedThisQ = true; S.ironSkillCooldown = cd;
+      render();
+      setTimeout(function(){ S.screen='ironover'; render(); }, 900);
+      return;
+    }
+  }
+
+  S.ironSkillUsedThisQ = true;
+  S.ironSkillCooldown = cd;
+  render();
+}
+
+// Called from pick() to apply Monk Focus effect
+function checkMonkFocus() {
+  if (S.ironClass === 'monk' && S.ironMonkFocusActive && S.ironWrong > 0) {
+    S.ironWrong--; S.ironLives = S.ironMaxLives - S.ironWrong;
+    S.ironMonkFocusActive = false;
+    return true;
+  }
+  return false;
+}
+
+/* ─────────────────────────────────────────────
+   IRON MAN CLASS SELECTION
+───────────────────────────────────────────── */
+function pickIronClassOptions() {
+  return shuf(Object.keys(IRON_CLASSES)).slice(0, 3);
+}
+function goToIronClassSelect() {
+  S.ironClassOptions = pickIronClassOptions();
+  S.screen = 'ironclass';
+  render();
+}
+function chooseIronClass(key) {
+  S.ironClass = key;
+  startQuiz();
+}
+
+/* ─────────────────────────────────────────────
+   IRON MAN TIMER
+───────────────────────────────────────────── */
+function startIronTimer() {
+  stopIronTimer();
+  S.ironTimeLeft = 30;
+  updateTimerDisplay();
+  S.ironTimerInterval = setInterval(function() {
+    S.ironTimeLeft--;
+    updateTimerDisplay();
+    if (S.ironTimeLeft <= 0) {
+      stopIronTimer();
+      // Time's up = wrong answer
+      S.done = true;
+      S.ironStreak = 0;
+      var q = S.shuffled[S.cur];
+      S.chosen = -1; // no choice = timeout
+      S.missed.push({ subj: q.subj, topic: q.topic, q: q.question, ok: q.choices[q.answer], bad: '⏱ Time ran out' });
+      S.ironTotalWrong++;
+      if (S.ironShieldRounds > 0) {
+        S.ironShielded = true;
+        S.ironTotalShieldBlocks++;
+      } else {
+        applyIronDamage();
+      }
+      render();
+      if (S.ironWrong >= S.ironMaxLives) setTimeout(function() { S.screen = 'ironover'; render(); }, 900);
+    }
+  }, 1000);
+}
+function stopIronTimer() {
+  if (S.ironTimerInterval) { clearInterval(S.ironTimerInterval); S.ironTimerInterval = null; }
+}
+function updateTimerDisplay() {
+  var bar = document.getElementById('ironTimerBar');
+  var lbl = document.getElementById('ironTimerLabel');
+  if (bar) {
+    var pct = (S.ironTimeLeft / 30) * 100;
+    bar.style.width = pct + '%';
+    // Color shift: green → yellow → red
+    if (S.ironTimeLeft > 15) bar.style.background = '#27ae60';
+    else if (S.ironTimeLeft > 8) bar.style.background = '#d4a052';
+    else bar.style.background = '#e74c3c';
+  }
+  if (lbl) lbl.textContent = S.ironTimeLeft + 's';
+}
+
+/* ─────────────────────────────────────────────
+   IRON MAN SCREENS
+───────────────────────────────────────────── */
+
+/* ─────────────────────────────────────────────
+   NORMAL MODE SETTINGS SCREEN
+───────────────────────────────────────────── */
+function screenNmSettings() {
+  var poolSize = totalSelected();
+
+  function toggle(id, field, desc, title, disabled, disabledNote) {
+    var checked = S[field] ? 'checked' : '';
+    var disabledAttr = disabled ? 'disabled' : '';
+    return '<div class="nm-toggle-row'+(disabled?' style="opacity:.5"':'')+'">'+
+      '<div class="nm-toggle-info">'+
+        '<div class="nm-toggle-title">'+title+'</div>'+
+        '<div class="nm-toggle-desc">'+desc+(disabled&&disabledNote?' <em>('+disabledNote+')</em>':'')+'</div>'+
+      '</div>'+
+      '<label class="nm-toggle"><input type="checkbox" '+checked+' '+disabledAttr+' onchange="S.'+field+'=this.checked;render()"><span class="nm-slider"></span></label>'+
+    '</div>';
+  }
+
+  var checkpointNote = '<div style="font-size:11px;color:'+(poolSize < 30 ? 'var(--gold)' : 'var(--muted)')+';margin-top:3px">'+
+    (poolSize < 30
+      ? '⚠ Checkpoints won\'t trigger — session has fewer than 30 questions.'
+      : 'ℹ Checkpoints trigger every 15 questions. Requires at least 30 questions to activate.')+
+    '</div>';
+  var checkpointToggle =
+    '<div class="nm-toggle-row">'+
+      '<div class="nm-toggle-info">'+
+        '<div class="nm-toggle-title">🚩 Checkpoint Mode</div>'+
+        '<div class="nm-toggle-desc">Every 15 questions: see your performance and choose to retry the last 15 or continue.</div>'+
+        checkpointNote+
+      '</div>'+
+      '<label class="nm-toggle"><input type="checkbox" '+(S.nmCheckpoint?'checked':'')+' onchange="S.nmCheckpoint=this.checked;render()"><span class="nm-slider"></span></label>'+
+    '</div>';
+
+  var redemptionCards = [
+    { key:'none',    icon:'⬜', name:'No Redemption', desc:'Standard mode. Missed questions are reviewed at the end only.' },
+    { key:'ghost',   icon:'👻', name:'Ghost Haunting', desc:'Wrong answers return once, reminding you of your mistake.' },
+    { key:'zombie',  icon:'🧟', name:'Zombie Apocalypse', desc:'Wrong answers haunt you indefinitely until answered correctly.' },
+    { key:'vampire', icon:'🧛', name:'Vampire Siege', desc:'Wrong answers return with one fewer wrong choice each time.' },
+    { key:'mummy',   icon:'🧙‍♀️', name:"Witching Hour", desc:'Wrong answers return exactly 10 times, guided by a witch who mistakes you for her lost child.' },
+  ].map(function(r) {
+    var sel = S.nmRedemption === r.key ? ' selected' : '';
+    var span = r.key === 'none' ? ' none-card' : '';
+    return '<button class="nm-redemption-card'+sel+span+'" onclick="S.nmRedemption=\''+r.key+'\';render()">'+
+      '<div class="nm-rcard-icon">'+r.icon+'</div>'+
+      '<div class="nm-rcard-name">'+r.name+'</div>'+
+      '<div class="nm-rcard-desc">'+r.desc+'</div>'+
+    '</button>';
+  }).join('');
+
+  return '<div class="breadcrumb">'+
+    '<span onclick="goTo(\'subjects\')">Subjects</span><span class="sep">/</span>'+
+    '<span onclick="goTo(\'topics\')">'+esc(S.curSubject)+'</span><span class="sep">/</span>'+
+    '<span class="cur">Settings</span>'+
+  '</div>'+
+  '<h1>Quiz Settings</h1>'+
+  '<p class="sub">Configure how this session works.</p>'+
+  '<div class="card">'+
+    '<div class="slbl">General Settings</div>'+
+    '<div class="nm-settings-wrap">'+
+      toggle('scrambleChk','scramble','Randomise question and answer order.','🔀 Shuffle Mode')+
+      toggle('nmMindful','nmMindful','Locks the Next button for 5 seconds after a wrong answer so you can reflect.','🧘 Mindful Mode')+
+      toggle('nmEraser','nmEraser','Lets you undo any answer, all the way back to the first question. Also undoes checkpoint decisions.','🧹 Eraser Mode')+
+      checkpointToggle+
+    '</div>'+
+  '</div>'+
+  '<div class="card">'+
+    '<div class="slbl">Redemption Mode <span style="font-size:11px;color:var(--muted);font-weight:400">(choose one)</span></div>'+
+    '<p style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6">Wrong answers are sent to the Graveyard. Graveyard questions return to your queue but do not extend your total question count.</p>'+
+    '<div class="nm-redemption-grid">'+redemptionCards+'</div>'+
+  '</div>'+
+  '<div class="brow">'+
+    '<button class="btn" onclick="goTo(\'topics\')">← Back</button>'+
+    '<button class="btn pri" onclick="startQuiz()">Start Quiz ▶</button>'+
+  '</div>';
+}
+
+/* ─────────────────────────────────────────────
+   NORMAL MODE CHECKPOINT SCREEN
+───────────────────────────────────────────── */
+function screenNmCheckpoint() {
+  var blockStart = S.nmCheckpointAt;
+  var blockEnd   = S.cur;
+  var blockTotal = blockEnd - blockStart + 1;
+  // Count only non-GY-injected future questions for the display (GY returns don't extend the run)
+  var remaining = 0;
+  for (var ri = S.cur + 1; ri < S.shuffled.length; ri++) {
+    if (!S.shuffled[ri]._gyEntry) remaining++;
+  }
+
+  // Only push a checkpoint record the FIRST time this checkpoint renders.
+  // Guard by checking if the last history entry already covers this block end.
+  var lastCP = S.nmCheckpointHistory.length > 0
+    ? S.nmCheckpointHistory[S.nmCheckpointHistory.length - 1] : null;
+  var alreadyRecorded = lastCP && lastCP.blockEnd === blockEnd;
+
+  if (!alreadyRecorded) {
+    // scoreAtBlockStart = score recorded at the END of the previous block
+    var scoreAtBlockStart = lastCP ? lastCP.scoreAtEnd : (S._resumeScoreBase !== undefined ? S._resumeScoreBase : 0);
+    var cpEntry = {
+      blockStart:      blockStart,
+      blockEnd:        blockEnd,
+      scoreAtStart:    scoreAtBlockStart, // score going INTO this block
+      scoreAtEnd:      S.score,           // score coming OUT of this block
+      // Retry restores to the START of this block (S.nmBlockStartSnap), not its
+      // end. Restoring the end-of-block state and then rewinding S.cur back to
+      // blockStart would "reawaken" graveyard returns already answered inside
+      // this block while leaving any newer copies they spawned still queued
+      // further out — producing duplicate copies of the same entry. Restoring
+      // the true pre-block state avoids that entirely.
+      snap:            S.nmBlockStartSnap,
+    };
+    S.nmCheckpointHistory.push(cpEntry);
+  }
+
+  var current = S.nmCheckpointHistory[S.nmCheckpointHistory.length - 1];
+  var blockScore = current.scoreAtEnd - current.scoreAtStart;
+  var blockPct   = blockTotal > 0 ? Math.round((blockScore / blockTotal) * 100) : 0;
+  var passed     = blockPct >= 70;
+
+  return '<div class="nm-checkpoint-wrap">'+
+    '<div class="nm-checkpoint-badge">🚩</div>'+
+    '<div class="nm-checkpoint-title">Checkpoint!</div>'+
+    '<div class="nm-checkpoint-sub">You just completed questions '+(blockStart+1)+'–'+(blockEnd+1)+'. Here’s how you did:</div>'+
+    '<div class="nm-checkpoint-stat-row">'+
+      '<span class="nm-checkpoint-pill">✅ '+blockScore+' / '+blockTotal+' correct</span>'+
+      '<span class="nm-checkpoint-pill" style="color:'+(passed?'var(--green-text)':'var(--red-text)')+'">'+blockPct+'% '+(passed?'Passing':'Below 70%')+'</span>'+
+      '<span class="nm-checkpoint-pill">'+remaining+' questions left</span>'+
+    '</div>'+
+    '<div class="nm-checkpoint-btns">'+
+      '<button class="btn pri" onclick="nmCheckpointContinue()">Continue →</button>'+
+      '<button class="btn" onclick="nmCheckpointRetry()">↺ Retry last 15 questions</button>'+
+      (S.nmEraser && S.cur > 0 ? '<button class="nm-eraser-btn" style="align-self:center;margin-top:4px" onclick="nmEraseOne()">✏️ Undo last answer</button>' : '')+
+    '</div>'+
+  '</div>';
+}
+
+function nmCheckpointContinue() {
+  S.nmCheckpointAt = S.cur + 1;
+  S.nmCheckpointReturnAt = S.cur + 1; // undo from this question (or any after, while unanswered) returns to checkpoint
+  S.screen = 'quiz';
+  S.cur++;
+  S.done = false; S.chosen = null;
+  S.nmIsGraveyardQ = !!(S.shuffled[S.cur] && S.shuffled[S.cur]._gyEntry);
+  S.nmGraveyardReturnInfo = S.nmIsGraveyardQ ? { prevAnswer: S.shuffled[S.cur]._gyPrevAnswer, returnNum: (S.shuffled[S.cur] && S.shuffled[S.cur]._gyReturnNum) || 1 } : null;
+  // Snapshot the start of this new block — see nmBlockStartSnap comment in startQuiz().
+  S.nmBlockStartSnap = nmSnapshot();
+  render();
+}
+
+function nmCheckpointRetry() {
+  // Pop the current block's record — we are retrying it
+  var thisCP = S.nmCheckpointHistory.pop();
+
+  // The score baseline for this retry = scoreAtStart of the block we just popped
+  var retryScoreBase = thisCP ? thisCP.scoreAtStart : 0;
+  var blockStart = thisCP ? thisCP.blockStart : S.nmCheckpointAt;
+
+  // Restore quiz state from the snapshot taken at the START of this block
+  if (thisCP && thisCP.snap) {
+    nmRestore(thisCP.snap);
+  } else {
+    // Fallback: manual reset to block start
+    S.score = retryScoreBase;
+    S.missed = [];
+    S.nmCheckpointAt = blockStart;
+  }
+
+  // Save undo entry AFTER nmRestore so it isn't wiped by the restore
+  if (S.nmEraser) {
+    var undoSnap = nmSnapshot();
+    undoSnap.nmCheckpointHistory = S.nmCheckpointHistory.concat([thisCP]);
+    S.nmHistory.push(undoSnap);
+  }
+
+  // Ensure position and state are correct for the retry
+  S.cur = blockStart;
+  S.score = retryScoreBase; // always enforce — in case snap had drift
+  S.nmCheckpointReturnAt = -1; // retry resets the post-checkpoint boundary
+  S.done = false; S.chosen = null;
+  S.nmIsGraveyardQ = !!(S.shuffled[S.cur] && S.shuffled[S.cur]._gyEntry);
+  S.nmGraveyardReturnInfo = S.nmIsGraveyardQ ? { prevAnswer: S.shuffled[S.cur]._gyPrevAnswer, returnNum: (S.shuffled[S.cur] && S.shuffled[S.cur]._gyReturnNum) || 1 } : null;
+  S.nmCheckpointAt = blockStart;
+  S.screen = 'quiz';
+  render();
+}
+
+function screenIronConfirm() {
+  return '<div class="iron-confirm-wrap">'+
+    '<div class="iron-confirm-badge">🔴</div>'+
+    '<div class="iron-confirm-title">IRON MAN MODE</div>'+
+    '<div class="iron-confirm-sub">This mode is not for the faint-hearted.<br>Only the truly prepared dare to enter.</div>'+
+    '<div class="iron-rule-box">'+
+      '<div class="iron-rule-title">⚠ Rules of Engagement</div>'+
+      '<div class="iron-rule"><span class="iron-rule-icon">⏱</span><span><strong>30 seconds</strong> per question. No extensions. No mercy.</span></div>'+
+      '<div class="iron-rule"><span class="iron-rule-icon">💀</span><span><strong>3 lives only.</strong> Wrong answer or timeout? You lose one.</span></div>'+
+      '<div class="iron-rule"><span class="iron-rule-icon">🃏</span><span>All subjects. All topics. <strong>Full random draw.</strong></span></div>'+
+      '<div class="iron-rule"><span class="iron-rule-icon">🚫</span><span><strong>No second chances.</strong> 3 mistakes and it&#39;s over.</span></div>'+
+      '<div class="iron-rule"><span class="iron-rule-icon">🏆</span><span>Survive as long as you can. Your score is your legacy.</span></div>'+
+    '</div>'+
+    '<button class="iron-confirm-btn" onclick="goToIronClassSelect()">I AM READY. BEGIN.</button>'+
+    '<button class="iron-back-btn" onclick="goTo(\'subjects\')">← I\'m not ready for this</button>'+
+  '</div>';
+}
+
+function screenIronClass() {
+  var cards = S.ironClassOptions.map(function(key) {
+    var c = IRON_CLASSES[key];
+    return '<button class="iron-reward-card" onclick="chooseIronClass(\''+key+'\')">'+
+      '<div class="iron-reward-icon">'+c.icon+'</div>'+
+      '<div class="iron-reward-name">'+esc(c.name)+'</div>'+
+      '<div class="iron-reward-desc">'+esc(c.desc)+'</div>'+
+    '</button>';
+  }).join('');
+  return '<div class="iron-confirm-wrap">'+
+    '<div class="iron-confirm-badge">🎭</div>'+
+    '<div class="iron-confirm-title">CHOOSE YOUR CLASS</div>'+
+    '<div class="iron-confirm-sub">Your class shapes how you survive. Choose wisely — you\'re stuck with it for this run.</div>'+
+    '<div class="iron-reward-grid">'+cards+'</div>'+
+    '<button class="iron-back-btn" style="margin-top:20px" onclick="goTo(\'subjects\')">← I\'m not ready for this</button>'+
+  '</div>';
+}
+
+function screenIronOver() {
+  stopIronTimer();
+
+  // ── Personal Records: save Iron Man run stats ──
+  if (!S.ironRunSaved) {
+    S.ironRunSaved = true;
+    prRecord(function(pr) {
+      pr.ironRoundsSurvivedAllTime += (S.ironTotalRounds || 0);
+      if (S.ironHighStreak > pr.ironLongestStreakEver) pr.ironLongestStreakEver = S.ironHighStreak;
+      if (S.score > pr.ironHighestScore) pr.ironHighestScore = S.score;
+      if (S.ironClass && S.score > pr.ironClassBest[S.ironClass]) pr.ironClassBest[S.ironClass] = S.score;
+    });
+  }
+  var msgs = [
+    'Every run makes you sharper. The questions fear your return.',
+    'You pushed further than most dare. Come back stronger.',
+    'Defeat is just data. Now you know where to focus.',
+    'The best engineers are forged through failure. Keep going.',
+    'One more run and you will surprise yourself.',
+    'This is how mastery is built — one hard attempt at a time.',
+    'Iron Man rewards the persistent. You are not done yet.',
+    'Each wrong answer is a lesson. You just leveled up without knowing it.'
+  ];
+  var msg = msgs[Math.floor(Math.random() * msgs.length)];
+
+  var totalRounds  = S.ironTotalRounds || 0;
+  var correctAns   = S.ironTotalCorrect || 0;
+  var accuracy     = totalRounds > 0 ? Math.round((correctAns / totalRounds) * 100) : 0;
+  var highStreak   = S.ironHighStreak || 0;
+  var wrongAns     = S.ironTotalWrong || 0;
+  var shieldBlocks = S.ironTotalShieldBlocks || 0;
+  var skipped      = S.ironTotalSkipped || 0;
+  var bombsRemoved = S.ironTotalBombsRemoved || 0;
+
+  function statRow(icon, label, value, colour) {
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid #2c2a48">'+
+      '<span style="font-size:13px;color:#9590ad">'+icon+' '+label+'</span>'+
+      '<span style="font-size:14px;font-weight:700;color:'+(colour||'#ebe8f7')+'">'+value+'</span>'+
+    '</div>';
+  }
+
+  var accuracyColour = accuracy >= 70 ? '#4caf8a' : accuracy >= 40 ? '#d4a052' : '#e07070';
+
+  var statsHtml =
+    '<div style="background:#1b1930;border:0.5px solid #2c2a48;border-radius:10px;padding:14px 18px;margin:18px 0;width:100%;max-width:400px;text-align:left">'+
+      '<div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#6e6890;margin-bottom:8px">Run Statistics</div>'+
+      statRow('&#128293;', 'Highest Streak',          highStreak,   '#f0c040')+
+      statRow('&#127919;', 'Game Accuracy',            accuracy+'%', accuracyColour)+
+      statRow('&#10060;',  'Wrong Answers',            wrongAns,     '#e07070')+
+      statRow('&#128737;', 'Damage Blocked by Shield', shieldBlocks, '#4a9edd')+
+      statRow('&#9197;',   'Skipped Questions',        skipped,      '#9590ad')+
+      statRow('&#128163;', 'Choices Removed by Bombs', bombsRemoved, '#e67e22')+
+    '</div>';
+
+  return '<div class="iron-gameover-wrap">'+
+    '<div class="iron-gameover-icon">&#128128;</div>'+
+    '<div class="iron-gameover-title">GAME OVER</div>'+
+    '<div class="iron-gameover-score">You scored <strong>'+S.score+'</strong> point'+(S.score!==1?'s':'')+' across <strong>'+totalRounds+'</strong> round'+(totalRounds!==1?'s':'')+' before falling.</div>'+
+    statsHtml+
+    '<div class="iron-gameover-msg" style="font-style:italic;color:#9590ad;margin-bottom:24px">'+esc(msg)+'</div>'+
+    '<button class="iron-gameover-btn" onclick="goTo(\'subjects\')">&#8592; Return to subject selection</button>'+
+  '</div>';
+}
+
+function screenIronMastery() {
+  var cls = S.ironClass ? IRON_CLASSES[S.ironClass] : null;
+  var MASTERY_DATA = {
+    knight:    { mastery: 'Brace for Impact',       desc: 'Shields last one more round.' },
+    bomber:    { mastery: 'Calculated Detonation',   desc: 'Bombs now remove 2 wrong answers instead of one. Bombs can no longer be used multiple times for one question.' },
+    thief:     { mastery: 'Gold Rush',               desc: 'Skip no longer breaks streaks.' },
+    rogue:     { mastery: 'Speedy Slingshot',        desc: 'Earn an extra point for scoring within 3 seconds.' },
+    paladin:   { mastery: 'Call for Karma',          desc: 'Every round, gain a stack of blessing. When Paladin passive is used up, consume all stacks every round — each stack triggers a chance to recover your Paladin Passive, increasing by 2% per stack.' },
+    monk:      { mastery: 'Lock In',                 desc: 'Correct answers now give a stack of concentration. For every stack, increase the chance of healing a missing life by 1.5% when getting a correct answer. Stacks are consumed whenever healing is triggered. Stacks accumulate even at full HP — healing just won\'t activate until a life is missing.' },
+    alchemist: { mastery: 'Complete Ingredients',    desc: 'Every round, gain a stack of adrenaline for every type of consumable you currently own. When 10 stacks are reached, consume all 10 and earn an extra point.' }
+  };
+
+  var m = cls ? MASTERY_DATA[S.ironClass] : null;
+  if (!m || !cls) return '<div class="iron-gameover-wrap"><div class="iron-gameover-title">MASTERY UNLOCKED</div></div>';
+
+  var starPositions = [
+    { top: '-8px', left: '50%', delay: '0s' },
+    { top: '20%',  left: '-12px', delay: '.1s' },
+    { top: '20%',  right: '-12px', delay: '.15s' },
+    { bottom: '10%', left: '-10px', delay: '.2s' },
+    { bottom: '10%', right: '-10px', delay: '.25s' },
+    { bottom: '-8px', left: '45%', delay: '.3s' }
+  ];
+  var starsHtml = starPositions.map(function(p) {
+    var style = 'animation-delay:' + p.delay + ';';
+    Object.keys(p).forEach(function(k) { if (k !== 'delay') style += k + ':' + p[k] + ';'; });
+    return '<span class="mastery-star" style="' + style + '">⭐</span>';
+  }).join('');
+
+  // Confetti pieces
+  var confettiColors = ['#f0c040','#9b59b6','#e74c3c','#27ae60','#3498db','#e67e22'];
+  var confetti = '';
+  for (var ci = 0; ci < 18; ci++) {
+    var cx = Math.random() * 100;
+    var cc = confettiColors[ci % confettiColors.length];
+    var cd = (Math.random() * 0.6).toFixed(2);
+    var cdu = (1.2 + Math.random() * 0.8).toFixed(2);
+    confetti += '<div class="mastery-confetti-piece" style="left:' + cx + '%;background:' + cc + ';animation-delay:' + cd + 's;animation-duration:' + cdu + 's;top:-10px"></div>';
+  }
+
+  return '<div class="mastery-wrap">' +
+    confetti +
+    '<div class="mastery-banner">⚡ Iron Man Mode · 15 Points Reached</div>' +
+    '<div class="mastery-badge-wrap">' +
+      '<div class="mastery-badge">' + cls.icon + '</div>' +
+      '<div class="mastery-stars">' + starsHtml + '</div>' +
+    '</div>' +
+    '<div class="mastery-title">MASTERY UNLOCKED</div>' +
+    '<div class="mastery-sub">You have proven your worth, ' + esc(cls.name) + '.<br>A new power awakens within you.</div>' +
+    '<div class="mastery-score-row">' +
+      '<span class="mastery-score-pill">⭐ 15 Points</span>' +
+      '<span class="mastery-score-pill">🏆 Current Score: ' + S.score + '</span>' +
+    '</div>' +
+    '<div class="mastery-class-card">' +
+      '<div class="mastery-class-header">' +
+        '<div class="mastery-class-icon">' + cls.icon + '</div>' +
+        '<div>' +
+          '<div class="mastery-class-name">' + esc(cls.name) + '</div>' +
+          '<div class="mastery-class-tag">Class Mastery</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="mastery-divider"></div>' +
+      '<div class="mastery-ability-label">✦ Mastery Trait Unlocked</div>' +
+      '<div class="mastery-ability-name">' + esc(m.mastery) + '</div>' +
+      '<div class="mastery-ability-desc">' + esc(m.desc) + '</div>' +
+    '</div>' +
+    '<button class="mastery-continue-btn" onclick="continueAfterMastery()">Continue the Run →</button>' +
+    '<button class="mastery-back-btn" onclick="goTo(\'subjects\')">← Quit to subjects</button>' +
+  '</div>';
+}
+
+function continueAfterMastery() {
+  // The current question was already answered (S.done=true), so just re-render quiz
+  // so the player can see the result feedback and press Next normally.
+  // Do NOT restart the timer — the question is already done.
+  S.screen = 'quiz';
+  render();
+}
+
+function screenIronReward() {
+  var cards = S.ironRewardOptions.map(function(type) {
+    var info = IRON_CONSUMABLE_INFO[type];
+    return '<button class="iron-reward-card" onclick="claimIronReward(\''+type+'\')">'+
+      '<div class="iron-reward-icon">'+info.icon+'</div>'+
+      '<div class="iron-reward-name">'+esc(info.name)+' \u00d7'+info.qty+'</div>'+
+      '<div class="iron-reward-desc">'+esc(info.desc)+'</div>'+
+    '</button>';
+  }).join('');
+  return '<div class="iron-confirm-wrap">'+
+    '<div class="iron-confirm-badge">🎁</div>'+
+    '<div class="iron-confirm-title" style="color:#f0c040;text-shadow:0 0 20px rgba(240,192,64,0.5)">'+S.ironRound+' ROUNDS SURVIVED</div>'+
+    '<div class="iron-confirm-sub">Choose one reward to carry into the next stretch.</div>'+
+    '<div class="iron-reward-grid">'+cards+'</div>'+
+  '</div>';
+}
+
+function screenSubjects() {
+  var cards = S.subjects.map(function(subj, idx) {
+    if (!subj.name.trim()) return '';
+    var isLoading = (S.loadingSubject === subj.name);
+    var err = S.loadErrors[subj.name];
+    var cached = S.loadedQ[subj.name];
+    var cachedCount = (S._idbCounts && S._idbCounts[subj.name]) || 0;
+
+    var isIron = (subj.name === IRON_MAN.name);
+    var sheetCount = isIron ? DEFAULT_SUBJECTS.length - 1 : subj.sheets.filter(function(u){ return u.trim(); }).length;
+    var info = '';
+    if (cached) {
+      info = cached.length + ' question' + (cached.length !== 1 ? 's' : '');
+      if (cachedCount > 0) info += ' \u00b7 <span class="cache-badge">\u2713 ' + cachedCount + ' offline</span>';
+    } else if (cachedCount > 0) {
+      info = cachedCount + ' question' + (cachedCount !== 1 ? 's' : '') + ' <span class="cache-badge">\u2713 offline</span>';
+    } else {
+      info = isIron ? 'All subjects combined' : '';
+    }
+
+    var badge = '';
+
+    var statusHtml = '';
+    if (isLoading) statusHtml = '<div class="subj-count"><span class="spin"></span> Loading\u2026</div>';
+    else if (err) statusHtml = '<div class="subj-count" style="color:var(--red-text)">\u26a0 Click to retry</div>';
+    else statusHtml = '<div class="subj-count">'+info+badge+'</div>';
+
+    var errBox = err
+      ? '<div class="err-box" style="margin-top:6px;font-size:12px;border-radius:0 0 var(--rs) var(--rs)" onclick="event.stopPropagation()"><strong>Error:</strong> '+esc(err)+'</div>'
+      : '';
+
+    var cls = 'subj-card' + (isLoading ? ' loading-card' : '') + (isIron ? ' iron-card' : '');
+    var cardStyle = err ? ' style="border-radius:var(--r) var(--r) 0 0;margin-bottom:0"' : '';
+    var numLabel = isIron ? '\u26a1 Special' : 'Subject ' + (idx + 1);
+    return '<div style="margin-bottom:10px">'+
+      '<div class="'+cls+'"'+cardStyle+' onclick="selectSubject(\''+esc(subj.name).replace(/'/g,"\\'")+'\')">'+
+        '<div class="subj-num">'+numLabel+'</div>'+
+        '<div class="subj-name">'+esc(subj.name)+'</div>'+
+        statusHtml+
+      '</div>'+
+      errBox+
+    '</div>';
+  }).filter(Boolean).join('');
+
+  // Iron Man card — always appended, not part of editable S.subjects
+  var ironLoading = (S.loadingSubject === IRON_MAN.name);
+  var ironErr = S.loadErrors[IRON_MAN.name];
+  var ironCached = S.loadedQ[IRON_MAN.name];
+  // Sum all subject IDB counts for Iron Man offline total
+  var ironOfflineTotal = 0;
+  if (S._idbCounts) {
+    DEFAULT_SUBJECTS.forEach(function(s) {
+      if (s.name !== IRON_MAN.name) ironOfflineTotal += (S._idbCounts[s.name] || 0);
+    });
+  }
+  var ironInfo = '';
+  if (ironCached) {
+    ironInfo = ironCached.length + ' question' + (ironCached.length !== 1 ? 's' : '') + ' \u00b7 all subjects';
+    if (ironOfflineTotal > 0) ironInfo += ' \u00b7 <span class="cache-badge">\u2713 ' + ironOfflineTotal + ' offline</span>';
+  } else if (ironOfflineTotal > 0) {
+    ironInfo = ironOfflineTotal + ' question' + (ironOfflineTotal !== 1 ? 's' : '') + ' \u00b7 all subjects <span class="cache-badge">\u2713 offline</span>';
+  } else {
+    ironInfo = 'All subjects combined';
+  }
+  var ironStatus = ironLoading
+    ? '<div class="subj-count"><span class="spin"></span> Loading\u2026</div>'
+    : ironErr ? '<div class="subj-count" style="color:var(--red-text)">\u26a0 Click to retry</div>'
+    : '<div class="subj-count">'+ironInfo+'</div>';
+  var ironErrBox = ironErr ? '<div class="err-box" style="margin-top:6px;font-size:12px;border-radius:0 0 var(--rs) var(--rs)" onclick="event.stopPropagation()"><strong>Error:</strong> '+esc(ironErr)+'</div>' : '';
+  var ironCard = '<div style="margin-bottom:10px">'+
+    '<div class="subj-card iron-card'+(ironLoading?' loading-card':'')+'" onclick="selectSubject(\''+esc(IRON_MAN.name)+'\')">'+
+      '<div class="subj-num">\u26a1 Special</div>'+
+      '<div class="subj-name">'+esc(IRON_MAN.name)+'</div>'+
+      ironStatus+
+    '</div>'+ironErrBox+
+  '</div>';
+
+  // Global resume button — shown when a save slot exists
+  var resumeCardHtml = '';
+  if (saveStateExists()) {
+    var rsnap = saveStateLoad();
+    var rDate  = rsnap && rsnap.savedAt ? new Date(rsnap.savedAt).toLocaleString() : 'previously';
+    var rSubj  = rsnap ? esc(rsnap.subject) : '?';
+    var rQ     = rsnap ? rsnap.cur + 1 : '?';
+    var rTotal = rsnap && rsnap.shuffled ? rsnap.shuffled.length : '?';
+    var rScore = rsnap ? rsnap.score : '?';
+    var rMode  = rsnap && rsnap.redemption && rsnap.redemption !== 'none' ? ' · ' + rsnap.redemption : '';
+    resumeCardHtml =
+      '<div class="nm-resume-card" style="margin-bottom:10px">'+
+        '<div class="nm-resume-info">'+
+          '<strong>💾 '+rSubj+'</strong>'+
+          'Q'+rQ+' / '+rTotal+' · Score: '+rScore+rMode+'<br>'+
+          '<span style="font-size:11px;color:var(--hint)">Saved '+rDate+'</span>'+
+        '</div>'+
+        '<div class="nm-resume-btns">'+
+          '<button class="nm-resume-btn" onclick="saveStateResume()">Resume →</button>'+
+          '<button class="nm-resume-discard" onclick="selenaConfirm(\'Discard this saved progress?\',function(){saveStateClear();render();})">Discard</button>'+
+        '</div>'+
+      '</div>';
+  }
+
+  var onlineStatus = navigator.onLine
+    ? ''
+    : '<div style="font-size:11.5px;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:5px">'+
+        '<span style="width:6px;height:6px;border-radius:50%;background:#e07070;display:inline-block"></span>Offline \u2014 subjects with \u2713 offline badge available'+
+      '</div>';
+
+  return '<div class="selena-brand">'+
+      '<div class="selena-logo"><span class="moon">\ud83c\udf19</span>PROJECT <span class="accent">SELENA</span></div>'+
+      '<div class="selena-tagline">Sanitary Engineering Licensure Exam Reviewer &amp; Quiz Mastery</div>'+
+    '</div>'+
+    '<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:16px;margin-bottom:4px">'+
+    '<div>'+
+      '<p class="sub" style="margin-bottom:0">Select a subject to start practicing</p>'+
+      onlineStatus+
+    '</div>'+
+    '<div style="display:flex;gap:8px">'+
+      '<button class="btn" style="font-size:13px;padding:6px 12px" onclick="goTo(\'records\')">📊 Records</button>'+
+      '<button class="dm-btn" title="Toggle dark mode" onclick="toggleDark()">'+(S.dark?'\u2600\ufe0f':'\ud83c\udf19')+'</button>'+
+    '</div>'+
+  '</div>'+
+  '<div class="subj-grid" style="margin-top:18px">'+cards+ironCard+'</div>'+
+  resumeCardHtml;
+}
+
+function screenTopics() {
+  var selQ = totalSelected();
+  var qs = S.loadedQ[S.curSubject] || [];
+
+  var topicItems = S.topics.map(function(t, ti) {
+    var cnt = topicCount(t);
+    var chk = S.checkedTopics[t] ? 'checked' : '';
+    return '<label class="topic-check">'+
+      '<input type="checkbox" '+chk+' onchange="S.checkedTopics[S.topics['+ti+']] = this.checked; renderTopicCounts()">'+
+      '<div class="topic-check-lbl">'+
+        '<div class="topic-name">'+esc(t)+'</div>'+
+        '<div class="topic-cnt">'+cnt+' question'+(cnt!==1?'s':'')+'</div>'+
+      '</div>'+
+    '</label>';
+  }).join('');
+
+  return '<div class="breadcrumb">'+
+    '<span onclick="goTo(\'subjects\')">Subjects</span>'+
+    '<span class="sep">/</span>'+
+    '<span class="cur">'+esc(S.curSubject)+'</span>'+
+  '</div>'+
+  '<h1>'+esc(S.curSubject)+'</h1>'+
+  '<p class="sub">Choose the topics to include in your quiz · <a href="#" onclick="reloadSubject(\''+esc(S.curSubject).replace(/'/g,"\\'")+'\');return false;" style="color:var(--blue-text);text-decoration:none">↺ Reload from Sheets</a></p>'+
+  '<div class="card">'+
+    '<div class="check-all-row">'+
+      '<div class="check-all-btns">'+
+        '<button class="check-all-btn" onclick="toggleAll(true); renderTopicCounts()">Select all</button>'+
+        '<button class="check-all-btn" onclick="toggleAll(false); renderTopicCounts()">Deselect all</button>'+
+      '</div>'+
+      '<span class="sel-count" id="selCount">'+selQ+' question'+(selQ!==1?'s':'')+' selected</span>'+
+    '</div>'+
+    '<div id="topicList">'+topicItems+'</div>'+
+  '</div>'+
+  '<div class="brow" style="align-items:center">'+
+    '<button class="btn" onclick="goTo(\'subjects\')">← Back</button>'+
+    '<button class="btn" onclick="S.screen=\'nmsettings\';render()" '+(selQ===0?'disabled':'')+'>⚙ Settings</button>'+
+    '<button class="btn pri" id="startBtn" onclick="startQuiz()" '+(selQ===0?'disabled':'')+'>Start quiz ('+selQ+' q) ▶</button>'+
+  '</div>';
+}
+
+function screenQuiz() {
+  var q = S.shuffled[S.cur];
+  var total = S.shuffled.length;
+  var pct = Math.round(((S.cur + (S.done ? 1 : 0)) / total) * 100);
+
+  var fbHtml = '';
+  if (S.done) {
+    if (S.skipped) {
+      // Thief Gold Rush: skip no longer breaks streak
+      var skipMsg = (S.ironClass === 'thief' && S.ironMasteryActive)
+        ? '⏭ Skipped — 🗝️ Gold Rush: streak preserved!'
+        : '⏭ Skipped — streak broken';
+      fbHtml = '<div class="fb no">'+skipMsg+'</div>';
+      if (S.ironMode && S.ironSkillEvent) fbHtml += '<div class="iron-skill-event">'+esc(S.ironSkillEvent)+'</div>';
+    } else {
+      var isOk = (S.chosen === q.answer);
+      var fbMsg = isOk ? '✓ Correct!' : (S.chosen === -1 ? '⏱ Time\'s up — correct answer highlighted' : '✗ Incorrect — correct answer highlighted');
+      if (!isOk && S.ironMode && S.ironShielded) fbMsg += ' · 🛡 Shield absorbed the damage!';
+      if (!isOk && S.ironMode && S.ironPaladinSaved) fbMsg += ' · 🛡️ Paladin\'s resolve — you cling on at 1 life!';
+      if (isOk && S.ironMode && S.ironRogueBonus) fbMsg += ' · 🎲 Rogue bonus +1 point!';
+      if (isOk && S.ironMode && S.ironRogueSpeedBonus) fbMsg += ' · ⚡ Speedy Slingshot — answered in time! +1 point!';
+      if (isOk && S.ironMode && S.ironMonkHeal) fbMsg += ' · 🧘 Monk healing — +1 life!';
+      if (isOk && S.ironMode && S.ironMasteryActive && S.ironClass === 'monk') fbMsg += ' · 🎯 Concentration: '+(S.ironMonkHeal ? 'stacks consumed' : S.ironMonkConcentration+' stack'+(S.ironMonkConcentration!==1?'s':'')+' ('+Math.min(S.ironMonkConcentration*1.5,100)+'% heal chance)');
+      if (isOk && S.ironMode && S.ironThiefGrantType) fbMsg += ' · 🗝️ Thief steals a '+IRON_CONSUMABLE_INFO[S.ironThiefGrantType].name+'!';
+      fbHtml = '<div class="fb '+(isOk?'ok':'no')+'">'+fbMsg+'</div>';
+      if (S.ironMode && S.ironSkillEvent) fbHtml += '<div class="iron-skill-event">'+esc(S.ironSkillEvent)+'</div>';
+    }
+  }
+
+  // ── Graveyard palette ──
+  var gyMode = S.nmIsGraveyardQ ? S.nmRedemption : '';
+  var gyCardClass = gyMode ? ' gy-card-'+gyMode : '';
+  var gyCbtnClass = gyMode ? ' gy-cbtn-'+gyMode : '';
+
+  var choicesHtml = q._order.map(function(origIdx, pos) {
+    var cls = '';
+    var removed = S.ironMode && S.ironRemoved[pos];
+    if (S.done) {
+      if (origIdx === q.answer) cls = 'correct';
+      else if (origIdx === S.chosen) cls = 'wrong';
+    } else if (removed) {
+      cls = 'removed';
+    }
+    return '<button class="cbtn'+gyCbtnClass+' '+cls+'" onclick="pick('+pos+')" '+((S.done||removed)?'disabled':'')+'>'+
+      '<span class="cltr">'+L[pos]+'.</span><span>'+esc(q.choices[origIdx])+(removed?' <span style="font-size:11px;opacity:.7">(removed)</span>':'')+'</span></button>';
+  }).join('');
+
+  var nxBtn = '';
+  if (S.done && !(S.ironMode && S.ironWrong >= S.ironMaxLives)) {
+    nxBtn = '<button class="btn pri" onclick="next()" style="width:100%;margin-top:6px">'+(S.cur+1>=total?'See results →':'Next question →')+'</button>';
+  }
+
+  // Iron Man header: lives + score + timer
+  var topBar = '';
+  if (S.ironMode) {
+    var hearts = '';
+    for (var h = 0; h < S.ironMaxLives; h++) {
+      hearts += '<span class="iron-heart'+(h >= S.ironLives ? ' dead' : '')+'">❤️</span>';
+    }
+    var shieldBadge = S.ironShieldRounds > 0 ? '<span class="iron-shield-badge" title="Shield active">🛡 '+S.ironShieldRounds+'r</span>' : '';
+    var streakBadge = S.ironStreak > 1 ? '<span style="font-size:12px;color:#e67e22;font-weight:600;margin-left:8px">🔥 '+S.ironStreak+'</span>' : '';
+    var classInfo = S.ironClass ? IRON_CLASSES[S.ironClass] : null;
+    var classBadge = classInfo ? '<span style="font-size:11px;color:#9b59b6;margin-left:6px" title="'+esc(classInfo.desc)+'">'+classInfo.icon+' '+esc(classInfo.name)+'</span>' : '';
+    topBar =
+      '<div class="qmeta" style="margin-bottom:6px">'+
+        '<div class="iron-lives">'+hearts+'<span style="font-size:12px;color:#c0392b;margin-left:4px">'+S.ironLives+' left</span>'+shieldBadge+classBadge+'</div>'+
+        '<div style="display:flex;align-items:center;gap:8px">'+
+          '<span style="color:#c0a060;font-weight:600">Score: '+S.score+'</span>'+streakBadge+
+          '<button class="dm-btn" onclick="toggleDark()" style="width:26px;height:26px;font-size:13px;border:none;background:none;cursor:pointer">'+(S.dark?'\u2600\ufe0f':'\ud83c\udf19')+'</button>'+
+          '<button class="dm-btn quit-btn" title="Quit to subjects" onclick="quitQuiz()" style="width:26px;height:26px;font-size:13px;border:none;background:none;cursor:pointer;color:var(--muted)">✕</button>'+
+        '</div>'+
+      '</div>'+
+      '<div class="iron-timer-wrap">'+(S.done?'':
+        '<div class="iron-timer-bar-bg"><div class="iron-timer-bar" id="ironTimerBar" style="width:100%"></div></div>'+
+        '<div class="iron-timer-label" id="ironTimerLabel">30s</div>'
+      )+'</div>'+
+      ironConsumableRow(q)+
+      ironSkillRow();
+  } else {
+    topBar =
+      '<div class="qmeta">'+
+        '<span>Q '+(S.cur+1)+' / '+total+'</span>'+
+        '<div style="display:flex;align-items:center;gap:8px">'+
+          '<span>Score: '+S.score+'</span>'+
+          '<button class="dm-btn" onclick="toggleDark()" style="width:26px;height:26px;font-size:13px;border:none;background:none;cursor:pointer">'+(S.dark?'\u2600\ufe0f':'\ud83c\udf19')+'</button>'+
+          '<button class="dm-btn quit-btn" title="Quit to subjects" onclick="quitQuiz()" style="width:26px;height:26px;font-size:13px;border:none;background:none;cursor:pointer;color:var(--muted)">✕</button>'+
+        '</div>'+
+      '</div>'+
+      '<div class="pbar"><div class="pfill" style="width:'+pct+'%"></div></div>';
+  }
+
+  var quitBtn = '<button class="btn" onclick="quitQuiz()" style="width:100%;margin-top:8px;color:var(--muted);font-size:13px">← Return to subjects</button>';
+
+  // ── Study Mode HUD extras ──
+  var nmHud = '';
+  if (!S.ironMode) {
+    var gyActive = S.nmGraveyard.filter(function(e){ return !e.removed; });
+    var gyBadge = gyActive.length > 0
+      ? '<span class="nm-graveyard-badge">💀 '+gyActive.length+' in graveyard</span>'
+      : '';
+    var canUndo = S.nmEraser && (S.done || S.cur > 0);
+    var eraserBtn = canUndo
+      ? '<button class="nm-eraser-btn" onclick="nmEraseOne()">✏️ ' + (S.done ? 'Undo answer' : 'Undo ←') + '</button>'
+      : '';
+    var saveBtn = '<button class="nm-save-btn" onclick="saveStateSave()" title="Save progress and resume later">💾 Save</button>';
+    if (gyBadge || eraserBtn || saveBtn) {
+      nmHud = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">'+gyBadge+eraserBtn+saveBtn+'</div>';
+    }
+    // Graveyard return banner — narrative per mode
+    if (S.nmIsGraveyardQ && S.nmGraveyardReturnInfo) {
+      var prevA = S.nmGraveyardReturnInfo.prevAnswer || '';
+      var retNum = S.nmGraveyardReturnInfo.returnNum || 1;
+      var retBannerIcon = '💀';
+      var retBannerTxt = '';
+      var retBannerClass = 'nm-graveyard-return-banner';
+
+      if (S.nmRedemption === 'ghost') {
+        retBannerIcon = '👻';
+        retBannerTxt = 'You are being haunted. This question lingers — you once answered: <strong>'+esc(prevA)+'</strong>';
+        retBannerClass = 'nm-ghost-banner';
+      } else if (S.nmRedemption === 'zombie') {
+        retBannerIcon = '🧟';
+        retBannerTxt = 'The dead return, calling for you to end their misery.';
+        retBannerClass = 'nm-zombie-banner';
+      } else if (S.nmRedemption === 'vampire') {
+        var vEntry = S.shuffled[S.cur] && S.shuffled[S.cur]._gyEntry;
+        var vElim = vEntry ? (vEntry.vampireWrongAnswers || []).length : 0;
+        var vOrder = S.shuffled[S.cur] && S.shuffled[S.cur]._order;
+        var isPity = vOrder && vOrder.length === 1;
+        retBannerIcon = '🧛';
+        retBannerClass = 'nm-vampire-banner';
+        if (isPity) {
+          retBannerTxt = 'There is not much more blood to drain — but this hunger cannot be helped otherwise.';
+          retBannerClass = 'nm-pity-banner';
+        } else {
+          retBannerTxt = 'The vampire comes again for more blood.' + (vElim > 0 ? ' <em>' + vElim + ' wrong choice' + (vElim !== 1 ? 's' : '') + ' drained away.</em>' : '');
+        }
+      } else if (S.nmRedemption === 'mummy') {
+        retBannerIcon = '🧙‍♀️';
+        retBannerClass = 'nm-mummy-banner';
+        var mummyLines = [
+          "<em>“Oh, you’re back. I knew you would be. Come, sit by the fire — I kept your bowl warm.”</em>",
+          "<em>“You have your father’s stubbornness, you know. Always wandering off. But you always come home.”</em>",
+          "<em>“I braided some dried lavender for your room. It keeps the cold spirits away. You used to love the smell.”</em>",
+          "<em>“Don’t rush, little one. The cauldron can wait. Tell me about your day first. I want to hear everything.”</em>",
+          "<em>“You’ve been quiet lately. That’s alright. I used to hold you without saying a word too. We understood each other that way.”</em>",
+          "<em>“I found your old drawings behind the hearth. Lopsided stars and crooked moons. I laughed until I cried. I’m still not sure which one it was.”</em>",
+          "<em>“You look at me sometimes… like you’re searching for something I can’t give you. I try not to notice. I’m sorry that I do.”</em>",
+          "<em>“Your eyes. I keep looking at your eyes. They’re the right color. They’re the right shape. But… something behind them isn’t hers.”</em>",
+          "<em>“What was her laugh like? I’m trying to remember and I can’t. I can’t. Why can’t I remember something so simple?”</em>",
+          "<em>“You’re not her. You were never her. And I knew — I think I always knew — I just… I needed someone to feed. Someone to wait for. I’m so sorry, child. I’m so, so sorry. Go. Please go. And don’t look back at this old house.”</em>",
+        ];
+        var mIdx = Math.min(retNum - 1, mummyLines.length - 1);
+        retBannerTxt = mummyLines[mIdx];
+      } else {
+        retBannerTxt = 'Graveyard Return — you previously answered: <strong>'+esc(prevA)+'</strong>';
+      }
+
+      nmHud += '<div class="'+retBannerClass+'">'+retBannerIcon+' '+retBannerTxt+'</div>';
+    }
+    // Mindful mode overlay
+    if (S.nmMindful && S.nmMindfulCount > 0) {
+      nmHud += '<div class="nm-mindful-overlay">'+
+        '<div class="nm-mindful-box">'+
+          '<div class="nm-mindful-title">🧘 Reflect on your mistake</div>'+
+          '<div class="nm-mindful-sub">Take a moment to understand why that was wrong before moving on.</div>'+
+          '<div class="nm-mindful-count" id="nmMindfulCount">'+S.nmMindfulCount+'</div>'+
+        '</div>'+
+      '</div>';
+    }
+  }
+
+  return topBar+nmHud+
+  '<div class="card'+gyCardClass+'" style="'+(S.ironMode?'border-color:#c0392b;':'')+'">'+(S.ironMode?'<div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#e74c3c;margin-bottom:4px">⚡ IRON MAN MODE · Q'+(S.cur+1)+'</div>':'')+
+    '<div class="qsubj">'+esc(q.subj)+'</div>'+
+    '<div class="qtopic">'+esc(q.topic)+'</div>'+
+    '<div class="qtxt">'+esc(q.question)+'</div>'+
+    fbHtml+choicesHtml+nxBtn+
+  '</div>'+
+  quitBtn;
+}
+
+function ironConsumableRow(q) {
+  var bombLeft = ironBombCandidatesLeft(q);
+  var maxBombUses = (S.ironClass === 'bomber' && S.ironMasteryActive) ? 1 : 3;
+  var shieldDisabled = S.done || S.ironConsumables.shield <= 0 || S.ironShieldRounds > 0;
+  var skipDisabled   = S.done || S.ironConsumables.skip  <= 0;
+  var bombDisabled   = S.done || S.ironConsumables.bomb  <= 0 || S.ironBombsUsedThisQ >= maxBombUses || bombLeft <= 0;
+  var shieldTitle = (S.ironClass === 'knight' && S.ironMasteryActive) ? 'Nullifies damage for 3 rounds (Brace for Impact)' : 'Nullifies damage for 2 rounds';
+  var skipTitle   = (S.ironClass === 'thief'  && S.ironMasteryActive) ? 'Skip · Gold Rush: streak preserved!' : 'Skip this question · breaks streak';
+  var bombTitle   = (S.ironClass === 'bomber' && S.ironMasteryActive) ? 'Remove 2 wrong answers · 1 use per question (Calculated Detonation)' : 'Remove a wrong answer · up to 3 per question';
+  return '<div class="iron-consumable-row">'+
+    '<button class="iron-cbtn" '+(shieldDisabled?'disabled':'')+' onclick="useIronShield()" title="'+shieldTitle+'">🛡 Shield<span class="iron-cbtn-count">'+S.ironConsumables.shield+'</span></button>'+
+    '<button class="iron-cbtn" '+(skipDisabled  ?'disabled':'')+' onclick="useIronSkip()"   title="'+skipTitle  +'">⏭ Skip<span class="iron-cbtn-count">'+S.ironConsumables.skip+'</span></button>'+
+    '<button class="iron-cbtn" '+(bombDisabled  ?'disabled':'')+' onclick="useIronBomb()"   title="'+bombTitle  +'">💣 Bomb<span class="iron-cbtn-count">'+S.ironConsumables.bomb+'</span></button>'+
+  '</div>';
+}
+
+function ironSkillRow() {
+  if (!S.ironClass) return '';
+  var cls = IRON_CLASSES[S.ironClass];
+  var cd = S.ironSkillCooldown;
+  var isMonkFull = (S.ironClass === 'monk' && S.ironWrong === 0);
+  var usedThisQ = S.ironSkillUsedThisQ;
+  var canUse = cd === 0 && !usedThisQ && !isMonkFull;
+  var needsActive = ['knight','bomber','thief','rogue'];
+  if (needsActive.indexOf(S.ironClass) !== -1 && S.done) canUse = false;
+
+  var cdHtml;
+  if (isMonkFull) {
+    cdHtml = '<span class="iron-skill-cd inactive">Full HP</span>';
+  } else if (usedThisQ) {
+    cdHtml = '<span class="iron-skill-cd">Used</span>';
+  } else if (cd > 0) {
+    cdHtml = '<span class="iron-skill-cd">'+cd+'r</span>';
+  } else {
+    cdHtml = '<span class="iron-skill-cd ready">READY</span>';
+  }
+
+  var baseDescriptions = {
+    knight:    'Nullify damage for 1 round',
+    bomber:    'Remove ALL wrong answers',
+    thief:     'Get a random consumable',
+    rogue:     'Skip + 50% get point / 50% lose life',
+    paladin:   '5% heal · 15% get consumable',
+    monk:      'Next correct answer heals 1 life',
+    alchemist: '3+ consumables: gain a life, lose 3. Fewer: lose a life, gain 3.'
+  };
+  var masteryDescriptions = {
+    knight:    'Nullify damage for 2 rounds (Brace for Impact)',
+    bomber:    'Remove ALL wrong answers (1 use/q with Calculated Detonation)',
+    thief:     'Get a random consumable (skip preserves streak)',
+    rogue:     'Skip + 50/50 · +1 pt if answered in ≤3s',
+    paladin:   '5% heal · 15% consumable · blessings recover passive',
+    monk:      'Next correct heals · Lock In: concentration stacks heal chance',
+    alchemist: '3+ consumables: gain a life, lose 3. Fewer: lose a life, gain 3. Adrenaline stacks earn bonus points.'
+  };
+
+  var desc = (S.ironMasteryActive ? masteryDescriptions : baseDescriptions)[S.ironClass];
+
+  // Alchemist: dynamic label based on consumable count and life state
+  if (S.ironClass === 'alchemist') {
+    var totalCons = S.ironConsumables.shield + S.ironConsumables.skip + S.ironConsumables.bomb;
+    var isLethal = totalCons < 3 && S.ironLives <= 1;
+    if (isLethal) {
+      desc = '\u26a0\ufe0f LETHAL \u2014 only 1 life left and fewer than 3 consumables. Life loss bypasses shield. Using this will kill you!';
+    } else if (totalCons >= 3) {
+      desc = 'Gain a life \u00b7 lose 3 consumables' + (S.ironMasteryActive ? ' \u00b7 adrenaline stacks earn bonus pts' : '');
+    } else {
+      desc = 'Lose a life \u00b7 gain 3 consumables (bypasses shield)' + (S.ironMasteryActive ? ' \u00b7 adrenaline stacks earn bonus pts' : '');
+    }
+  }
+
+  // Rogue: warn when 1 life and no active shield (50% chance of death)
+  if (S.ironClass === 'rogue') {
+    var rogueShielded = S.ironShieldRounds > 0;
+    var rogueDangerous = S.ironLives <= 1 && !rogueShielded;
+    if (rogueDangerous) {
+      desc = '\u26a0\ufe0f RISKY \u2014 50% chance to lose your last life. Activate a shield first to be safe.';
+    }
+  }
+
+  var masteryBadge = S.ironMasteryActive
+    ? '<span style="font-size:9px;font-weight:700;letter-spacing:.1em;color:#f0c040;background:rgba(240,192,64,0.15);border:0.5px solid rgba(240,192,64,0.4);border-radius:10px;padding:1px 6px;margin-left:4px">MASTERY</span>'
+    : '';
+
+  // Show active mastery counters
+  var masteryCounter = '';
+  if (S.ironMasteryActive) {
+    if (S.ironClass === 'paladin' && S.ironPaladinBlessings > 0) {
+      masteryCounter = '<div style="font-size:10px;color:#f0c040;margin-top:3px">✨ Blessings: '+S.ironPaladinBlessings+' stack'+(S.ironPaladinBlessings!==1?'s':'')+' · '+(S.ironPaladinUsed?'passive spent — consuming next round':'passive intact')+'</div>';
+    }
+    if (S.ironClass === 'monk') {
+      masteryCounter = '<div style="font-size:10px;color:#9b59b6;margin-top:3px">🎯 Concentration: '+S.ironMonkConcentration+' stack'+(S.ironMonkConcentration!==1?'s':'')+' ('+Math.min(S.ironMonkConcentration*1.5,100)+'% heal chance)</div>';
+    }
+    if (S.ironClass === 'alchemist') {
+      masteryCounter = '<div style="font-size:10px;color:#e67e22;margin-top:3px">⚗️ Adrenaline: '+S.ironAlchemistAdrenaline+'/10 stacks</div>';
+    }
+  }
+
+  return '<div class="iron-skill-row">'+
+    '<button class="iron-skill-btn" '+(canUse?'':'disabled')+' onclick="useClassSkill()" title="'+esc(cls.skillName)+'">'+
+      '<div class="iron-skill-btn-left">'+
+        '<span>'+cls.icon+'</span>'+
+        '<div>'+
+          '<div class="iron-skill-name">'+esc(cls.skillName)+masteryBadge+'</div>'+
+          '<div class="iron-skill-desc" style="'+((S.ironClass==="alchemist"&&(S.ironConsumables.shield+S.ironConsumables.skip+S.ironConsumables.bomb)<3&&S.ironLives<=1)||(S.ironClass==="rogue"&&S.ironLives<=1&&S.ironShieldRounds===0)?'color:#e74c3c;font-weight:600':'')+'">'+esc(desc)+'</div>'+
+          masteryCounter+
+        '</div>'+
+      '</div>'+
+      cdHtml+
+    '</button>'+
+  '</div>';
+}
+
+/* ── Custom confirm dialog (replaces native window.confirm for WebView compat) ── */
+function selenaConfirm(msg, onOk, onCancel) {
+  var overlay = document.getElementById('selena-modal-overlay');
+  var msgEl   = document.getElementById('selena-modal-msg');
+  var okBtn   = document.getElementById('selena-modal-ok');
+  var cancelBtn = document.getElementById('selena-modal-cancel');
+  msgEl.textContent = msg;
+  overlay.classList.add('active');
+  function cleanup() {
+    overlay.classList.remove('active');
+    okBtn.removeEventListener('click', handleOk);
+    cancelBtn.removeEventListener('click', handleCancel);
+    overlay.removeEventListener('click', handleOverlay);
+  }
+  function handleOk()      { cleanup(); if (onOk)     onOk(); }
+  function handleCancel()  { cleanup(); if (onCancel) onCancel(); }
+  function handleOverlay(e){ if (e.target === overlay) handleCancel(); }
+  okBtn.addEventListener('click', handleOk);
+  cancelBtn.addEventListener('click', handleCancel);
+  overlay.addEventListener('click', handleOverlay);
+}
+
+function quitQuiz() {
+  selenaConfirm('Quit this quiz and return to subjects?', function() {
+    stopIronTimer();
+    goTo('subjects');
+  });
+}
+
+function screenResults() {
+  var total = S.shuffled.length;
+  var pct = Math.round((S.score / total) * 100);
+  var pass = pct >= 75;
+  var bgc = pass ? 'var(--green-bg)' : 'var(--amber-bg)';
+  var txc = pass ? 'var(--green-text)' : 'var(--amber-text)';
+
+  var mx = '';
+  if (S.missed.length) {
+    mx = '<div class="card" style="margin-top:12px">'+
+      '<div class="slbl">Missed items ('+S.missed.length+')</div>'+
+      S.missed.map(function(m) {
+        return '<div class="mi">'+
+          '<div class="mmeta">'+esc(m.subj)+' · '+esc(m.topic)+'</div>'+
+          '<div class="mq">'+esc(m.q)+'</div>'+
+          '<div class="mok">✓ '+esc(m.ok)+'</div>'+
+          '<div class="mbad">✗ Your answer: '+esc(m.bad)+'</div>'+
+        '</div>';
+      }).join('')+
+    '</div>';
+  }
+
+  return '<div class="card" style="text-align:center;padding:1.75rem 1.25rem">'+
+    '<div class="rcirc" style="background:'+bgc+'">'+
+      '<div class="rpct" style="color:'+txc+'">'+pct+'%</div>'+
+      '<div class="rgrd" style="color:'+txc+'">'+(pass?'Passing':'Needs review')+'</div>'+
+    '</div>'+
+    '<div class="sgrid">'+
+      '<div class="sc"><div class="sv">'+S.score+'</div><div class="sl">Correct</div></div>'+
+      '<div class="sc"><div class="sv">'+(total-S.score)+'</div><div class="sl">Wrong</div></div>'+
+      '<div class="sc"><div class="sv">'+total+'</div><div class="sl">Total</div></div>'+
+    '</div>'+
+    '<div style="display:flex;gap:8px;margin-top:12px;align-items:center;flex-wrap:wrap">'+
+      '<button class="btn" onclick="startQuiz()" style="flex:1">↺ Retake</button>'+
+      '<button class="btn" onclick="S.screen=\'nmsettings\';render()" style="flex:1">⚙ Settings</button>'+
+      '<button class="btn" onclick="goTo(\'topics\')" style="flex:1">Topics</button>'+
+      '<button class="btn" onclick="goTo(\'subjects\')" style="flex:1">← Subjects</button>'+
+    '</div>'+
+  '</div>'+mx;
+}
+
+/* ─────────────────────────────────────────────
+   PERSONAL RECORDS SCREEN
+───────────────────────────────────────────── */
+function screenRecords() {
+  var pr = prLoad();
+
+  function statBox(icon, val, lbl) {
+    return '<div class="pr-stat"><div class="pr-stat-icon">'+icon+'</div><div class="pr-stat-val">'+val+'</div><div class="pr-stat-lbl">'+esc(lbl)+'</div></div>';
+  }
+
+  // Study Mode
+  var normalHtml =
+    '<div class="pr-section-title">📖 Study Mode</div>'+
+    '<div class="pr-grid">'+
+      statBox('📝', pr.normalQuestionsReviewed.toLocaleString(), 'Questions Reviewed')+
+      statBox('▶️', pr.normalSessionsStarted.toLocaleString(), 'Sessions Started')+
+      statBox('🏅', pr.normalLongestSession, 'Longest Session (questions)')+
+      statBox('🏷️', pr.topicsExplored.length, 'Topics Explored')+
+    '</div>';
+
+  // Iron Man — General
+  var ironGenHtml =
+    '<div class="pr-section-title">⚔️ Iron Man Mode — General</div>'+
+    '<div class="pr-grid">'+
+      statBox('🔄', pr.ironRoundsSurvivedAllTime.toLocaleString(), 'Rounds Survived (All-Time)')+
+      statBox('⚡', pr.ironSessionsPlayed, 'Sessions Played')+
+      statBox('🌟', pr.ironHighestScore, 'Highest Score (Single Run)')+
+      statBox('🔥', pr.ironLongestStreakEver, 'Longest Streak Ever')+
+      statBox('✨', pr.ironTotalMasteryEarned, 'Total Mastery Earned')+
+    '</div>';
+
+  // Iron Man — Consumables
+  var ironConsHtml =
+    '<div class="pr-section-title">🎒 Iron Man Mode — Consumables Used</div>'+
+    '<div class="pr-grid">'+
+      statBox('🛡️', pr.ironTotalShieldsUsed, 'Shields Used')+
+      statBox('⏭️', pr.ironTotalSkipsUsed, 'Skips Used')+
+      statBox('💣', pr.ironTotalBombsUsed, 'Bombs Used')+
+    '</div>';
+
+  // Iron Man — Per Class
+  var classOrder = ['knight','bomber','thief','rogue','paladin','monk','alchemist'];
+  var classRowsHtml = classOrder.map(function(key) {
+    var cls = IRON_CLASSES[key];
+    var runs = pr.ironClassRuns[key];
+    var best = pr.ironClassBest[key];
+    var mastered = pr.ironClassMastery[key];
+    if (runs === 0) {
+      return '<div class="pr-class-row">'+
+        '<div class="pr-class-left">'+
+          '<div class="pr-class-icon">'+cls.icon+'</div>'+
+          '<div><div class="pr-class-name">'+esc(cls.name)+'</div><div class="pr-class-runs">Never played</div></div>'+
+        '</div>'+
+        '<div class="pr-class-right"><div class="pr-class-untried">Try me!</div></div>'+
+      '</div>';
+    }
+    return '<div class="pr-class-row">'+
+      '<div class="pr-class-left">'+
+        '<div class="pr-class-icon">'+cls.icon+'</div>'+
+        '<div>'+
+          '<div class="pr-class-name">'+esc(cls.name)+'</div>'+
+          '<div class="pr-class-runs">'+runs+' run'+(runs!==1?'s':'')+' played</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="pr-class-right">'+
+        '<div class="pr-class-best">Best: '+best+' pts</div>'+
+        '<div class="pr-class-mastery">'+(mastered?'⭐ Mastery Unlocked':'— Mastery Locked')+'</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  var ironClassHtml =
+    '<div class="pr-section-title">🎭 Iron Man Mode — Per Class</div>'+
+    '<div class="card" style="padding:0 1.25rem">'+classRowsHtml+'</div>';
+
+  // Iron Man — Class Gameplay Stats
+  function flavourRow(icon, lbl, val) {
+    return '<div class="pr-flavour-row">'+
+      '<div class="pr-flavour-lbl">'+icon+' '+esc(lbl)+'</div>'+
+      '<div class="pr-flavour-val">'+val+'</div>'+
+    '</div>';
+  }
+  var flavourHtml =
+    '<div class="pr-section-title">⚔️ Iron Man Mode — Class Gameplay Stats</div>'+
+    '<div class="card" style="padding:0 1.25rem">'+
+      flavourRow('⚔️', 'Knight — Rounds Shield Was Active', pr.knightRoundsShieldActive)+
+      flavourRow('💣', 'Bomber — Free Bombs Granted by Passive', pr.bomberFreeGrants)+
+      flavourRow('🗝️', 'Thief — Consumables Stolen via Streak', pr.thiefConsumablesStolen)+
+      flavourRow('🎲', 'Rogue — Rogue Bonus Points Earned', pr.rogueBonus)+
+      flavourRow('🛡️', 'Paladin — Times Paladin Passive Saved a Life', pr.paladinSaves)+
+      flavourRow('🧘', 'Monk — Lives Healed by Passive / Focus', pr.monkLivesHealed)+
+      flavourRow('⚗️', 'Alchemist — Lives Gained via Transmutation', pr.alchemistTransmutationLivesGained)+
+    '</div>';
+
+  return '<div class="breadcrumb">'+
+    '<span onclick="goTo(\'subjects\')">Subjects</span>'+
+    '<span class="sep">/</span>'+
+    '<span class="cur">Personal Records</span>'+
+  '</div>'+
+  '<h1>Personal Records</h1>'+
+  '<p class="sub">Your all-time stats — persists across HTML updates automatically.</p>'+
+  normalHtml+ironGenHtml+ironConsHtml+ironClassHtml+flavourHtml+
+  '<div style="text-align:center;margin-top:8px">'+
+    '<button class="pr-reset-btn" onclick="selenaConfirm(\'Reset ALL Personal Records? This cannot be undone.\',function(){localStorage.removeItem(\''+PR_KEY+'\');goTo(\'records\');})">Reset All Records</button>'+
+  '</div>'+
+  '<div class="brow" style="margin-top:16px"><button class="btn" onclick="goTo(\'subjects\')">← Back to Subjects</button></div>';
+}
+
+/* ─────────────────────────────────────────────
+   RENDER
+───────────────────────────────────────────── */
+function render() {
+  var app = document.getElementById('app');
+  switch (S.screen) {
+    case 'subjects':    app.innerHTML = screenSubjects();    break;
+    case 'topics':      app.innerHTML = screenTopics();      break;
+    case 'quiz':        app.innerHTML = screenQuiz();        break;
+    case 'results':     app.innerHTML = screenResults();     break;
+    case 'records':     app.innerHTML = screenRecords();     break;
+    case 'nmsettings':  app.innerHTML = screenNmSettings();  break;
+    case 'nmcheckpoint':app.innerHTML = screenNmCheckpoint(); break;
+    case 'ironconfirm': app.innerHTML = screenIronConfirm(); break;
+    case 'ironclass':   app.innerHTML = screenIronClass();   break;
+    case 'ironover':    app.innerHTML = screenIronOver();    break;
+    case 'ironreward':  app.innerHTML = screenIronReward();  break;
+    case 'ironmastery': app.innerHTML = screenIronMastery(); break;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   INIT
+───────────────────────────────────────────── */
+
+loadConfig();
+S.screen = 'subjects';
+
+/* ═══════════════════════════════════════════════════════
+   OFFLINE ENGINE — IndexedDB question bank
+   Works from file:// and any origin, no Service Worker needed.
+   DB: SELEQuizDB  |  Store: questions  |  Key: subj||topic||question
+═══════════════════════════════════════════════════════ */
+
+/* ── IndexedDB helpers ── */
+var _idb = null;
+var _idbOpening = false;
+var _idbQueue = [];
+var IDB_NAME = 'SELEQuizDB', IDB_VER = 2, IDB_STORE = 'questions';
+
+function idbOpen() {
+  return new Promise(function(res, rej) {
+    if (_idb) { res(_idb); return; }
+    _idbQueue.push({ res: res, rej: rej });
+    if (_idbOpening) return;
+    _idbOpening = true;
+    console.log('[IDB] opening', IDB_NAME, 'v', IDB_VER);
+    var r = indexedDB.open(IDB_NAME, IDB_VER);
+    r.onupgradeneeded = function(e) {
+      console.log('[IDB] onupgradeneeded — creating store');
+      var db = e.target.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) {
+        var os = db.createObjectStore(IDB_STORE, { keyPath: 'key' });
+        os.createIndex('subj', 'subj', { unique: false });
+      }
+    };
+    r.onsuccess = function(e) {
+      _idb = e.target.result;
+      _idbOpening = false;
+      console.log('[IDB] opened OK');
+      var q = _idbQueue.splice(0);
+      for (var i = 0; i < q.length; i++) q[i].res(_idb);
+    };
+    r.onerror = function(e) {
+      _idbOpening = false;
+      console.error('[IDB] open ERROR', e.target.error);
+      var err = e.target.error;
+      var q = _idbQueue.splice(0);
+      for (var i = 0; i < q.length; i++) q[i].rej(err);
+    };
+  });
+}
+
+/* Upsert all questions for a subject — key is short: subj||rowIndex */
+function idbSave(subjName, questions) {
+  console.log('[IDB] idbSave START', subjName, questions.length);
+  return idbOpen().then(function(db) {
+    return new Promise(function(res, rej) {
+      var tx = db.transaction(IDB_STORE, 'readwrite');
+      var os = tx.objectStore(IDB_STORE);
+      var now = Date.now();
+      questions.forEach(function(q, idx) {
+        var rowIdx = (q.rowIndex !== undefined ? q.rowIndex : idx);
+        os.put({
+          key:     subjName + '||' + rowIdx,
+          subj:    subjName,
+          topic:   q.topic,
+          question:q.question,
+          choices: q.choices,
+          answer:  q.answer,
+          rowIndex:rowIdx,
+          savedAt: now
+        });
+      });
+      tx.oncomplete = function() { console.log('[IDB] idbSave COMPLETE', subjName, questions.length); res(questions.length); };
+      tx.onerror    = function(e) { console.error('[IDB] idbSave ERROR', subjName, e.target.error); rej(e.target.error); };
+      tx.onabort    = function(e) { console.error('[IDB] idbSave ABORT', subjName, e.target.error); rej(e.target.error || new Error('IDB transaction aborted')); };
+    });
+  }).catch(function(e) { console.error('[IDB] idbSave CATCH', subjName, e); throw e; });
+}
+
+/* Load all questions for a subject from IDB */
+function idbLoad(subjName) {
+  console.log('[IDB] idbLoad START', subjName);
+  return idbOpen().then(function(db) {
+    return new Promise(function(res, rej) {
+      var tx  = db.transaction(IDB_STORE, 'readonly');
+      var req = tx.objectStore(IDB_STORE).index('subj').getAll(IDBKeyRange.only(subjName));
+      req.onsuccess = function(e) {
+        var rows = (e.target.result||[]).slice();
+        console.log('[IDB] idbLoad RESULT', subjName, rows.length);
+        rows.sort(function(a, b) { return (a.rowIndex !== undefined ? a.rowIndex : 0) - (b.rowIndex !== undefined ? b.rowIndex : 0); });
+        res(rows.map(function(r){
+          return { subj:r.subj, topic:r.topic, question:r.question, choices:r.choices, answer:r.answer, rowIndex:r.rowIndex };
+        }));
+      };
+      req.onerror = function(e) { console.error('[IDB] idbLoad ERROR', subjName, e.target.error); rej(e.target.error); };
+    });
+  });
+}
+
+/* Count cached questions per subject */
+function idbCount(subjName) {
+  return idbOpen().then(function(db) {
+    return new Promise(function(res) {
+      var req = db.transaction(IDB_STORE,'readonly').objectStore(IDB_STORE).index('subj').count(IDBKeyRange.only(subjName));
+      req.onsuccess = function(e) { res(e.target.result||0); };
+      req.onerror   = function()  { res(0); };
+    });
+  }).catch(function(){ return 0; });
+}
+
+/* Delete all cached questions for a subject — uses index key range for speed */
+function idbDeleteSubject(subjName) {
+  return idbOpen().then(function(db) {
+    return new Promise(function(res, rej) {
+      var tx  = db.transaction(IDB_STORE, 'readwrite');
+      var os  = tx.objectStore(IDB_STORE);
+      // Delete by iterating the subj index — getAll keys then delete each
+      var req = os.index('subj').getAllKeys(IDBKeyRange.only(subjName));
+      req.onsuccess = function(e) {
+        var keys = e.target.result || [];
+        keys.forEach(function(k) { os.delete(k); });
+      };
+      req.onerror = function() {}; // best-effort
+      tx.oncomplete = function() { res(); };
+      tx.onerror    = function(e) { rej(e.target.error); };
+      tx.onabort    = function()  { res(); }; // don't hang on abort
+    });
+  });
+}
+
+/* Refresh IDB counts shown on subject cards */
+function refreshIdbCounts() {
+  S._idbCounts = S._idbCounts || {};
+  var subs = DEFAULT_SUBJECTS.filter(function(s){ return s.name !== IRON_MAN.name; });
+  var promises = subs.map(function(s) {
+    return idbCount(s.name).then(function(n) {
+      S._idbCounts[s.name] = n;
+    });
+  });
+  // Re-render once after ALL counts are updated, not one-by-one
+  Promise.all(promises).then(function() {
+    if (S.screen === 'subjects') render();
+  });
+}
+
+/* ── Override fetchSubject: network → IDB fallback ── */
+function fetchSubjectFromSheets(subjName, callback) {
+  var cfg = null;
+  for (var i=0; i<S.subjects.length; i++) if (S.subjects[i].name===subjName){cfg=S.subjects[i];break;}
+  if (!cfg) { console.error('[FETCH] Subject not found in S.subjects:', subjName, S.subjects.map(function(s){return s.name;})); callback('Subject not found',[]);return; }
+  var ids = cfg.sheets.map(function(s){return toSheetId(s);}).filter(function(id){return id&&id!=='ALL';});
+  if (!ids.length) { console.error('[FETCH] No valid sheet IDs for', subjName, cfg.sheets); callback('No valid spreadsheet IDs configured.',[]);return; }
+  console.log('[FETCH] fetching', subjName, 'ids:', ids);
+  var allQ=[], errors=[], remaining=ids.length;
+  function done(){ 
+    if(errors.length===ids.length) { console.error('[FETCH] ALL FAILED', subjName, errors); callback(errors[0],[]); }
+    else { console.log('[FETCH] SUCCESS', subjName, allQ.length, 'questions'); callback(null,allQ); }
+  }
+  ids.forEach(function(id){
+    fetchSpreadsheet(id)
+      .then(function(rows){
+        console.log('[FETCH] rows received', subjName, rows.length);
+        var qs=rowsToQuestions(rows,subjName);
+        console.log('[FETCH] questions parsed', subjName, qs.length);
+        if(!qs.length) throw new Error('No valid questions found.');
+        allQ=allQ.concat(qs); remaining--; if(remaining===0) done();
+      })
+      .catch(function(err){ console.error('[FETCH] sheet error', subjName, id, err.message); errors.push(err.message); remaining--; if(remaining===0) done(); });
+  });
+}
+
+function fetchSubject(subjName, callback) {
+  // Offline: skip network entirely, go straight to IDB
+  if (!navigator.onLine) {
+    idbLoad(subjName).then(function(cached) {
+      if (cached.length) {
+        callback(null, cached);
+      } else {
+        callback('No questions cached. Connect to the internet and open this subject once to enable offline use.', []);
+      }
+    }).catch(function() {
+      callback('Could not load questions.', []);
+    });
+    return;
+  }
+  fetchSubjectFromSheets(subjName, function(netErr, netQs) {
+    if (!netErr && netQs.length) {
+      // Network OK → save fresh data to IDB (put is upsert, no delete needed)
+      idbSave(subjName, netQs).then(function(){ refreshIdbCounts(); }).catch(function(){});
+      callback(null, netQs);
+    } else {
+      // Network failed → fall back to IDB
+      idbLoad(subjName).then(function(cached) {
+        if (cached.length) {
+          callback(null, cached);
+        } else {
+          callback(
+            netErr || 'No questions cached. Connect to the internet and open this subject once to enable offline use.',
+            []
+          );
+        }
+      }).catch(function(){
+        callback(netErr || 'Could not load questions.', []);
+      });
+    }
+  });
+}
+
+/* ── Eager preload: populate S.loadedQ for all subjects on startup so
+      question counts appear immediately on the subjects screen.
+      Reads ONLY from IDB — never triggers a network request. ── */
+function preloadAllSubjects() {
+  var subs = DEFAULT_SUBJECTS.filter(function(s){ return s.name !== IRON_MAN.name; });
+  var remaining = subs.length;
+  subs.forEach(function(subj) {
+    if (S.loadedQ[subj.name] && S.loadedQ[subj.name].length) {
+      remaining--;
+      if (remaining === 0) _updateIronManCount();
+      return;
+    }
+    idbLoad(subj.name).then(function(qs) {
+      if (qs.length) {
+        S.loadedQ[subj.name] = qs;
+        if (S.screen === 'subjects') render();
+      }
+      remaining--;
+      if (remaining === 0) _updateIronManCount();
+    }).catch(function() {
+      remaining--;
+      if (remaining === 0) _updateIronManCount();
+    });
+  });
+}
+
+function _updateIronManCount() {
+  // Build Iron Man loadedQ count from whatever subjects loaded successfully
+  // Only updates the count display — does NOT enter Iron Man mode
+  var all = [];
+  DEFAULT_SUBJECTS.forEach(function(s) {
+    if (s.name !== IRON_MAN.name && S.loadedQ[s.name]) all = all.concat(S.loadedQ[s.name]);
+  });
+  if (all.length) {
+    S.loadedQ[IRON_MAN.name] = all;
+    if (S.screen === 'subjects') render();
+  }
+}
+var _bannerTimer = null;
+function showBanner(type, msg, autohideMs) {
+  var el = document.getElementById('offlineBanner');
+  if (!el) return;
+  el.className = type;
+  el.style.display = 'flex';
+  var icon = type==='syncing' ? '<span class="bspin"></span>' : '<span class="bdot"></span>';
+  el.innerHTML = '<span>'+icon+msg+'</span>'+
+    '<button class="bclose" onclick="this.parentNode.style.display=\'none\'">✕</button>';
+  clearTimeout(_bannerTimer);
+  if (autohideMs) _bannerTimer = setTimeout(function(){ el.style.display='none'; }, autohideMs);
+}
+function hideBanner() { var el=document.getElementById('offlineBanner'); if(el) el.style.display='none'; }
+
+function syncAll() {
+  var subs = DEFAULT_SUBJECTS.filter(function(s){ return s.name !== IRON_MAN.name; });
+  var failed = 0;
+  var savePromises = [];
+  var fetchedQ = {};
+  var done = false;
+  console.log('[SYNC] syncAll START, subjects:', subs.map(function(s){return s.name;}));
+  showBanner('syncing', 'Syncing question bank…', null);
+
+  function finish() {
+    if (done) return;
+    done = true;
+    console.log('[SYNC] finish called, failed:', failed, '/', subs.length, 'fetched:', Object.keys(fetchedQ));
+    subs.forEach(function(s) {
+      if (fetchedQ[s.name]) S.loadedQ[s.name] = fetchedQ[s.name];
+    });
+    _updateIronManCount();
+    refreshIdbCounts();
+    if (failed === subs.length) {
+      showBanner('offline', 'Can\'t reach Google Sheets — using cached question bank', null);
+    } else {
+      showBanner('synced', 'Question bank updated — all subjects available offline ✓', 4500);
+      if (S.screen === 'subjects') render();
+    }
+  }
+
+  var safetyTimer = setTimeout(function() {
+    console.warn('[SYNC] safety timeout fired');
+    finish();
+  }, 15000);
+
+  var remaining = subs.length;
+  subs.forEach(function(subj) {
+    fetchSubjectFromSheets(subj.name, function(err, qs) {
+      console.log('[SYNC] fetchSubjectFromSheets callback', subj.name, 'err:', err, 'qs:', qs ? qs.length : 0);
+      if (!err && qs.length) {
+        fetchedQ[subj.name] = qs;
+        var saveP = idbSave(subj.name, qs).catch(function(e){ console.error('[SYNC] idbSave failed', subj.name, e); });
+        savePromises.push(saveP);
+      } else {
+        failed++;
+      }
+      remaining--;
+      console.log('[SYNC] remaining:', remaining, 'failed:', failed);
+      if (remaining === 0) {
+        console.log('[SYNC] all fetched, waiting for', savePromises.length, 'saves');
+        Promise.all(savePromises).then(function() {
+          clearTimeout(safetyTimer);
+          finish();
+        }).catch(function(e) {
+          console.error('[SYNC] Promise.all error', e);
+          clearTimeout(safetyTimer);
+          finish();
+        });
+      }
+    });
+  });
+}
+
+/* ── Online / offline events ── */
+window.addEventListener('online',  function() { syncAll(); if (S.screen === 'subjects') render(); });
+window.addEventListener('offline', function() {
+  showBanner('offline', 'You\'re offline — using cached question bank', null);
+  if (S.screen === 'subjects') render();
+});
+
+/* ── Startup ── */
+refreshIdbCounts();
+render();
+if (navigator.onLine) {
+  var syncDelay = /Mobi|Android/i.test(navigator.userAgent) ? 1200 : 600;
+  // First show IDB counts immediately, then sync from network
+  preloadAllSubjects();
+  setTimeout(syncAll, syncDelay);
+} else {
+  showBanner('offline', 'You\'re offline — using cached question bank', null);
+  preloadAllSubjects();
+}
+
+/* ── PWA: register service worker for offline app-shell ── */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('service-worker.js').catch(function (e) {
+      console.warn('[SW] registration failed', e);
+    });
+  });
+}
+</script>
+</body>
+</html>
