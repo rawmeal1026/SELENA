@@ -4714,19 +4714,7 @@ function fetchSubject(subjName, callback) {
   fetchSubjectFromSheets(subjName, function(netErr, netQs) {
     if (!netErr && netQs.length) {
       // Network OK → save fresh data to IDB (put is upsert, no delete needed)
-      idbSave(subjName, netQs).then(function(){ // ── Restore saved theme on load ──
-(function() {
-  try {
-    var saved = localStorage.getItem('SELENA_theme');
-    var pr0 = prLoad();
-    var allowed = ['dark', 'light'];
-    if (pr0.shopVioletSky) allowed.push('violet');
-    if (saved && allowed.indexOf(saved) !== -1) applyTheme(saved);
-    else applyTheme('dark');
-  } catch(e) { applyTheme('dark'); }
-})();
-
-refreshIdbCounts(); }).catch(function(){});
+      idbSave(subjName, netQs).then(function(){ refreshIdbCounts(); }).catch(function(){});
       callback(null, netQs);
     } else {
       // Network failed → fall back to IDB
@@ -4865,6 +4853,17 @@ window.addEventListener('offline', function() {
 });
 
 /* ── Startup ── */
+// Restore saved theme before first render
+(function() {
+  try {
+    var saved = localStorage.getItem('SELENA_theme');
+    var pr0 = prLoad();
+    var allowed = ['dark', 'light'];
+    if (pr0.shopVioletSky) allowed.push('violet');
+    if (saved && allowed.indexOf(saved) !== -1) applyTheme(saved);
+    else applyTheme('dark');
+  } catch(e) { applyTheme('dark'); }
+})();
 refreshIdbCounts();
 render();
 if (navigator.onLine) {
