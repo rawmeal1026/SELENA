@@ -748,6 +748,7 @@ html.violet .nm-mummy-banner   { background:#241a08; border-color:#c79a3a; color
 #selena-modal-msg {
   font-size: 15px; color: var(--text); line-height: 1.5;
   margin-bottom: 1.25rem; text-align: center;
+  max-height: 60vh; overflow-y: auto;
 }
 #selena-modal-btns {
   display: flex; gap: 8px; justify-content: flex-end;
@@ -888,6 +889,8 @@ var S = {
   ironPaladinPassiveSavesThisRun: 0,
   ironMonkHealsThisRun: 0,
   ironAlchemistSkillUsesThisRun: 0,
+  ironNecroDeathScoreThisRun: 0,  // Necromancer: total score earned from death coin flips this run
+  ironFairyMoonsThisRun: 0,       // Fairy: total Moons gained this run (Winker Bell achievement)
 
 };
 
@@ -906,9 +909,50 @@ var IRON_CLASSES = {
   paladin:   { name: 'Paladin',   icon: '\ud83d\udee1\ufe0f', desc: 'Survive one fatal mistake.', skillName: 'Pray',               skillCooldown: 5 },
   monk:      { name: 'Monk',      icon: '\ud83e\uddd8',     desc: '3% chance to heal a missing life on correct answers.', skillName: 'Focus',              skillCooldown: 30 },
   alchemist:   { name: 'Alchemist',   icon: '\u2697\ufe0f',     desc: 'Get a consumable choice every 8 rounds instead of 10.', skillName: 'Transmutation',      skillCooldown: 8 },
-  necromancer: { name: 'Necromancer', icon: '\ud83d\udc80',     desc: 'Wrong answers are stored in your graveyard.', skillName: 'Redemption',         skillCooldown: 30 }
+  necromancer: { name: 'Necromancer', icon: '\ud83d\udc80',     desc: 'Wrong answers are stored in your graveyard.', skillName: 'Redemption',         skillCooldown: 40 },
+  beastman:    { name: 'Beastman',    icon: '\ud83d\udc3a',     desc: 'Odd rounds: Human Form — correct answers give no points. Even rounds: Beast Form — your skill is available.', skillName: 'Wild Roar', skillCooldown: 0 },
+  medium:      { name: 'Medium',      icon: '\ud83d\udd2e',     desc: 'Coming Soon.', skillName: '???', skillCooldown: 0 },
+  assassin:    { name: 'Assassin',    icon: '\ud83d\udde1\ufe0f', desc: 'Coming Soon.', skillName: '???', skillCooldown: 0 },
+  scout:       { name: 'Scout',       icon: '\ud83c\udff9',     desc: 'Coming Soon.', skillName: '???', skillCooldown: 0 },
+  fairy:       { name: 'Fairy',       icon: '\ud83e\uddda',     desc: 'Get 2 Moons for every unique topic answered per run.', skillName: 'Rebirth',           skillCooldown: 0 },
+  elf:         { name: 'Elf',         icon: '\ud83e\udddd',     desc: 'Coming Soon.', skillName: '???', skillCooldown: 0 }
 };
 var L = ['A','B','C','D'];
+
+// ── Wish on the Sky (gacha) ──
+// Wish target rotates daily. Only classes flagged true in WISH_ENABLED are currently wishable;
+// other days show their scheduled class but the feature stays disabled until turned on.
+var WISH_SCHEDULE = {
+  0: 'scout',       // Sunday
+  1: 'fairy',       // Monday
+  2: 'elf',         // Tuesday
+  3: 'necromancer', // Wednesday
+  4: 'beastman',    // Thursday
+  5: 'medium',      // Friday
+  6: 'assassin'     // Saturday
+};
+var WISH_ENABLED = {
+  necromancer: true,
+  fairy:       true,
+  elf:         false,
+  beastman:    true,
+  medium:      false,
+  assassin:    false,
+  scout:       false
+};
+function getWishTargetClass() {
+  return WISH_SCHEDULE[new Date().getDay()];
+}
+function isWishEnabledToday() {
+  return !!WISH_ENABLED[getWishTargetClass()];
+}
+var WISH_ODDS = [
+  { key: 'moons1',  type: 'moons',  amount: 1,  weight: 50, label: '1 Moon' },
+  { key: 'moons5',  type: 'moons',  amount: 5,  weight: 25, label: '5 Moons' },
+  { key: 'moons8',  type: 'moons',  amount: 8,  weight: 15, label: '8 Moons' },
+  { key: 'moons10', type: 'moons',  amount: 10, weight: 9,  label: '10 Moons' },
+  { key: 'unlock',  type: 'unlock', amount: 0,  weight: 1,  label: 'Unlock Target Class' }
+];
 
 var API_KEY = 'AIzaSyBfViUDonSzMfdhL08_LCMrQFU_4XmVQkA';
 
@@ -930,6 +974,13 @@ var PR_DEFAULTS = {
   shopIronMaiden: false,  // Iron Maiden purchased
   // ironMaxBonus: total +lives purchased (1 from Iron Will, 2 from Iron Maiden)
   ironMaxBonus: 0,
+  // Starter consumables for the NEXT Iron Man Mode run only (consumed on run start, then reset to false)
+  shopStartShield: false,
+  shopStartSkip: false,
+  shopStartBomb: false,
+
+  // Wish on the Sky — classes unlocked via gacha
+  wishUnlockedClasses: { necromancer: false, beastman: false, medium: false, assassin: false, scout: false, fairy: false, elf: false },
 
   // Study Mode
   normalQuestionsReviewed: 0,
@@ -952,9 +1003,9 @@ var PR_DEFAULTS = {
   ironTotalBombsUsed: 0,
 
   // Iron Man — Per Class
-  ironClassRuns:    { knight:0, bomber:0, thief:0, rogue:0, paladin:0, monk:0, alchemist:0 },
-  ironClassBest:    { knight:0, bomber:0, thief:0, rogue:0, paladin:0, monk:0, alchemist:0 },
-  ironClassMastery: { knight:false, bomber:false, thief:false, rogue:false, paladin:false, monk:false, alchemist:false },
+  ironClassRuns:    { knight:0, bomber:0, thief:0, rogue:0, paladin:0, monk:0, alchemist:0, necromancer:0, beastman:0, fairy:0 },
+  ironClassBest:    { knight:0, bomber:0, thief:0, rogue:0, paladin:0, monk:0, alchemist:0, necromancer:0, beastman:0, fairy:0 },
+  ironClassMastery: { knight:false, bomber:false, thief:false, rogue:false, paladin:false, monk:false, alchemist:false, necromancer:false, beastman:false, fairy:false },
 
   // Iron Man — Class Gameplay Stats
   knightRoundsShieldActive: 0,
@@ -965,6 +1016,9 @@ var PR_DEFAULTS = {
   monkLivesHealed: 0,
   alchemistAdrenalinePoints: 0,
   alchemistTransmutationLivesGained: 0,
+  necromancerGraveyardRemovals: 0,
+  beastmanWildRoarExtraPoints: 0,
+  fairyDustProcs: 0,
 };
 
 function prLoad() {
@@ -976,7 +1030,7 @@ function prLoad() {
     var result = JSON.parse(JSON.stringify(PR_DEFAULTS));
     for (var k in saved) {
       if (k in result) {
-        if (k === 'ironClassRuns' || k === 'ironClassBest' || k === 'ironClassMastery') {
+        if (k === 'ironClassRuns' || k === 'ironClassBest' || k === 'ironClassMastery' || k === 'wishUnlockedClasses') {
           for (var cls in saved[k]) { if (cls in result[k]) result[k][cls] = saved[k][cls]; }
         } else {
           result[k] = saved[k];
@@ -993,9 +1047,13 @@ function prLoad() {
 function prMigrateAchievements(pr) {
   if (pr.ironTotalMasteryEarned >= 1) unlockAchievement('survivors_mastery');
   var masteryMap = pr.ironClassMastery || {};
+  var baseClasses = ['knight','bomber','thief','rogue','paladin','monk','alchemist'];
+  var allBaseMastered = baseClasses.length > 0 &&
+    baseClasses.every(function(k){ return masteryMap[k]; });
+  if (allBaseMastered) unlockAchievement('violet_sky');
   var allMastered = Object.keys(masteryMap).length > 0 &&
     Object.keys(masteryMap).every(function(k){ return masteryMap[k]; });
-  if (allMastered) unlockAchievement('violet_sky');
+  if (allMastered) unlockAchievement('violet_sky_all');
 }
 
 function prSave(pr) {
@@ -1043,8 +1101,10 @@ var ACHIEVEMENTS = [
     desc:'Complete your first Iron Man run.' },
   { id:'survivors_mastery',   icon:'⭐', cat:'Iron Man', title:"Survivor's Mastery",
     desc:'Unlock your first class mastery.' },
-  { id:'violet_sky',          icon:'🌌', cat:'Iron Man', title:'You could be Violet Sky',
-    desc:'Unlock mastery for all classes.' },
+  { id:'violet_sky',          icon:'🟤', cat:'Iron Man', title:'You could be Brown, You could be Blue',
+    desc:'Unlock mastery for all free classes.' },
+  { id:'violet_sky_all',      icon:'🌌', cat:'Iron Man', title:'You could be Violet Sky',
+    desc:'Unlock mastery for all classes, including the locked ones.' },
   { id:'ten_hit_combo',       icon:'🔥', cat:'Iron Man', title:'10 Hit Combo',
     desc:'Reach a 10 streak in one Iron Man run.' },
 
@@ -1063,6 +1123,12 @@ var ACHIEVEMENTS = [
     desc:'As Monk, heal 4 lives in one Iron Man run.' },
   { id:'mad_science',     icon:'⚗️', cat:'Class', title:'Mad Science',
     desc:'As Alchemist, trigger Transmutation 4 times in one Iron Man run.' },
+  { id:'martyr_of_death', icon:'💀', cat:'Class', title:'Martyr of Death',
+    desc:'As Necromancer, earn a total of +15 score from Master of Death coin flips in one Iron Man run.' },
+  { id:'winker_bell',     icon:'🧚', cat:'Class', title:'Winker Bell',
+    desc:'As Fairy, get 30 Moons in one Iron Man run.' },
+  { id:'howling_moon',    icon:'🌕', cat:'Class', title:'Howling Moon',
+    desc:'As Beastman, earn 4 or more points in a single question. Combine Wild Roar (+2), correct answer scoring, and consumables with Free from the Curse mastery to reach the threshold.' },
 
   // ── Misc ──
   { id:'no_touch_move_rule', icon:'✏️', cat:'Misc', title:'No Touch Move Rule',
@@ -1559,12 +1625,24 @@ function startQuiz() {
     S.ironRound = 0; S.ironStreak = 0; S.ironShielded = false;
     S.ironShieldRounds = 0; S.ironBombsUsedThisQ = 0; S.ironRemoved = {};
     S.ironConsumables = { shield: 0, skip: 0, bomb: 0 };
+    // Shop-purchased starter consumables: apply once, then clear so they must be re-bought for the next run.
+    (function(){
+      var _pr = prLoad();
+      var _used = false;
+      if (_pr.shopStartShield) { S.ironConsumables.shield += 1; _pr.shopStartShield = false; _used = true; }
+      if (_pr.shopStartSkip)   { S.ironConsumables.skip   += 1; _pr.shopStartSkip   = false; _used = true; }
+      if (_pr.shopStartBomb)   { S.ironConsumables.bomb   += 1; _pr.shopStartBomb   = false; _used = true; }
+      if (_used) prSave(_pr);
+    })();
     S.ironRewardCadence = (S.ironClass === 'alchemist') ? 8 : 10;
+    S.ironFairyTopics = {};
+    S.ironFairyRebirthUsed = false;
     S.ironPaladinUsed = false; S.ironPaladinSaved = false;
     S.ironRogueBonus = false; S.ironMonkHeal = false; S.ironThiefGrantType = null;
     S.ironSkillCooldown = 0; S.ironSkillUsedThisQ = false; S.ironSkillEvent = null;
     S.ironMonkFocusActive = false;
-    S.ironMasteryTriggered = false;
+    S.ironBeastWildRoarActive = false;
+    S.ironBeastPtsThisQ = 0;
     S.ironMasteryActive = false;
     S.necroGraveyard = [];
     S.necroRedemptionActive = false;
@@ -1591,6 +1669,8 @@ function startQuiz() {
     S.ironPaladinPassiveSavesThisRun = 0;
     S.ironMonkHealsThisRun = 0;
     S.ironAlchemistSkillUsesThisRun = 0;
+    S.ironNecroDeathScoreThisRun = 0;
+    S.ironFairyMoonsThisRun = 0;
   }
   S.skipped = false;
 
@@ -1954,6 +2034,27 @@ function nmStartMindful() {
   }, 1000);
 }
 
+// Fairy: track total Moons gained this Iron Man run, unlock Winker Bell at 16
+function fairyTrackMoons(amount) {
+  if (!(S.ironMode && S.ironClass === 'fairy')) return;
+  S.ironFairyMoonsThisRun = (S.ironFairyMoonsThisRun || 0) + amount;
+  if (S.ironFairyMoonsThisRun >= 30) unlockAchievement('winker_bell');
+}
+
+// Beastman: round 1 = Human Form (odd), round 2 = Beast Form (even), alternating.
+// S.ironRound is 0-indexed and matches the round of the question currently on screen.
+function isBeastFormRound() {
+  return ((S.ironRound + 1) % 2 === 0);
+}
+// Beastman Mastery — Free from the Curse: using a consumable also scores a point
+function beastmanConsumableScore() {
+  if (!(S.ironMode && S.ironClass === 'beastman' && S.ironMasteryActive)) return;
+  S.score++;
+  S.ironBeastPtsThisQ = (S.ironBeastPtsThisQ || 0) + 1;
+  if (S.ironBeastPtsThisQ >= 4) unlockAchievement('howling_moon');
+  showBanner('synced', '🐺✨ Free from the Curse — Consumable used! +1 Point! (Score: '+S.score+')', 2200);
+}
+
 function pick(displayIdx) {
   if (S.done) return;
   if (S.ironMode && S.ironRemoved[displayIdx]) return;
@@ -1973,12 +2074,55 @@ function pick(displayIdx) {
       if (pr.normalQuestionsReviewed >= 100) unlockAchievement('active_participator');
     }
   });
+
+  // ── Fairy passive: +2 Moons for every unique topic answered this run ──
+  if (S.ironMode && S.ironClass === 'fairy' && q.topic) {
+    S.ironFairyTopics = S.ironFairyTopics || {};
+    if (!S.ironFairyTopics[q.topic]) {
+      S.ironFairyTopics[q.topic] = true;
+      prRecord(function(pr){ pr.moons = (pr.moons || 0) + 2; });
+      fairyTrackMoons(2);
+      var fairyMsg = '🧚 New Topic — ' + esc(q.topic) + ' · +2 Moons!';
+      // Fairy Mastery — Fairy Dust: gaining Moons from passive grants 5% chance to heal.
+      // Healing at full HP grants 10 Moons instead.
+      if (S.ironMasteryActive && Math.random() < 0.05) {
+        prRecord(function(pr){ pr.fairyDustProcs = (pr.fairyDustProcs || 0) + 1; });
+        if (S.ironWrong > 0) {
+          S.ironWrong--; S.ironLives = S.ironMaxLives - S.ironWrong;
+          fairyMsg += ' · ✨ Fairy Dust — Healed 1 life!';
+        } else {
+          prRecord(function(pr){ pr.moons = (pr.moons || 0) + 10; });
+          fairyTrackMoons(10);
+          fairyMsg += ' · ✨ Fairy Dust — Full HP! +10 Moons instead!';
+        }
+      }
+      showBanner('synced', fairyMsg, 2800);
+    }
+  }
+
   if (origIdx === q.answer) {
-    S.score++;
+    // ── Beastman: scoring depends on Wild Roar / Human-Beast form / mastery ──
+    if (S.ironMode && S.ironClass === 'beastman') {
+      var beastPtsThisAnswer = 0;
+      if (S.ironBeastWildRoarActive) {
+        beastPtsThisAnswer = 2; // Wild Roar: correct answer scores double
+        prRecord(function(pr){ pr.beastmanWildRoarExtraPoints = (pr.beastmanWildRoarExtraPoints || 0) + 1; }); // +1 extra vs normal
+      } else if (isBeastFormRound() || S.ironMasteryActive) {
+        beastPtsThisAnswer = 1; // Beast Form or mastery: normal score
+      }
+      // else: Human Form without mastery — no points
+      S.score += beastPtsThisAnswer;
+      S.ironBeastPtsThisQ = (S.ironBeastPtsThisQ || 0) + beastPtsThisAnswer;
+      if (S.ironBeastPtsThisQ >= 4) unlockAchievement('howling_moon');
+    } else {
+      S.score++;
+    }
     // ── Currency: award 1 Moon per correct answer (both Study Mode and Iron Man) ──
-    prRecord(function(pr){ pr.moons = (pr.moons || 0) + (pr.shopMoonForge ? 2 : 1); });
+    var moonGain = 1;
+    prRecord(function(pr){ moonGain = pr.shopMoonForge ? 2 : 1; pr.moons = (pr.moons || 0) + moonGain; });
+    fairyTrackMoons(moonGain);
     // Necromancer: Redemption answered correctly
-    if (S.ironMode && S.ironClass === 'necromancer' && S.necroRedemptionActive) {
+    if (S.ironMode && S.ironClass === 'necromancer') {
       var _rq = S.shuffled[S.cur];
       if (_rq._necroRedemption) {
         // Reward: heal 1 life + 1 of each consumable
@@ -1986,9 +2130,12 @@ function pick(displayIdx) {
         S.ironConsumables.shield += 1;
         S.ironConsumables.skip   += 1;
         S.ironConsumables.bomb   += 1;
-        // Remove from graveyard
-        S.necroGraveyard.splice(_rq._necroGyIdx, 1);
+        // Remove from graveyard by object reference
+        var _necroRef = _rq._necroGyRef;
+        var _necroRemIdx = _necroRef ? S.necroGraveyard.indexOf(_necroRef) : -1;
+        if (_necroRemIdx !== -1) S.necroGraveyard.splice(_necroRemIdx, 1);
         S.necroRedemptionActive = false;
+        prRecord(function(pr){ pr.necromancerGraveyardRemovals = (pr.necromancerGraveyardRemovals || 0) + 1; });
         showBanner('synced', '💀 Redemption! Soul at rest — +1 Life & ×1 of each consumable!', 3500);
       }
     }
@@ -2066,9 +2213,12 @@ function pick(displayIdx) {
           pr.ironTotalMasteryEarned++;
           if (S.ironClass) pr.ironClassMastery[S.ironClass] = true;
           if (pr.ironTotalMasteryEarned >= 1) unlockAchievement('survivors_mastery');
-          var allMastered = true;
-          for (var ck in pr.ironClassMastery) { if (!pr.ironClassMastery[ck]) { allMastered = false; break; } }
-          if (allMastered) unlockAchievement('violet_sky');
+          var _baseClasses = ['knight','bomber','thief','rogue','paladin','monk','alchemist'];
+          var _allBaseMastered = _baseClasses.every(function(k){ return pr.ironClassMastery[k]; });
+          if (_allBaseMastered) unlockAchievement('violet_sky');
+          var _allMastered = true;
+          for (var ck in pr.ironClassMastery) { if (!pr.ironClassMastery[ck]) { _allMastered = false; break; } }
+          if (_allMastered) unlockAchievement('violet_sky_all');
         });
         render();
         setTimeout(function() { S.screen = 'ironmastery'; render(); }, 700);
@@ -2130,12 +2280,16 @@ function pick(displayIdx) {
         S.necroRedemptionActive = false;
       }
       // Necromancer passive: store wrong question in graveyard
-      if (S.ironClass === 'necromancer' && !S.necroRedemptionActive) {
+      // Skip if this is itself a redemption question (already in graveyard; wrong means it stays there)
+      if (S.ironClass === 'necromancer' && !S.shuffled[S.cur]._necroRedemption) {
         var _nq = S.shuffled[S.cur];
         var _already = S.necroGraveyard.some(function(e){ return e.q === _nq; });
         if (!_already) S.necroGraveyard.push({ q: _nq });
       }
-      if (S.ironShieldRounds > 0) {
+      if (S.ironClass === 'beastman' && S.ironBeastWildRoarActive) {
+        // Wild Roar: a wrong answer costs 2 lives; shields cannot block this damage
+        applyIronDamage(2);
+      } else if (S.ironShieldRounds > 0) {
         S.ironShielded = true;
         S.ironTotalShieldBlocks++;
         if (S.ironClass === 'knight') {
@@ -2150,7 +2304,8 @@ function pick(displayIdx) {
   }
   render();
   // In Iron Man mode, if all lives lost, show game over after brief delay
-  if (S.ironMode && S.ironWrong >= S.ironMaxLives) {
+  // Skip if Necromancer coin flip is pending — necroCoinContinue will handle the screen transition
+  if (S.ironMode && S.ironWrong >= S.ironMaxLives && !S.necroCoinFlipPending) {
     setTimeout(function() { S.screen = 'ironover'; render(); }, 900);
   }
 }
@@ -2280,9 +2435,16 @@ function advanceQuestion() {
     S.nmGraveyardReturnInfo = S.nmIsGraveyardQ ? { prevAnswer: S.shuffled[S.cur]._gyPrevAnswer, returnNum: (S.shuffled[S.cur] && S.shuffled[S.cur]._gyReturnNum) || 1 } : null;
     S.skipped = false; S.ironShielded = false; S.ironPaladinSaved = false;
     S.ironRogueBonus = false; S.ironMonkHeal = false; S.ironThiefGrantType = null;
+    S.ironBeastWildRoarActive = false;
+    S.ironBeastPtsThisQ = 0;
     S.ironBombsUsedThisQ = 0; S.ironRemoved = {};
     S.ironSkillUsedThisQ = false; S.ironSkillEvent = null;
     S.ironRogueSpeedBonus = false; S.ironTimeAtPick = 30;
+    // If next question is not a redemption question, clear the flag so stale state can't cause issues
+    if (S.ironMode && S.ironClass === 'necromancer' && S.necroRedemptionActive) {
+      var _nextQ = S.shuffled[S.cur];
+      if (!_nextQ || !_nextQ._necroRedemption) S.necroRedemptionActive = false;
+    }
     // Note: ironMonkFocusActive persists until triggered in pick()
   }
   render();
@@ -2300,6 +2462,7 @@ function useIronShield() {
   prRecord(function(pr){ pr.ironTotalShieldsUsed++; });
   // Knight Mastery — Brace for Impact: shield lasts 3 rounds instead of 2
   S.ironShieldRounds = (S.ironClass === 'knight' && S.ironMasteryActive) ? 3 : 2;
+  beastmanConsumableScore();
   render();
 }
 function useIronSkip() {
@@ -2315,6 +2478,7 @@ function useIronSkip() {
   S.chosen = null;
   S.ironTotalSkipped++;
   stopIronTimer();
+  beastmanConsumableScore();
   render();
 }
 function ironBombCandidatesLeft(q) {
@@ -2345,6 +2509,7 @@ function useIronBomb() {
   S.ironBombsUsedThisQ++;
   S.ironConsumables.bomb--;
   prRecord(function(pr){ pr.ironTotalBombsUsed++; });
+  beastmanConsumableScore();
   render();
 }
 function pickIronRewardOptions() {
@@ -2361,9 +2526,10 @@ function grantRandomConsumable() {
   S.ironConsumables[type] += IRON_CONSUMABLE_INFO[type].qty;
   S.ironThiefGrantType = type;
 }
-function applyIronDamage() {
-  var wouldBeWrong = S.ironWrong + 1;
-  // Necromancer Mastery: Escape from Death — coin flip on fatal hit
+function applyIronDamage(amount) {
+  amount = amount || 1;
+  var wouldBeWrong = S.ironWrong + amount;
+  // Necromancer Mastery: Master of Death — coin flip on fatal hit
   if (wouldBeWrong >= S.ironMaxLives && S.ironClass === 'necromancer' && S.ironMasteryActive && S.necroGraveyard.length > 0 && !S.necroCoinFlipPending) {
     S.necroCoinFlipPending = true;
     S.ironWrong = wouldBeWrong; // apply damage (may be fatal) — flip decides survival
@@ -2383,7 +2549,7 @@ function applyIronDamage() {
     return;
   }
   S.ironWrong = wouldBeWrong;
-  S.ironLives = S.ironMaxLives - S.ironWrong;
+  S.ironLives = Math.max(S.ironMaxLives - S.ironWrong, 0);
 }
 
 /* ─────────────────────────────────────────────
@@ -2393,6 +2559,7 @@ function useClassSkill() {
   if (!S.ironMode || !S.ironClass) return;
   if (S.ironSkillUsedThisQ) return;
   if (S.ironSkillCooldown > 0) return;
+  if (S.ironClass === 'fairy' && S.ironFairyRebirthUsed) return;
   var cls = S.ironClass;
   var cd = IRON_CLASSES[cls].skillCooldown;
 
@@ -2487,7 +2654,7 @@ function useClassSkill() {
     // Insert clone at S.cur+1 so it appears immediately after advancing
     var _gyQ = JSON.parse(JSON.stringify(_gyEntry.q));
     _gyQ._necroRedemption = true;
-    _gyQ._necroGyIdx = _gyIdx;
+    _gyQ._necroGyRef = _gyEntry; // store object ref instead of index to avoid index-shift bugs
     S.shuffled.splice(S.cur + 1, 0, _gyQ);
     S.necroRedemptionActive = true;
     S.ironSkillEvent = '💀 Redemption — A fallen question rises from the grave!';
@@ -2508,7 +2675,8 @@ function useClassSkill() {
     var reshuffled = shuf(allUnits.map(function(_){ return shuf(typeKeys)[0]; }));
     for (var ri = 0; ri < reshuffled.length; ri++) newPool[reshuffled[ri]]++;
     S.ironConsumables = newPool;
-    if (total >= 3) {
+    var atFullLife = (S.ironWrong <= 0);
+    if (total >= 3 && !atFullLife) {
       // Gain a life, lose 3 consumables
       var lost = 3;
       var order2 = shuf(typeKeys);
@@ -2535,6 +2703,19 @@ function useClassSkill() {
       setTimeout(function(){ S.screen='ironover'; render(); }, 900);
       return;
     }
+  } else if (cls === 'beastman') {
+    // Wild Roar: only usable while in Beast Form (even rounds). Buffs this round:
+    // correct answer scores double, wrong answer costs 2 lives (bypasses shields).
+    if (S.done) return;
+    if (!isBeastFormRound()) return;
+    S.ironBeastWildRoarActive = true;
+    S.ironSkillEvent = '🐺 Wild Roar — Unleashed! Correct = +2 points. Wrong = -2 lives (shields won\'t help).';
+  } else if (cls === 'fairy') {
+    // Rebirth: can only be used once per run. Fully heals all lives.
+    S.ironFairyRebirthUsed = true;
+    S.ironWrong = 0;
+    S.ironLives = S.ironMaxLives;
+    S.ironSkillEvent = '🧚 Rebirth — Fully healed! All lives restored!';
   }
 
   S.ironSkillUsedThisQ = true;
@@ -2555,8 +2736,22 @@ function checkMonkFocus() {
 /* ─────────────────────────────────────────────
    IRON MAN CLASS SELECTION
 ───────────────────────────────────────────── */
+var IRON_BASE_CLASSES = ['knight','bomber','thief','rogue','paladin','monk','alchemist']; // always-unlocked, slots 1-7
+var IRON_CLASS_ROSTER  = IRON_BASE_CLASSES.concat(['necromancer','beastman','medium','assassin','scout','fairy','elf']); // fixed slot order: 8 Necromancer,9 Beastman,10 Medium,11 Assassin,12 Scout,13 Fairy,14 Elf
+var TOTAL_CLASS_SLOTS  = 16; // remaining slots (15-16) are reserved for future classes
+
+function isIronClassUnlocked(key, pr) {
+  if (IRON_BASE_CLASSES.indexOf(key) !== -1) return true;
+  return !!(pr.wishUnlockedClasses && pr.wishUnlockedClasses[key]);
+}
+
 function pickIronClassOptions() {
-  return Object.keys(IRON_CLASSES); // all 7 classes, fixed order
+  var pr = prLoad();
+  var keys = IRON_BASE_CLASSES.slice();
+  IRON_CLASS_ROSTER.forEach(function(key) {
+    if (IRON_BASE_CLASSES.indexOf(key) === -1 && isIronClassUnlocked(key, pr)) keys.push(key);
+  });
+  return keys;
 }
 function goToIronClassSelect() {
   S.ironClassOptions = pickIronClassOptions();
@@ -2587,7 +2782,10 @@ function startIronTimer() {
       S.chosen = -1; // no choice = timeout
       S.missed.push({ subj: q.subj, topic: q.topic, q: q.question, ok: q.choices[q.answer], bad: '⏱ Time ran out' });
       S.ironTotalWrong++;
-      if (S.ironShieldRounds > 0) {
+      if (S.ironClass === 'beastman' && S.ironBeastWildRoarActive) {
+        // Wild Roar: a wrong answer (including timeout) costs 2 lives; shields cannot block this
+        applyIronDamage(2);
+      } else if (S.ironShieldRounds > 0) {
         S.ironShielded = true;
         S.ironTotalShieldBlocks++;
         if (S.ironClass === 'knight') {
@@ -2658,9 +2856,9 @@ function screenNmSettings() {
 
   var redemptionCards = [
     { key:'none',    icon:'⬜', name:'No Redemption', desc:'Standard mode. Missed questions are reviewed at the end only.' },
-    { key:'ghost',   icon:'👻', name:'Ghost Haunting', desc:'Wrong answers return once, reminding you of your mistake.' },
-    { key:'zombie',  icon:'🧟', name:'Zombie Apocalypse', desc:'Wrong answers haunt you indefinitely until answered correctly.' },
-    { key:'vampire', icon:'🧛', name:'Vampire Siege', desc:'Wrong answers return with one fewer wrong choice each time.' },
+    { key:'ghost',   icon:'👻', name:'Ghost Haunting', desc:'Graveyard Questions return once, reminding you of your mistake.' },
+    { key:'zombie',  icon:'🧟', name:'Zombie Apocalypse', desc:'Graveyard Questions haunt you indefinitely until answered correctly.' },
+    { key:'vampire', icon:'🧛', name:'Vampire Siege', desc:'Graveyard Questions return with one fewer wrong choice each time.' },
     { key:'mummy',   icon:'🧙‍♀️', name:"Witching Hour", desc:'Wrong answers return exactly 10 times, guided by a witch who mistakes you for her lost child.' },
   ].map(function(r) {
     var sel = S.nmRedemption === r.key ? ' selected' : '';
@@ -2829,13 +3027,22 @@ function screenIronConfirm() {
 }
 
 function screenIronClass() {
-  var cards = S.ironClassOptions.map(function(key) {
+  var pr = prLoad();
+
+  var rosterCards = IRON_CLASS_ROSTER.map(function(key) {
     var c = IRON_CLASSES[key];
-    return '<button class="iron-reward-card" onclick="chooseIronClass(\''+key+'\')">' +
-      '<div class="iron-reward-icon">'+c.icon+'</div>' +
+    if (isIronClassUnlocked(key, pr)) {
+      return '<button class="iron-reward-card" onclick="chooseIronClass(\''+key+'\')">' +
+        '<div class="iron-reward-icon">'+c.icon+'</div>' +
+        '<div class="iron-reward-name">'+esc(c.name)+'</div>' +
+        '<div class="iron-reward-desc">'+esc(c.desc)+'</div>' +
+      '</button>';
+    }
+    return '<div class="iron-reward-card" style="opacity:0.38;cursor:not-allowed;pointer-events:none">' +
+      '<div class="iron-reward-icon">🔒</div>' +
       '<div class="iron-reward-name">'+esc(c.name)+'</div>' +
-      '<div class="iron-reward-desc">'+esc(c.desc)+'</div>' +
-    '</button>';
+      '<div class="iron-reward-desc">A Granted Wish on the Sky Unlocks this Class</div>' +
+    '</div>';
   }).join('');
 
   var lockedCard =
@@ -2844,13 +3051,24 @@ function screenIronClass() {
       '<div class="iron-reward-name">???</div>' +
       '<div class="iron-reward-desc">Coming Soon</div>' +
     '</div>';
-  var lockedCards = Array(9).fill(lockedCard).join('');
+  var WISH_RESERVED_SLOTS = 14; // slots 8-14 are reserved for wish-unlockable classes
+  var wishLockedCount = Math.max(0, WISH_RESERVED_SLOTS - IRON_CLASS_ROSTER.length);
+  var wishLockedCard =
+    '<div class="iron-reward-card" style="opacity:0.38;cursor:not-allowed;pointer-events:none">' +
+      '<div class="iron-reward-icon">🔒</div>' +
+      '<div class="iron-reward-name">???</div>' +
+      '<div class="iron-reward-desc">A Granted Wish on the Sky Unlocks this Class</div>' +
+    '</div>';
+  var wishLockedCards = Array(wishLockedCount).fill(wishLockedCard).join('');
+
+  var farLockedCount = Math.max(0, TOTAL_CLASS_SLOTS - WISH_RESERVED_SLOTS);
+  var farLockedCards = Array(farLockedCount).fill(lockedCard).join('');
 
   return '<div class="iron-confirm-wrap">'+
     '<div class="iron-confirm-badge">🎭</div>'+
     '<div class="iron-confirm-title">CHOOSE YOUR CLASS</div>'+
     '<div class="iron-confirm-sub">Your class shapes how you survive. Choose wisely — you\'re stuck with it for this run.</div>'+
-    '<div class="iron-reward-grid">'+cards+lockedCards+'</div>'+
+    '<div class="iron-reward-grid">'+rosterCards+wishLockedCards+farLockedCards+'</div>'+
     '<button class="iron-back-btn" style="margin-top:20px" onclick="goTo(\'home\')">← I\'m not ready for this</button>'+
   '</div>';
 }
@@ -2887,6 +3105,7 @@ function screenIronOver() {
   var shieldBlocks = S.ironTotalShieldBlocks || 0;
   var skipped      = S.ironTotalSkipped || 0;
   var bombsRemoved = S.ironTotalBombsRemoved || 0;
+  var necroRemovals = (S.ironClass === 'necromancer') ? S.necroGraveyard.length : -1;
 
   function statRow(icon, label, value, colour) {
     return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid #2c2a48">'+
@@ -2906,6 +3125,7 @@ function screenIronOver() {
       statRow('&#128737;', 'Damage Blocked by Shield', shieldBlocks, '#4a9edd')+
       statRow('&#9197;',   'Skipped Questions',        skipped,      '#9590ad')+
       statRow('&#128163;', 'Choices Removed by Bombs', bombsRemoved, '#e67e22')+
+      (necroRemovals >= 0 ? statRow('&#128128;', 'Graveyard Souls Remaining', necroRemovals, '#e07070') : '')+
     '</div>';
 
   return '<div class="iron-gameover-wrap">'+
@@ -2966,14 +3186,14 @@ function screenNecroCoinFlip() {
     actionHtml =
       '<p style="font-size:14px;margin-bottom:8px">You called <strong>' + chosen + '</strong>. ' + resultMsg + '</p>' +
       '<button class="btn pri" style="margin-top:12px;padding:10px 28px" onclick="necroCoinContinue()">' +
-        'Rise Again →' +
+        'Accept Fate →' +
       '</button>';
   }
 
   return '<div class="iron-confirm-wrap">' +
     '<div class="iron-confirm-badge">💀</div>' +
-    '<div class="iron-confirm-title">ESCAPE FROM DEATH</div>' +
-    '<div class="iron-confirm-sub">The graveyard stirs. ' + graveyardCount + ' soul' + (graveyardCount !== 1 ? 's' : '') + ' answer your call.</div>' +
+    '<div class="iron-confirm-title">MASTER OF DEATH</div>' +
+    '<div class="iron-confirm-sub">The graveyard stirs. ' + graveyardCount + ' soul' + (graveyardCount !== 1 ? 's' : '') + ' witness your fall — call the flip and earn your final score.</div>' +
     '<div style="display:flex;flex-wrap:wrap;justify-content:center;margin:16px 0">' + coinsHtml + '</div>' +
     actionHtml +
   '</div>';
@@ -2986,35 +3206,62 @@ function necroCoinChoose(face) {
 
 function necroCoinContinue() {
   var matches = S.necroCoinResults.filter(function(r){ return r === S.necroCoinChoice; }).length;
-  // Always survive at 1 life; coin matches only award bonus score
-  S.ironWrong = S.ironMaxLives - 1;
-  S.ironLives = 1;
+  // No revive — death stands. Coin matches only award bonus score before game over.
   if (matches > 0) {
-    S.score += matches * 3;
-    showBanner('synced', '💀 Escape from Death — ' + matches + ' coin' + (matches !== 1 ? 's' : '') + ' matched! +' + (matches * 3) + ' score!', 3500);
+    var earned = matches * 3;
+    S.score += earned;
+    S.ironNecroDeathScoreThisRun = (S.ironNecroDeathScoreThisRun || 0) + earned;
+    if (S.ironNecroDeathScoreThisRun >= 15) unlockAchievement('martyr_of_death');
+    showBanner('synced', '💀 Master of Death — ' + matches + ' coin' + (matches !== 1 ? 's' : '') + ' matched! +' + earned + ' score!', 3500);
   } else {
-    showBanner('synced', '💀 Escape from Death — No coins matched. You rise with nothing but your life.', 3000);
+    showBanner('synced', '💀 Master of Death — No coins matched. A worthy final stand.', 3000);
   }
   // Cleanup
   S.necroCoinFlipPending = false;
   S.necroCoinResults = null;
   S.necroCoinChoice = null;
-  S.screen = 'quiz';
+  // Death stands — go to game over
+  S.screen = 'ironover';
   render();
 }
 
+var IRON_SKILL_BASE_DESC = {
+  knight:      'Nullify damage for 1 round.',
+  bomber:      'Remove ALL wrong answers.',
+  thief:       'Get a random consumable.',
+  rogue:       'Skip the question + 50% chance to gain a point / 50% chance to lose a life.',
+  paladin:     '5% chance to heal a life · 15% chance to get a consumable.',
+  monk:        'Your next correct answer heals 1 life.',
+  alchemist:   '3+ consumables: gain a life, lose 3 consumables. Fewer than 3: lose a life, gain 3 consumables.',
+  necromancer: 'Pull a question from your graveyard. Answer correctly to gain +1 life and ×1 of each consumable.',
+  beastman:    'Wild Roar — only usable in Beast Form (even rounds). Answer correctly this round for +2 points instead of +1. Answer wrong this round and lose 2 lives instead of 1 — shields cannot block this damage.',
+  medium:      'Coming Soon.',
+  assassin:    'Coming Soon.',
+  scout:       'Coming Soon.',
+  fairy:       'Rebirth — can only be used once per run. Fully heals all lives.',
+  elf:         'Coming Soon.'
+};
+
+var IRON_MASTERY_DATA = {
+  knight:    { mastery: 'Brace for Impact',       desc: 'Shields last one more round.' },
+  bomber:    { mastery: 'Calculated Detonation',   desc: 'Bombs now remove 2 wrong answers instead of one. Bombs can no longer be used multiple times for one question.' },
+  thief:     { mastery: 'Gold Rush',               desc: 'Skip no longer breaks streaks.' },
+  rogue:     { mastery: 'Speedy Slingshot',        desc: 'Earn an extra point for scoring within 3 seconds.' },
+  paladin:   { mastery: 'Call for Karma',          desc: 'Every round, gain a stack of blessing. Once your passive is spent, every round instead burns your current stack for a chance to recover it — 2% per stack.' },
+  monk:      { mastery: 'Lock In',                 desc: 'Correct answers now give a stack of concentration. For every stack, increase the chance of healing a missing life by 1.5% when getting a correct answer. Stacks are consumed whenever healing is triggered. Stacks accumulate even at full HP — healing just won\'t activate until a life is missing.' },
+  alchemist:   { mastery: 'Complete Ingredients',    desc: 'Every round, gain a stack of adrenaline for every type of consumable you currently own. When 10 stacks are reached, consume all 10 and earn an extra point.' },
+  necromancer: { mastery: 'Master of Death',        desc: 'On a fatal hit, flip one coin per question in your graveyard — call heads or tails. Each coin that matches your call earns +3 score. You still die.' },
+  beastman:    { mastery: 'Free from the Curse',  desc: 'You can now score points in Human Form. Using a consumable (Shield, Skip, or Bomb) also grants +1 point.' },
+  medium:      { mastery: 'Coming Soon',            desc: 'Coming Soon.' },
+  assassin:    { mastery: 'Coming Soon',            desc: 'Coming Soon.' },
+  scout:       { mastery: 'Coming Soon',            desc: 'Coming Soon.' },
+  fairy:       { mastery: 'Fairy Dust',             desc: 'Gaining new Moons from your passive now grants a 5% chance to heal a missing life. Healing while at full HP grants 10 Moons instead.' },
+  elf:         { mastery: 'Coming Soon',            desc: 'Coming Soon.' }
+};
+
 function screenIronMastery() {
   var cls = S.ironClass ? IRON_CLASSES[S.ironClass] : null;
-  var MASTERY_DATA = {
-    knight:    { mastery: 'Brace for Impact',       desc: 'Shields last one more round.' },
-    bomber:    { mastery: 'Calculated Detonation',   desc: 'Bombs now remove 2 wrong answers instead of one. Bombs can no longer be used multiple times for one question.' },
-    thief:     { mastery: 'Gold Rush',               desc: 'Skip no longer breaks streaks.' },
-    rogue:     { mastery: 'Speedy Slingshot',        desc: 'Earn an extra point for scoring within 3 seconds.' },
-    paladin:   { mastery: 'Call for Karma',          desc: 'Every round, gain a stack of blessing. Once your passive is spent, every round instead burns your current stack for a chance to recover it — 2% per stack.' },
-    monk:      { mastery: 'Lock In',                 desc: 'Correct answers now give a stack of concentration. For every stack, increase the chance of healing a missing life by 1.5% when getting a correct answer. Stacks are consumed whenever healing is triggered. Stacks accumulate even at full HP — healing just won\'t activate until a life is missing.' },
-    alchemist:   { mastery: 'Complete Ingredients',    desc: 'Every round, gain a stack of adrenaline for every type of consumable you currently own. When 10 stacks are reached, consume all 10 and earn an extra point.' },
-    necromancer: { mastery: 'Escape from Death',        desc: 'On a fatal hit, you always survive at 1 life. Then flip one coin per question in your graveyard — call heads or tails. Each coin that matches your call earns +3 score.' }
-  };
+  var MASTERY_DATA = IRON_MASTERY_DATA;
 
   var m = cls ? MASTERY_DATA[S.ironClass] : null;
   if (!m || !cls) return '<div class="iron-gameover-wrap"><div class="iron-gameover-title">MASTERY UNLOCKED</div></div>';
@@ -3122,13 +3369,13 @@ function screenHome() {
       '<div style="display:flex;align-items:center;gap:6px;background:var(--gold-bg);border:1px solid var(--gold-glow);border-radius:20px;padding:4px 12px;font-size:13px;font-weight:700;color:var(--gold)">'+
         '🌙 <span id="moonCount">'+((prLoad().moons)||0).toLocaleString()+'</span>'+
       '</div>'+
-      '<div style="display:flex;gap:8px;align-items:center">'+
-        '<button class="btn" style="font-size:13px;padding:6px 12px" onclick="goTo(\'achievements\')">\ud83c\udfc6 Achievements</button>'+
-        '<button class="btn" style="font-size:13px;padding:6px 12px" onclick="goTo(\'records\')">\ud83d\udcca Records</button>'+
-        '<button class="btn" style="font-size:13px;padding:6px 12px" onclick="goTo(\'shop\')">🛒 Shop</button>'+
-        '<button class="btn" style="font-size:13px;padding:6px 12px" onclick="openFeedback()">📝 Feedback</button>'+
-        '<button class="dm-btn" title="Toggle dark mode" onclick="toggleDark()">'+(THEME_ICONS[S.theme]||'🌙')+'</button>'+
-      '</div>'+
+      '<button class="dm-btn" title="Toggle dark mode" onclick="toggleDark()">'+(THEME_ICONS[S.theme]||'🌙')+'</button>'+
+    '</div>'+
+    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:4px">'+
+      '<button class="btn" style="font-size:11px;padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.2" onclick="goTo(\'achievements\')"><span style="font-size:16px">🏆</span><span>Achievements</span></button>'+
+      '<button class="btn" style="font-size:11px;padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.2" onclick="goTo(\'records\')"><span style="font-size:16px">📊</span><span>Records</span></button>'+
+      '<button class="btn" style="font-size:11px;padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.2" onclick="goTo(\'shop\')"><span style="font-size:16px">🛒</span><span>Shop</span></button>'+
+      '<button class="btn" style="font-size:11px;padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.2" onclick="openFeedback()"><span style="font-size:16px">📝</span><span>Feedback</span></button>'+
     '</div>'+
     '<p class="sub" style="margin-top:10px">Choose how you want to study</p>'+
     '<div class="home-card-grid">'+
@@ -3292,6 +3539,12 @@ function screenQuiz() {
       if (isOk && S.ironMode && S.ironMonkHeal) fbMsg += ' · 🧘 Monk healing — +1 life!';
       if (isOk && S.ironMode && S.ironMasteryActive && S.ironClass === 'monk') fbMsg += ' · 🎯 Concentration: '+(S.ironMonkHeal ? 'stacks consumed' : S.ironMonkConcentration+' stack'+(S.ironMonkConcentration!==1?'s':'')+' ('+Math.min(S.ironMonkConcentration*1.5,100)+'% heal chance)');
       if (isOk && S.ironMode && S.ironThiefGrantType) fbMsg += ' · 🗝️ Thief steals a '+IRON_CONSUMABLE_INFO[S.ironThiefGrantType].name+'!';
+      if (isOk && S.ironMode && S.ironClass === 'necromancer' && q._necroRedemption) fbMsg += ' · 💀 Soul redeemed — +1 Life & ×1 each consumable!';
+      if (!isOk && S.ironMode && S.ironClass === 'necromancer' && q._necroRedemption) fbMsg += ' · 💀 Soul lingers — redemption failed';
+      if (isOk && S.ironMode && S.ironClass === 'beastman' && S.ironBeastWildRoarActive) fbMsg += ' · 🐺 Wild Roar — Double score! (+2 points)';
+      if (!isOk && S.ironMode && S.ironClass === 'beastman' && S.ironBeastWildRoarActive) fbMsg += ' · 🐺 Wild Roar — Lost 2 lives! Shields offered no protection.';
+      if (isOk && S.ironMode && S.ironClass === 'beastman' && !S.ironBeastWildRoarActive && !isBeastFormRound() && !S.ironMasteryActive) fbMsg += ' · 🧍 Human Form — no points this round';
+      if (isOk && S.ironMode && S.ironClass === 'beastman' && !S.ironBeastWildRoarActive && !isBeastFormRound() && S.ironMasteryActive) fbMsg += ' · 🐺✨ Free from the Curse — scored in Human Form!';
       fbHtml = '<div class="fb '+(isOk?'ok':'no')+'">'+fbMsg+'</div>';
       if (S.ironMode && S.ironSkillEvent) fbHtml += '<div class="iron-skill-event">'+esc(S.ironSkillEvent)+'</div>';
     }
@@ -3331,9 +3584,12 @@ function screenQuiz() {
     var streakBadge = S.ironStreak > 1 ? '<span style="font-size:12px;color:#e67e22;font-weight:600;margin-left:8px">🔥 '+S.ironStreak+'</span>' : '';
     var classInfo = S.ironClass ? IRON_CLASSES[S.ironClass] : null;
     var classBadge = classInfo ? '<span style="font-size:11px;color:#9b59b6;margin-left:6px" title="'+esc(classInfo.desc)+'">'+classInfo.icon+' '+esc(classInfo.name)+'</span>' : '';
+    var gyBadge = (S.ironClass === 'necromancer' && S.necroGraveyard.length > 0)
+      ? '<span class="nm-graveyard-badge" style="margin-left:6px" title="Graveyard souls">💀 '+S.necroGraveyard.length+'</span>'
+      : '';
     topBar =
       '<div class="qmeta" style="margin-bottom:6px">'+
-        '<div class="iron-lives">'+hearts+'<span style="font-size:12px;color:#c0392b;margin-left:4px">'+S.ironLives+' left</span>'+shieldBadge+classBadge+'</div>'+
+        '<div class="iron-lives">'+hearts+'<span style="font-size:12px;color:#c0392b;margin-left:4px">'+S.ironLives+' left</span>'+shieldBadge+classBadge+gyBadge+'</div>'+
         '<div style="display:flex;align-items:center;gap:8px">'+
           '<span style="color:#c0a060;font-weight:600">Score: '+S.score+'</span>'+streakBadge+
           '<button class="dm-btn" onclick="toggleDark()" style="width:26px;height:26px;font-size:13px;border:none;background:none;cursor:pointer">'+(THEME_ICONS[S.theme]||'🌙')+'</button>'+
@@ -3439,8 +3695,18 @@ function screenQuiz() {
     }
   }
 
+  var necroRedemptionBanner = '';
+  if (S.ironMode && S.ironClass === 'necromancer' && q._necroRedemption) {
+    necroRedemptionBanner = '<div style="'+
+      'background:var(--red-bg);border:0.5px solid var(--red-bd);border-radius:var(--rs);'+
+      'padding:7px 12px;font-size:12px;color:var(--red-text);margin-bottom:10px;line-height:1.5">'+
+      '💀 <strong>Redemption</strong> — This soul rose from your graveyard. Answer correctly for <strong>+1 Life</strong> &amp; <strong>×1 of each consumable</strong>.'+
+    '</div>';
+  }
+
   return topBar+nmHud+
   '<div class="card'+gyCardClass+'" style="'+(S.ironMode?'border-color:#c0392b;':'')+'">'+(S.ironMode?'<div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#e74c3c;margin-bottom:4px">⚡ IRON MAN MODE · Q'+(S.cur+1)+'</div>':'')+
+    necroRedemptionBanner+
     '<div class="qsubj">'+esc(q.subj)+'</div>'+
     '<div class="qtopic">'+esc(q.topic)+'</div>'+
     '<div class="qtxt">'+esc(q.question)+'</div>'+
@@ -3470,14 +3736,23 @@ function ironSkillRow() {
   var cls = IRON_CLASSES[S.ironClass];
   var cd = S.ironSkillCooldown;
   var isMonkFull = (S.ironClass === 'monk' && S.ironWrong === 0);
+  var isNecroEmpty = (S.ironClass === 'necromancer' && S.necroGraveyard.length === 0);
+  var isFairyUsed = (S.ironClass === 'fairy' && S.ironFairyRebirthUsed);
+  var isBeastmanHuman = (S.ironClass === 'beastman' && !isBeastFormRound());
   var usedThisQ = S.ironSkillUsedThisQ;
-  var canUse = cd === 0 && !usedThisQ && !isMonkFull;
-  var needsActive = ['knight','bomber','thief','rogue'];
+  var canUse = cd === 0 && !usedThisQ && !isMonkFull && !isNecroEmpty && !isFairyUsed && !isBeastmanHuman;
+  var needsActive = ['knight','bomber','thief','rogue','necromancer','beastman'];
   if (needsActive.indexOf(S.ironClass) !== -1 && S.done) canUse = false;
 
   var cdHtml;
   if (isMonkFull) {
     cdHtml = '<span class="iron-skill-cd inactive">Full HP</span>';
+  } else if (isNecroEmpty) {
+    cdHtml = '<span class="iron-skill-cd inactive">Empty</span>';
+  } else if (isFairyUsed) {
+    cdHtml = '<span class="iron-skill-cd inactive">Spent</span>';
+  } else if (isBeastmanHuman) {
+    cdHtml = '<span class="iron-skill-cd inactive">Human Form</span>';
   } else if (usedThisQ) {
     cdHtml = '<span class="iron-skill-cd">Used</span>';
   } else if (cd > 0) {
@@ -3487,22 +3762,28 @@ function ironSkillRow() {
   }
 
   var baseDescriptions = {
-    knight:    'Nullify damage for 1 round',
-    bomber:    'Remove ALL wrong answers',
-    thief:     'Get a random consumable',
-    rogue:     'Skip + 50% get point / 50% lose life',
-    paladin:   '5% heal · 15% get consumable',
-    monk:      'Next correct answer heals 1 life',
-    alchemist: '3+ consumables: gain a life, lose 3. Fewer: lose a life, gain 3.'
+    knight:      'Nullify damage for 1 round',
+    bomber:      'Remove ALL wrong answers',
+    thief:       'Get a random consumable',
+    rogue:       'Skip + 50% get point / 50% lose life',
+    paladin:     '5% heal · 15% get consumable',
+    monk:        'Next correct answer heals 1 life',
+    alchemist:   '3+ consumables: gain a life, lose 3. Fewer: lose a life, gain 3.',
+    necromancer: S.necroGraveyard.length === 0 ? 'Graveyard empty — waiting for wrong answers' : 'Pull from graveyard ('+S.necroGraveyard.length+' soul'+(S.necroGraveyard.length!==1?'s':'')+') · correct = +life & ×1 each consumable',
+    beastman:    isBeastmanHuman ? 'Human Form — correct answers give no points this round' : 'Beast Form: correct = +2 pts, wrong = -2 lives (bypasses shield)',
+    fairy:       S.ironFairyRebirthUsed ? 'Rebirth already used this run' : 'Once per run: fully heal all lives'
   };
   var masteryDescriptions = {
-    knight:    'Nullify damage for 2 rounds (Brace for Impact)',
-    bomber:    'Remove ALL wrong answers (1 use/q with Calculated Detonation)',
-    thief:     'Get a random consumable (skip preserves streak)',
-    rogue:     'Skip + 50/50 · +1 pt if answered in ≤3s',
-    paladin:   '5% heal · 15% consumable · blessings recover passive',
-    monk:      'Next correct heals · Lock In: concentration stacks heal chance',
-    alchemist: '3+ consumables: gain a life, lose 3. Fewer: lose a life, gain 3. Adrenaline stacks earn bonus points.'
+    knight:      'Nullify damage for 2 rounds (Brace for Impact)',
+    bomber:      'Remove ALL wrong answers (1 use/q with Calculated Detonation)',
+    thief:       'Get a random consumable (skip preserves streak)',
+    rogue:       'Skip + 50/50 · +1 pt if answered in ≤3s',
+    paladin:     '5% heal · 15% consumable · blessings recover passive',
+    monk:        'Next correct heals · Lock In: concentration stacks heal chance',
+    alchemist:   '3+ consumables: gain a life, lose 3. Fewer: lose a life, gain 3. Adrenaline stacks earn bonus points.',
+    necromancer: S.necroGraveyard.length === 0 ? 'Graveyard empty — waiting for wrong answers' : 'Pull from graveyard ('+S.necroGraveyard.length+' soul'+(S.necroGraveyard.length!==1?'s':'')+') · Master of Death active on fatal hits',
+    beastman:    isBeastmanHuman ? 'Human Form — Free from the Curse: you can still score here' : 'Beast Form: correct = +2 pts, wrong = -2 lives (bypasses shield) · consumables also score',
+    fairy:       S.ironFairyRebirthUsed ? 'Rebirth already used this run' : 'Once per run: fully heal all lives'
   };
 
   var desc = (S.ironMasteryActive ? masteryDescriptions : baseDescriptions)[S.ironClass];
@@ -3511,12 +3792,13 @@ function ironSkillRow() {
   if (S.ironClass === 'alchemist') {
     var totalCons = S.ironConsumables.shield + S.ironConsumables.skip + S.ironConsumables.bomb;
     var isLethal = totalCons < 3 && S.ironLives <= 1;
+    var atFullLifePreview = (S.ironWrong <= 0);
     if (isLethal) {
       desc = '\u26a0\ufe0f LETHAL \u2014 only 1 life left and fewer than 3 consumables. Life loss bypasses shield. Using this will kill you!';
-    } else if (totalCons >= 3) {
+    } else if (totalCons >= 3 && !atFullLifePreview) {
       desc = 'Gain a life \u00b7 lose 3 consumables' + (S.ironMasteryActive ? ' \u00b7 adrenaline stacks earn bonus pts' : '');
     } else {
-      desc = 'Lose a life \u00b7 gain 3 consumables (bypasses shield)' + (S.ironMasteryActive ? ' \u00b7 adrenaline stacks earn bonus pts' : '');
+      desc = 'Lose a life \u00b7 gain 3 consumables (bypasses shield)' + (atFullLifePreview ? ' \u00b7 life is full' : '') + (S.ironMasteryActive ? ' \u00b7 adrenaline stacks earn bonus pts' : '');
     }
   }
 
@@ -3545,6 +3827,33 @@ function ironSkillRow() {
     if (S.ironClass === 'alchemist') {
       masteryCounter = '<div style="font-size:10px;color:#e67e22;margin-top:3px">⚗️ Adrenaline: '+S.ironAlchemistAdrenaline+'/10 stacks</div>';
     }
+  }
+
+  // Beastman: always show current form (not gated by mastery — it's core passive info)
+  if (S.ironClass === 'beastman') {
+    var beastFormNow = isBeastFormRound();
+    masteryCounter += '<div style="font-size:10px;color:'+(beastFormNow?'#e67e22':'#888')+';margin-top:3px">'+
+      (beastFormNow ? '🐺 Beast Form' : '🧍 Human Form') +
+      (S.ironBeastWildRoarActive ? ' · Wild Roar ACTIVE this round!' : '') +
+    '</div>';
+  }
+
+  // Necromancer: show graveyard soul count as the right-side badge (replaces/augments cdHtml)
+  if (S.ironClass === 'necromancer') {
+    var gyCount = S.necroGraveyard.length;
+    if (isNecroEmpty) {
+      // Already handled above as 'Empty' badge
+    } else if (cd > 0) {
+      // On cooldown but has souls — show both
+      cdHtml = '<div style="display:flex;flex-direction:column;align-items:center;gap:3px">'+
+        '<span class="iron-skill-cd">'+cd+'r</span>'+
+        '<span style="font-size:11px;color:#e07070;font-weight:700">💀 '+gyCount+'</span>'+
+      '</div>';
+    } else if (!usedThisQ) {
+      // Ready and has souls — show soul count as main badge
+      cdHtml = '<span class="iron-skill-cd ready" style="display:flex;align-items:center;gap:3px">💀 '+gyCount+'</span>';
+    }
+    masteryCounter = ''; // moved to right side
   }
 
   return '<div class="iron-skill-row">'+
@@ -3696,7 +4005,7 @@ function screenRecords() {
     '</div>';
 
   // Iron Man — Per Class
-  var classOrder = ['knight','bomber','thief','rogue','paladin','monk','alchemist'];
+  var classOrder = ['knight','bomber','thief','rogue','paladin','monk','alchemist','necromancer','beastman','fairy'];
   var classRowsHtml = classOrder.map(function(key) {
     var cls = IRON_CLASSES[key];
     var runs = pr.ironClassRuns[key];
@@ -3746,6 +4055,9 @@ function screenRecords() {
       flavourRow('🛡️', 'Paladin — Times Paladin Passive Saved a Life', pr.paladinSaves)+
       flavourRow('🧘', 'Monk — Lives Healed by Passive / Focus', pr.monkLivesHealed)+
       flavourRow('⚗️', 'Alchemist — Lives Gained via Transmutation', pr.alchemistTransmutationLivesGained)+
+      flavourRow('💀', 'Necromancer — Questions Removed from Graveyard (via Redemption)', pr.necromancerGraveyardRemovals || 0)+
+      flavourRow('🐺', 'Beastman — Extra Points Collected from Wild Roar', pr.beastmanWildRoarExtraPoints || 0)+
+      flavourRow('🧚', 'Fairy — Fairy Dust Procs (Heal / Bonus Moons)', pr.fairyDustProcs || 0)+
     '</div>';
 
   return '<div class="breadcrumb">'+
@@ -3833,6 +4145,8 @@ function screenShop() {
     var btnHtml = '';
     if (state === 'owned') {
       btnHtml = '<span style="color:var(--green-text);font-weight:700;font-size:13px">✔ Owned</span>';
+    } else if (state === 'queued') {
+      btnHtml = '<span style="color:var(--green-text);font-weight:700;font-size:13px">✔ Ready for next run</span>';
     } else if (state === 'soldout') {
       btnHtml = '<span style="color:var(--muted);font-size:13px">Sold Out</span>';
     } else if (state === 'locked') {
@@ -3860,7 +4174,7 @@ function screenShop() {
     "shopBuy('violet')");
 
   // Moon Forge
-  var forgeState = pr.shopMoonForge ? 'soldout' : 'buy';
+  var forgeState = pr.shopMoonForge ? 'owned' : 'buy';
   var forgeItem = shopItem('forge', '⚗️', 'Moon Forge', 200,
     'Correct answers now grant 2 Moons instead of 1.',
     forgeState,
@@ -3879,6 +4193,66 @@ function screenShop() {
     maidenItem = shopItem('maiden','⚔️', 'Iron Maiden', 100, 'Maximum Life in Iron Man Mode +1 again (standard: 5, Knight: 6).', 'locked', '');
   }
 
+  // Iron Man Starter Consumables (one-time, for the next run; re-purchasable after each run)
+  var shieldState = pr.shopStartShield ? 'queued' : 'buy';
+  var shieldItem = shopItem('startShield', '🛡️', 'Shield', 20,
+    'Next Iron Man Mode run starts with one Shield. (Becomes available again after that run.)',
+    shieldState,
+    "shopBuy('startShield')");
+
+  var skipState = pr.shopStartSkip ? 'queued' : 'buy';
+  var skipItem = shopItem('startSkip', '⏭️', 'Skip', 10,
+    'Next Iron Man Mode run starts with one Skip. (Becomes available again after that run.)',
+    skipState,
+    "shopBuy('startSkip')");
+
+  var bombState = pr.shopStartBomb ? 'queued' : 'buy';
+  var bombItem = shopItem('startBomb', '💣', 'Bomb', 10,
+    'Next Iron Man Mode run starts with one Bomb. (Becomes available again after that run.)',
+    bombState,
+    "shopBuy('startBomb')");
+
+  // ── Section 2: Wish on the Sky (gacha)
+  var DOW_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var todayDow = new Date().getDay();
+  var wishTargetKey = WISH_SCHEDULE[todayDow];
+  var wishCls = IRON_CLASSES[wishTargetKey];
+  var wishEnabled = !!WISH_ENABLED[wishTargetKey];
+  var wishUnlocked = isIronClassUnlocked(wishTargetKey, pr);
+  var can1  = wishEnabled && moons >= 10;
+  var can10 = wishEnabled && moons >= 100;
+
+  var scheduleRows = DOW_NAMES.map(function(name, i) {
+    var key = WISH_SCHEDULE[i];
+    var cls = IRON_CLASSES[key];
+    var active = (i === todayDow);
+    return '<div style="display:flex;justify-content:space-between;padding:3px 0;'+(active?'font-weight:700;color:var(--text)':'color:var(--muted)')+'">' +
+      '<span>'+name+(active?' (Today)':'')+'</span><span>'+cls.icon+' '+esc(cls.name)+(WISH_ENABLED[key]?'':' · Coming Soon')+'</span>' +
+    '</div>';
+  }).join('');
+
+  var wishSection =
+  '<div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px">🌌 Wish on the Sky</div>' +
+  '<div class="card" style="padding:18px 16px;margin-bottom:10px">' +
+    '<div style="display:flex;align-items:center;gap:12px;margin-bottom:4px">' +
+      '<div style="font-size:30px;'+(wishEnabled?'':'opacity:0.4')+'">'+wishCls.icon+'</div>' +
+      '<div>' +
+        '<div style="font-weight:700;font-size:15px;color:var(--text)">Target Class: '+esc(wishCls.name)+'</div>' +
+        '<div style="font-size:12px;color:var(--muted)">'+(!wishEnabled ? "Today's target isn't wishable yet. Check back on its next scheduled day!" : (wishUnlocked ? 'Already unlocked — duplicate wishes grant 100 Moons instead.' : 'Wish on the sky for a chance to unlock this class for Iron Man Mode.'))+'</div>' +
+      '</div>' +
+    '</div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px">' +
+      '<button class="btn pri" style="font-size:13px;padding:10px 8px;opacity:'+(can1?'1':'0.45')+'"'+(can1?' onclick="wishPull(1)"':' disabled')+'>🌠 Wish 1 Time<br><span style="font-weight:400;font-size:11px">🌙 10</span></button>' +
+      '<button class="btn pri" style="font-size:13px;padding:10px 8px;opacity:'+(can10?'1':'0.45')+'"'+(can10?' onclick="wishPull(10)"':' disabled')+'>✨ Wish 10 Times<br><span style="font-weight:400;font-size:11px">🌙 100</span></button>' +
+      '<button class="btn" style="font-size:13px;padding:10px 8px" onclick="wishShowOdds()">📊 Show Odds</button>' +
+      '<button class="btn" style="font-size:13px;padding:10px 8px" onclick="wishShowClassDetails()">📜 Show Class Details</button>' +
+    '</div>' +
+    '<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--bd)">' +
+      '<div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px">WEEKLY SCHEDULE</div>' +
+      '<div style="font-size:12px">'+scheduleRows+'</div>' +
+    '</div>' +
+  '</div>';
+
   return '<div class="breadcrumb" style="display:flex;justify-content:space-between;align-items:center">' +
     '<div style="display:flex;align-items:center;gap:6px">' +
     '<span onclick="goTo(\'home\')">Home</span>' +
@@ -3895,21 +4269,128 @@ function screenShop() {
   '<div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">🛒 Moon Shop</div>' +
   violetItem + forgeItem + willItem + maidenItem +
 
-  // ── Section 2: Wish (Coming Soon)
-  '<div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px">🌌 Wish on the Sky</div>' +
-  '<div class="card" style="padding:20px 16px;text-align:center;opacity:0.6">' +
-    '<div style="font-size:32px;margin-bottom:8px">🎴</div>' +
-    '<div style="font-weight:700;font-size:15px;color:var(--text);margin-bottom:4px">Gacha — New Iron Man Classes</div>' +
-    '<div style="font-size:13px;color:var(--muted);margin-bottom:12px">Spend Moons to pull rare new classes for Iron Man Mode.</div>' +
-    '<span style="background:var(--amber-bg);color:var(--amber-text);border-radius:20px;padding:4px 14px;font-size:12px;font-weight:700">Coming Soon</span>' +
-  '</div>' +
+  // ── Section 1b: Iron Man Starter Consumables
+  '<div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px">⚔️ Iron Man Starter Kit</div>' +
+  shieldItem + skipItem + bombItem +
+
+  // ── Section 2: Wish (gacha)
+  wishSection +
 
   '<div class="brow" style="margin-top:20px"><button class="btn" onclick="goTo(\'home\')">← Back to Home</button></div>';
 }
 
+/* ── Raw-HTML variant of selenaAlert (content is pre-built HTML, not escaped) ── */
+function selenaAlertHTML(title, bodyHtml) {
+  var overlay   = document.getElementById('selena-modal-overlay');
+  var msgEl     = document.getElementById('selena-modal-msg');
+  var okBtn     = document.getElementById('selena-modal-ok');
+  var cancelBtn = document.getElementById('selena-modal-cancel');
+  msgEl.innerHTML = '<strong style="display:block;margin-bottom:8px;font-size:15px">'+esc(title)+'</strong><div style="font-size:13px;color:var(--muted);text-align:left">'+bodyHtml+'</div>';
+  cancelBtn.style.display = 'none';
+  okBtn.textContent = 'OK';
+  overlay.classList.add('active');
+  function cleanup() {
+    overlay.classList.remove('active');
+    cancelBtn.style.display = '';
+    msgEl.innerHTML = '';
+    okBtn.textContent = 'OK';
+    okBtn.removeEventListener('click', handleOk);
+    overlay.removeEventListener('click', handleOk);
+  }
+  function handleOk() { cleanup(); }
+  okBtn.addEventListener('click', handleOk);
+  overlay.addEventListener('click', function(e){ if (e.target === overlay) handleOk(); });
+}
+
+/* ── Wish on the Sky (gacha) ── */
+function wishRoll() {
+  var r = Math.random() * 100;
+  var acc = 0;
+  for (var i = 0; i < WISH_ODDS.length; i++) {
+    acc += WISH_ODDS[i].weight;
+    if (r < acc) return WISH_ODDS[i];
+  }
+  return WISH_ODDS[WISH_ODDS.length - 1];
+}
+
+function wishOnce(pr, targetKey) {
+  var roll = wishRoll();
+  if (roll.type === 'unlock') {
+    pr.wishUnlockedClasses = pr.wishUnlockedClasses || {};
+    if (isIronClassUnlocked(targetKey, pr)) {
+      pr.moons += 100;
+      return { kind: 'dupe', moons: 100 };
+    }
+    pr.wishUnlockedClasses[targetKey] = true;
+    return { kind: 'unlock' };
+  }
+  pr.moons += roll.amount;
+  return { kind: 'moons', amount: roll.amount };
+}
+
+function wishPull(times) {
+  var targetKey = getWishTargetClass();
+  if (!isWishEnabledToday()) return;
+  var pr = prLoad();
+  var cost = (times === 1) ? 10 : 100;
+  if ((pr.moons || 0) < cost) return;
+  pr.moons -= cost;
+  var n = (times === 1) ? 1 : 10;
+  var results = [];
+  for (var i = 0; i < n; i++) results.push(wishOnce(pr, targetKey));
+  prSave(pr);
+  render();
+  wishShowResults(results, targetKey);
+}
+
+function wishShowResults(results, targetKey) {
+  var totalMoons = 0, unlocks = 0, dupes = 0;
+  results.forEach(function(r) {
+    if (r.kind === 'moons') totalMoons += r.amount;
+    else if (r.kind === 'unlock') unlocks++;
+    else if (r.kind === 'dupe') { totalMoons += r.moons; dupes++; }
+  });
+  var clsName = esc(IRON_CLASSES[targetKey].name);
+  var lines = results.map(function(r, i) {
+    if (r.kind === 'unlock') return '<div>'+(i+1)+'. ⭐ <strong style="color:var(--gold)">Unlocked '+clsName+'!</strong></div>';
+    if (r.kind === 'dupe')   return '<div>'+(i+1)+'. 🌟 Duplicate — +100 Moons</div>';
+    return '<div>'+(i+1)+'. 🌙 +'+r.amount+' Moons</div>';
+  }).join('');
+  var title = unlocks > 0 ? '✨ A Wish Came True!' : '🌌 Wish Results';
+  var summaryBits = ['Gained 🌙 ' + totalMoons + ' Moons'];
+  if (unlocks)  summaryBits.push('Unlocked ' + clsName + ' ×' + unlocks);
+  if (dupes)    summaryBits.push(dupes + ' duplicate' + (dupes !== 1 ? 's' : ''));
+  var body = lines + '<div style="margin-top:10px;font-weight:700;color:var(--text)">' + summaryBits.join(' · ') + '</div>';
+  selenaAlertHTML(title, body);
+}
+
+function wishShowOdds() {
+  var targetKey = getWishTargetClass();
+  var rows = WISH_ODDS.map(function(o) {
+    var label = (o.type === 'unlock') ? 'Unlock ' + esc(IRON_CLASSES[targetKey].name) + ' (100 Moons if already unlocked)' : o.label;
+    return '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bd)">' +
+      '<span>'+label+'</span><span style="font-weight:700;color:var(--gold)">'+o.weight+'%</span>' +
+    '</div>';
+  }).join('');
+  selenaAlertHTML('📊 Wish Odds', rows);
+}
+
+function wishShowClassDetails() {
+  var targetKey = getWishTargetClass();
+  var cls = IRON_CLASSES[targetKey];
+  var m = IRON_MASTERY_DATA[targetKey];
+  var body =
+    '<div style="margin-bottom:10px"><strong style="color:var(--text)">'+cls.icon+' '+esc(cls.name)+'</strong></div>' +
+    '<div style="margin-bottom:10px"><div style="font-weight:700;color:var(--text);margin-bottom:2px">Passive</div><div>'+esc(cls.desc)+'</div></div>' +
+    '<div style="margin-bottom:10px"><div style="font-weight:700;color:var(--text);margin-bottom:2px">Skill — '+esc(cls.skillName)+' (CD '+cls.skillCooldown+')</div><div>'+esc(IRON_SKILL_BASE_DESC[targetKey])+'</div></div>' +
+    '<div style="margin-bottom:10px"><div style="font-weight:700;color:var(--text);margin-bottom:2px">Mastery — '+esc(m.mastery)+'</div><div>'+esc(m.desc)+'</div></div>' +
+    '<div><div style="font-weight:700;color:var(--text);margin-bottom:2px">Class Upgrade</div><div style="font-style:italic;opacity:.75">Coming Soon</div></div>';
+  selenaAlertHTML('📜 ' + cls.name + ' — Class Details', body);
+}
+
 function shopBuy(item) {
   var pr = prLoad();
-  var costs = { violet: 50, forge: 200, will: 50, maiden: 100 };
+  var costs = { violet: 50, forge: 200, will: 50, maiden: 100, startShield: 20, startSkip: 10, startBomb: 10 };
   var cost = costs[item];
   if ((pr.moons || 0) < cost) return;
   pr.moons -= cost;
@@ -3917,6 +4398,9 @@ function shopBuy(item) {
   if (item === 'forge')   { pr.shopMoonForge  = true; }
   if (item === 'will')    { pr.shopIronWill   = true; pr.ironMaxBonus = (pr.ironMaxBonus || 0) + 1; }
   if (item === 'maiden')  { pr.shopIronMaiden = true; pr.ironMaxBonus = (pr.ironMaxBonus || 0) + 1; }
+  if (item === 'startShield') { pr.shopStartShield = true; }
+  if (item === 'startSkip')   { pr.shopStartSkip   = true; }
+  if (item === 'startBomb')   { pr.shopStartBomb   = true; }
   prSave(pr);
   // If violet was just bought, cycle to it immediately
   if (item === 'violet') applyTheme('violet');
@@ -3963,8 +4447,14 @@ function screenAchievements() {
           progressHtml = progressBar(subjectsDone, 6);
         } else if (a.id === 'violet_sky') {
           var masteryMap = pr.ironClassMastery || {};
+          var baseClasses = ['knight','bomber','thief','rogue','paladin','monk','alchemist'];
+          var masteredCount = baseClasses.filter(function(k){ return masteryMap[k]; }).length;
+          progressHtml = progressBar(masteredCount, baseClasses.length);
+        } else if (a.id === 'violet_sky_all') {
+          var masteryMap = pr.ironClassMastery || {};
+          var totalClasses = Object.keys(masteryMap).length || 1;
           var masteredCount = Object.keys(masteryMap).filter(function(k){ return masteryMap[k]; }).length;
-          progressHtml = progressBar(masteredCount, 7);
+          progressHtml = progressBar(masteredCount, totalClasses);
         }
       }
       return '<div class="achv-card'+(unlocked ? ' unlocked' : ' locked')+'">'+
