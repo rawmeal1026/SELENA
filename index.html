@@ -89,6 +89,227 @@ html.violet .qtext { color: #e8e3f2; }
 html.violet .qtopic, html.violet .qmeta { color: #837aa3; }
 html.violet .qsubj { background: #221d38; color: #c2b6dc; }
 
+/* ── Jester Speech Bubble Modal ── */
+/* ── Jester Speech Bubble — shared layout ── */
+#jester-overlay {
+  display: none; position: fixed; inset: 0; z-index: 10000;
+  background: rgba(0,0,0,0.62); backdrop-filter: blur(3px);
+  align-items: flex-end; justify-content: center;
+  padding-bottom: 32px;
+}
+#jester-overlay.active { display: flex; }
+#jester-box {
+  border-radius: 16px; padding: 0; max-width: 380px; width: 93%;
+  position: relative; overflow: hidden;
+}
+#jester-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 16px 11px;
+}
+#jester-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+#jester-name {
+  font-size: 14px; font-weight: 700; letter-spacing: .04em;
+}
+#jester-title {
+  font-size: 11px; margin-top: 2px;
+}
+#jester-body {
+  padding: 16px 18px 12px;
+  min-height: 88px;
+  border-top: 1px solid; border-bottom: 1px solid;
+}
+#jester-text {
+  font-size: 14px; line-height: 1.68; font-style: italic;
+}
+#jester-text p { margin: 0 0 10px; }
+#jester-text p:last-child { margin-bottom: 0; }
+#jester-footer {
+  padding: 11px 16px 14px;
+  display: flex; gap: 8px; justify-content: flex-end; align-items: center;
+}
+#jester-cost-label { font-size: 12px; flex: 1; }
+.jester-btn {
+  padding: 7px 16px; border-radius: var(--rs);
+  font-size: 13px; cursor: pointer; font-family: inherit;
+  font-weight: 500; border: 1px solid transparent;
+  transition: opacity .12s, background .12s;
+}
+.jester-btn.primary:hover { opacity: .86; }
+
+/* ── Light theme ── */
+html:not(.dark):not(.violet) #jester-box {
+  background: #ffffff;
+  border: 1.5px solid #c8bde8;
+  box-shadow: 0 10px 40px rgba(80,50,140,0.14), 0 2px 8px rgba(0,0,0,0.08);
+}
+html:not(.dark):not(.violet) #jester-header {
+  background: linear-gradient(135deg, #f0eafa 0%, #e8e0f8 100%);
+}
+html:not(.dark):not(.violet) #jester-avatar {
+  background: linear-gradient(135deg, #d4b8f8, #a888e0);
+  border: 2px solid #8b5cd4;
+  box-shadow: 0 0 10px rgba(139,92,212,0.25);
+}
+html:not(.dark):not(.violet) #jester-name {
+  color: #3d2080;
+  text-shadow: none;
+}
+html:not(.dark):not(.violet) #jester-title { color: #7a68a8; }
+html:not(.dark):not(.violet) #jester-body {
+  border-color: #e5ddf5;
+}
+html:not(.dark):not(.violet) #jester-text { color: #2a1f4a; }
+html:not(.dark):not(.violet) #jester-cost-label { color: #7a68a8; }
+html:not(.dark):not(.violet) .jester-btn.primary {
+  background: linear-gradient(135deg, #6030b8, #4a20a0);
+  color: #f4ecff; border-color: #7040c8;
+}
+html:not(.dark):not(.violet) .jester-btn.secondary {
+  background: #f0eafa; color: #5a4890; border-color: #c8bde8;
+}
+html:not(.dark):not(.violet) .jester-btn.secondary:hover {
+  background: #e4d8f8; color: #3d2080;
+}
+
+/* ── Dark theme ── */
+html.dark #jester-box {
+  background: #1b1930;
+  border: 1.5px solid #3a3760;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.55);
+}
+html.dark #jester-header {
+  background: linear-gradient(135deg, #130c22 0%, #0d111e 100%);
+}
+html.dark #jester-avatar {
+  background: linear-gradient(135deg, #4a1060, #1a0a60);
+  border: 2px solid #9c6adb;
+  box-shadow: 0 0 12px rgba(156,106,219,0.35);
+}
+html.dark #jester-name {
+  color: #c8a0f0;
+  text-shadow: 0 0 8px rgba(200,160,240,0.4);
+}
+html.dark #jester-title { color: #6e6890; }
+html.dark #jester-body { border-color: #2c2a48; }
+html.dark #jester-text { color: #ebe8f7; }
+html.dark #jester-cost-label { color: #9590ad; }
+html.dark .jester-btn.primary {
+  background: linear-gradient(135deg, #6a30b0, #3a1870);
+  color: #f0e0ff; border-color: #8a50d0;
+}
+html.dark .jester-btn.secondary {
+  background: #1b1930; color: #9590ad; border-color: #2c2a48;
+}
+html.dark .jester-btn.secondary:hover { background: #261f49; color: #c3b6f0; }
+
+/* ── Violet Sky theme ── */
+html.violet #jester-box {
+  background: #0a0712;
+  border: 1.5px solid #6040a0;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.7), 0 0 32px rgba(120,60,200,0.15);
+}
+html.violet #jester-header {
+  background: linear-gradient(135deg, #0e0820 0%, #06040f 100%);
+}
+html.violet #jester-avatar {
+  background: linear-gradient(135deg, #3a0858, #0e0640);
+  border: 2px solid #c8a0ff;
+  box-shadow: 0 0 14px rgba(200,160,255,0.3);
+}
+html.violet #jester-name {
+  color: #e0c0ff;
+  text-shadow: 0 0 10px rgba(224,192,255,0.5);
+}
+html.violet #jester-title { color: #5b5280; }
+html.violet #jester-body { border-color: #2a1e48; }
+html.violet #jester-text { color: #e8e3f2; }
+html.violet #jester-cost-label { color: #837aa3; }
+html.violet .jester-btn.primary {
+  background: linear-gradient(135deg, #7020c0, #420a88);
+  color: #f0d8ff; border-color: #a060e0;
+}
+html.violet .jester-btn.secondary {
+  background: #0a0712; color: #837aa3; border-color: #322a4d;
+}
+html.violet .jester-btn.secondary:hover { background: #150e28; color: #c2b6dc; }
+
+/* ── Jester Card (Lunar Codex entry point) ── */
+.jester-card {
+  cursor: pointer; margin-bottom: 16px;
+  border-radius: var(--r); padding: 14px 16px;
+  display: flex; align-items: center; gap: 14px;
+  transition: box-shadow .2s, border-color .2s, background .2s;
+}
+.jester-card-avatar {
+  width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+}
+.jester-card-name {
+  font-size: 13px; font-weight: 700; letter-spacing: .04em;
+}
+.jester-card-sub {
+  font-size: 11px; margin-top: 2px;
+}
+
+/* Light */
+html:not(.dark):not(.violet) .jester-card {
+  background: linear-gradient(135deg, #f0eafa 0%, #e6dcf8 100%);
+  border: 1.5px solid #c0aee8;
+  box-shadow: 0 2px 12px rgba(100,60,200,0.09);
+}
+html:not(.dark):not(.violet) .jester-card:hover {
+  border-color: #8b5cd4;
+  box-shadow: 0 4px 20px rgba(100,60,200,0.18);
+}
+html:not(.dark):not(.violet) .jester-card-avatar {
+  background: linear-gradient(135deg, #d4b8f8, #a888e0);
+  border: 2px solid #8b5cd4;
+  box-shadow: 0 0 10px rgba(139,92,212,0.22);
+}
+html:not(.dark):not(.violet) .jester-card-name { color: #3d2080; }
+html:not(.dark):not(.violet) .jester-card-sub  { color: #7a68a8; }
+
+/* Dark */
+html.dark .jester-card {
+  background: linear-gradient(135deg, #130c22 0%, #0d0a1c 60%, #0a1228 100%);
+  border: 1.5px solid #5a3a9a;
+  box-shadow: 0 0 18px rgba(140,80,220,0.15);
+}
+html.dark .jester-card:hover {
+  border-color: #9c6adb;
+  box-shadow: 0 0 28px rgba(156,106,219,0.32);
+}
+html.dark .jester-card-avatar {
+  background: linear-gradient(135deg, #4a1060, #1a0a60);
+  border: 2px solid #9c6adb;
+  box-shadow: 0 0 12px rgba(156,106,219,0.4);
+}
+html.dark .jester-card-name { color: #c8a0f0; }
+html.dark .jester-card-sub  { color: #5a4880; }
+
+/* Violet Sky */
+html.violet .jester-card {
+  background: linear-gradient(135deg, #0e0820 0%, #06040f 100%);
+  border: 1.5px solid #6040a0;
+  box-shadow: 0 0 18px rgba(120,60,200,0.12);
+}
+html.violet .jester-card:hover {
+  border-color: #c8a0ff;
+  box-shadow: 0 0 28px rgba(200,160,255,0.22);
+}
+html.violet .jester-card-avatar {
+  background: linear-gradient(135deg, #3a0858, #0e0640);
+  border: 2px solid #c8a0ff;
+  box-shadow: 0 0 14px rgba(200,160,255,0.28);
+}
+html.violet .jester-card-name { color: #e0c0ff; }
+html.violet .jester-card-sub  { color: #5b5280; }
+
 /* Dark mode toggle */
 .dm-btn, .nav-back-btn {
   width: 34px; height: 34px; border: 0.5px solid var(--bdh);
@@ -148,7 +369,7 @@ h1 { font-size: 18px; font-weight: 500; margin-bottom: 4px; }
 .subj-card:hover { border-color: var(--blue); background: var(--blue-bg); }
 .subj-card.loading-card { opacity: .6; cursor: default; pointer-events: none; }
 .subj-card.disabled-card { opacity: .45; cursor: not-allowed; pointer-events: none; }
-.home-card-grid { display: flex; flex-direction: column; gap: 12px; margin-top: 18px; }
+.home-card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 12px; }
 .home-card-grid .subj-card { padding: 1.1rem 1.25rem; }
 .subj-num { font-size: 11px; font-weight: 500; color: var(--blue-text); background: var(--blue-bg); display: inline-block; padding: 2px 8px; border-radius: 20px; width: fit-content; }
 .subj-name { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.4; }
@@ -774,6 +995,27 @@ html.violet .nm-mummy-banner   { background:#241a08; border-color:#c79a3a; color
 <div id="achvToastContainer"></div>
 <div id="app"></div>
 
+<!-- Jester NPC Speech Bubble -->
+<div id="jester-overlay">
+  <div id="jester-box">
+    <div id="jester-header">
+      <div id="jester-avatar">🃏</div>
+      <div>
+        <div id="jester-name">JESTER</div>
+        <div id="jester-title">The Prisoner of the Lunar Codex</div>
+      </div>
+    </div>
+    <div id="jester-body">
+      <div id="jester-text"></div>
+    </div>
+    <div id="jester-footer">
+      <span id="jester-cost-label"></span>
+      <button id="jester-btn-secondary" class="jester-btn secondary">Leave</button>
+      <button id="jester-btn-primary" class="jester-btn primary">Continue →</button>
+    </div>
+  </div>
+</div>
+
 <!-- Custom confirm modal (replaces window.confirm for in-app WebView compatibility) -->
 <div id="selena-modal-overlay">
   <div id="selena-modal-box">
@@ -911,11 +1153,11 @@ var IRON_CLASSES = {
   alchemist:   { name: 'Alchemist',   icon: '\u2697\ufe0f',     desc: 'Get a consumable choice every 8 rounds instead of 10.', skillName: 'Transmutation',      skillCooldown: 8 },
   necromancer: { name: 'Necromancer', icon: '\ud83d\udc80',     desc: 'Wrong answers are stored in your graveyard.', skillName: 'Redemption',         skillCooldown: 40 },
   beastman:    { name: 'Beastman',    icon: '\ud83d\udc3a',     desc: 'Odd rounds: Human Form — correct answers give no points. Even rounds: Beast Form — your skill is available.', skillName: 'Wild Roar', skillCooldown: 0 },
-  medium:      { name: 'Medium',      icon: '\ud83d\udd2e',     desc: 'Coming Soon.', skillName: '???', skillCooldown: 0 },
+  medium:      { name: 'Medium',      icon: '\ud83d\udd2e',     desc: 'Using consumables gives you a Possession stack. Use your skill to peek at any choice to learn if it\'s correct before you answer.', skillName: 'Communicate with the Dead', skillCooldown: 0 },
   assassin:    { name: 'Assassin',    icon: '\ud83d\udde1\ufe0f', desc: 'Coming Soon.', skillName: '???', skillCooldown: 0 },
   scout:       { name: 'Scout',       icon: '\ud83c\udff9',     desc: 'Coming Soon.', skillName: '???', skillCooldown: 0 },
   fairy:       { name: 'Fairy',       icon: '\ud83e\uddda',     desc: 'Get 2 Moons for every unique topic answered per run.', skillName: 'Rebirth',           skillCooldown: 0 },
-  elf:         { name: 'Elf',         icon: '\ud83e\udddd',     desc: 'Coming Soon.', skillName: '???', skillCooldown: 0 }
+  elf:         { name: 'Elf',         icon: '\ud83e\udddd',     desc: 'Each round gives you a stack of Spirit Love. Summon the spirits to answer for you — burn stacks for a better chance at the truth.', skillName: 'Spirit Judgement', skillCooldown: 0 }
 };
 var L = ['A','B','C','D'];
 
@@ -934,9 +1176,9 @@ var WISH_SCHEDULE = {
 var WISH_ENABLED = {
   necromancer: true,
   fairy:       true,
-  elf:         false,
+  elf:         true,
   beastman:    true,
-  medium:      false,
+  medium:      true,
   assassin:    false,
   scout:       false
 };
@@ -961,10 +1203,11 @@ var API_KEY = 'AIzaSyBfViUDonSzMfdhL08_LCMrQFU_4XmVQkA';
    Key: SELENA_records  (survives HTML file updates)
 ───────────────────────────────────────────── */
 var PR_KEY = 'SELENA_records';
+var CODEX_KEY = 'SELENA_codex';
 
 var PR_DEFAULTS = {
   // Currency
-  moons: 0,
+  moons: 100000,
 
   // Shop purchases
   feedbackClaimed: false, // 300-moon bonus for first feedback form visit
@@ -978,6 +1221,8 @@ var PR_DEFAULTS = {
   shopStartShield: false,
   shopStartSkip: false,
   shopStartBomb: false,
+  shopIronCodex: false,   // Iron Codex unlocked (access the fallen questions log)
+  shopMoonCodex: false,   // Lunar Codex upgrade (expands codex from 5 → 10 entries, renames to Lunar Codex)
 
   // Wish on the Sky — classes unlocked via gacha
   wishUnlockedClasses: { necromancer: false, beastman: false, medium: false, assassin: false, scout: false, fairy: false, elf: false },
@@ -1003,9 +1248,9 @@ var PR_DEFAULTS = {
   ironTotalBombsUsed: 0,
 
   // Iron Man — Per Class
-  ironClassRuns:    { knight:0, bomber:0, thief:0, rogue:0, paladin:0, monk:0, alchemist:0, necromancer:0, beastman:0, fairy:0 },
-  ironClassBest:    { knight:0, bomber:0, thief:0, rogue:0, paladin:0, monk:0, alchemist:0, necromancer:0, beastman:0, fairy:0 },
-  ironClassMastery: { knight:false, bomber:false, thief:false, rogue:false, paladin:false, monk:false, alchemist:false, necromancer:false, beastman:false, fairy:false },
+  ironClassRuns:    { knight:0, bomber:0, thief:0, rogue:0, paladin:0, monk:0, alchemist:0, necromancer:0, beastman:0, medium:0, fairy:0, elf:0 },
+  ironClassBest:    { knight:0, bomber:0, thief:0, rogue:0, paladin:0, monk:0, alchemist:0, necromancer:0, beastman:0, medium:0, fairy:0, elf:0 },
+  ironClassMastery: { knight:false, bomber:false, thief:false, rogue:false, paladin:false, monk:false, alchemist:false, necromancer:false, beastman:false, medium:false, fairy:false, elf:false },
 
   // Iron Man — Class Gameplay Stats
   knightRoundsShieldActive: 0,
@@ -1019,6 +1264,10 @@ var PR_DEFAULTS = {
   necromancerGraveyardRemovals: 0,
   beastmanWildRoarExtraPoints: 0,
   fairyDustProcs: 0,
+  elfSpiritLoveSpent: 0,
+  elfSpiritCorrectTells: 0,
+  moonsSpent: 0,
+  totalWishes: 0,
 };
 
 function prLoad() {
@@ -1064,6 +1313,30 @@ function prRecord(fn) {
   var pr = prLoad();
   fn(pr);
   prSave(pr);
+}
+
+// ── Iron Codex: stores up to 5 Iron Man deaths ──
+var CODEX_BASE = 5;
+var CODEX_EXPANDED = 10;
+function codexMax() { var pr = prLoad(); return pr.shopMoonCodex ? CODEX_EXPANDED : CODEX_BASE; }
+function codexLabel() { var pr = prLoad(); return pr.shopMoonCodex ? 'Lunar Codex' : 'Iron Codex'; }
+function codexLoad() {
+  try { return JSON.parse(localStorage.getItem(CODEX_KEY) || '[]'); } catch(e) { return []; }
+}
+function codexSave(entries) {
+  try { localStorage.setItem(CODEX_KEY, JSON.stringify(entries)); } catch(e) {}
+}
+function codexPushDeath(entry) {
+  // entry: { question, correct, chosen, class, score, round, date }
+  var entries = codexLoad();
+  entries.unshift(entry);           // newest first
+  if (entries.length > codexMax()) entries = entries.slice(0, codexMax());
+  codexSave(entries);
+}
+function tryOpenCodex() {
+  var pr = prLoad();
+  if (pr.shopIronCodex) { goTo('ironcodex'); return; }
+  selenaAlert('🔒 ' + codexLabel() + ' Locked', 'Unlock the Iron Codex in the Moon Shop to access your fallen questions log.');
 }
 
 // Helper: add to a unique-array field
@@ -1125,10 +1398,14 @@ var ACHIEVEMENTS = [
     desc:'As Alchemist, trigger Transmutation 4 times in one Iron Man run.' },
   { id:'martyr_of_death', icon:'💀', cat:'Class', title:'Martyr of Death',
     desc:'As Necromancer, earn a total of +15 score from Master of Death coin flips in one Iron Man run.' },
-  { id:'winker_bell',     icon:'🧚', cat:'Class', title:'Winker Bell',
-    desc:'As Fairy, get 30 Moons in one Iron Man run.' },
   { id:'howling_moon',    icon:'🌕', cat:'Class', title:'Howling Moon',
     desc:'As Beastman, earn 4 or more points in a single question. Combine Wild Roar (+2), correct answer scoring, and consumables with Free from the Curse mastery to reach the threshold.' },
+  { id:'call_for_validation', icon:'🔮', cat:'Class', title:'Call for Validation',
+    desc:'As Medium, use Possession 3 or more times in a single run and have every single peek reveal that your choice is correct.' },
+  { id:'winker_bell',     icon:'🧚‍♀️', cat:'Class', title:'Winker Bell',
+    desc:'As Fairy, get 30 Moons in one Iron Man run.' },
+  { id:'better_off_alone', icon:'🧝', cat:'Class', title:'Better off Alone',
+    desc:'As Elf, use Spirit Judgement but the spirit points to the wrong answer — then ignore it and answer correctly yourself.' },
 
   // ── Misc ──
   { id:'no_touch_move_rule', icon:'✏️', cat:'Misc', title:'No Touch Move Rule',
@@ -1139,6 +1416,14 @@ var ACHIEVEMENTS = [
     desc:'Get 3 mistakes in a row with Force Reflection on.' },
   { id:'disco_mode',         icon:'🕺', cat:'Misc', title:'Disco Mode', secret:true,
     desc:'Toggle between light mode and dark mode 10 times.' },
+  { id:'flags_for_nothing',  icon:'🚩', cat:'Misc', title:'Bringing the Flags for Nothing', secret:true,
+    desc:'Start a study session with fewer than 30 questions while Checkpoint Mode is on.' },
+  { id:'shopping_spree',     icon:'🛒', cat:'Misc', title:'Shopping Spree', secret:true,
+    desc:'Spend a total of 10,000 Moons in the Shop (Wish on the Sky and Starter Kit included).' },
+  { id:'stargazer',          icon:'🌠', cat:'Misc', title:'Stargazer', secret:true,
+    desc:'Wish on the Sky 300 times.' },
+  { id:'story_of_the_prisoner', icon:'🃏', cat:'Misc', title:'The Story of The Prisoner', secret:true,
+    desc:'You found her. You listened.' },
 ];
 
 var ACHV_KEY = 'SELENA_achievements';
@@ -1156,15 +1441,22 @@ function achvIsUnlocked(id) {
   return !!achvLoad()[id];
 }
 // Unlock an achievement by id. No-op if already unlocked. Shows a toast on first unlock.
+// Guard: prevent multiple 20-Moon awards when achievements unlock simultaneously in one tick
+var _achvMoonBatchPending = false;
+
 function unlockAchievement(id) {
   var state = achvLoad();
   if (state[id]) return false;
   state[id] = { unlockedAt: Date.now() };
   achvSaveState(state);
-  prRecord(function(pr){ pr.moons = (pr.moons || 0) + 20; });
-  // Refresh moon counter in the DOM if it's currently visible
-  var _mc = document.getElementById('moonCount');
-  if (_mc) _mc.textContent = (prLoad().moons || 0).toLocaleString();
+  // Only award 20 Moons once per synchronous batch (handles simultaneous unlocks)
+  if (!_achvMoonBatchPending) {
+    _achvMoonBatchPending = true;
+    prRecord(function(pr){ pr.moons = (pr.moons || 0) + 20; });
+    var _mc = document.getElementById('moonCount');
+    if (_mc) _mc.textContent = (prLoad().moons || 0).toLocaleString();
+    setTimeout(function() { _achvMoonBatchPending = false; }, 0);
+  }
   var def = null;
   for (var i = 0; i < ACHIEVEMENTS.length; i++) { if (ACHIEVEMENTS[i].id === id) { def = ACHIEVEMENTS[i]; break; } }
   if (def) showAchievementToast(def);
@@ -1618,6 +1910,8 @@ function startQuiz() {
     S.nmJustUndidWrongAt = -1;
     S.nmWrongStreak = 0;
     S.nmLoopWrongCount = 0;
+    // ── Achievement: Bringing Flags for Nothing ──
+    if (S.nmCheckpoint && S.shuffled.length < 30) unlockAchievement('flags_for_nothing');
   }
   if (S.ironMode) {
     var _ironBonus = (prLoad().ironMaxBonus || 0); S.ironMaxLives = (S.ironClass === 'knight') ? 4 + _ironBonus : 3 + _ironBonus;
@@ -1643,6 +1937,9 @@ function startQuiz() {
     S.ironMonkFocusActive = false;
     S.ironBeastWildRoarActive = false;
     S.ironBeastPtsThisQ = 0;
+    S.ironElfSpiritLove = 0;
+    S.ironElfSpiritSuggestion = null;
+    S.ironElfSpiritWasCorrect = false;
     S.ironMasteryActive = false;
     S.necroGraveyard = [];
     S.necroRedemptionActive = false;
@@ -1671,6 +1968,13 @@ function startQuiz() {
     S.ironAlchemistSkillUsesThisRun = 0;
     S.ironNecroDeathScoreThisRun = 0;
     S.ironFairyMoonsThisRun = 0;
+    S.ironMediumPossession = 0;
+    S.ironMediumPossessing = false;
+    S.ironMediumPeekedPos = null;
+    S.ironMediumUsedThisQ = false;
+    S.ironMediumCorrectPeeks = 0;
+    S.ironMediumTotalPeeks = 0;
+    S.ironMediumAnyWrongPeek = false;
   }
   S.skipped = false;
 
@@ -2035,6 +2339,26 @@ function nmStartMindful() {
 }
 
 // Fairy: track total Moons gained this Iron Man run, unlock Winker Bell at 16
+// Check and trigger Iron Man mastery milestone (15 points). Safe to call after any score increment.
+function checkIronMastery() {
+  if (!S.ironMode || S.ironMasteryTriggered || S.score < 15) return;
+  S.ironMasteryTriggered = true;
+  S.ironMasteryActive = true;
+  prRecord(function(pr){
+    pr.ironTotalMasteryEarned++;
+    if (S.ironClass) pr.ironClassMastery[S.ironClass] = true;
+    if (pr.ironTotalMasteryEarned >= 1) unlockAchievement('survivors_mastery');
+    var _baseClasses = ['knight','bomber','thief','rogue','paladin','monk','alchemist'];
+    var _allBaseMastered = _baseClasses.every(function(k){ return pr.ironClassMastery[k]; });
+    if (_allBaseMastered) unlockAchievement('violet_sky');
+    var _allMastered = true;
+    for (var ck in pr.ironClassMastery) { if (!pr.ironClassMastery[ck]) { _allMastered = false; break; } }
+    if (_allMastered) unlockAchievement('violet_sky_all');
+  });
+  render();
+  setTimeout(function() { S.screen = 'ironmastery'; render(); }, 700);
+}
+
 function fairyTrackMoons(amount) {
   if (!(S.ironMode && S.ironClass === 'fairy')) return;
   S.ironFairyMoonsThisRun = (S.ironFairyMoonsThisRun || 0) + amount;
@@ -2052,12 +2376,15 @@ function beastmanConsumableScore() {
   S.score++;
   S.ironBeastPtsThisQ = (S.ironBeastPtsThisQ || 0) + 1;
   if (S.ironBeastPtsThisQ >= 4) unlockAchievement('howling_moon');
+  checkIronMastery();
   showBanner('synced', '🐺✨ Free from the Curse — Consumable used! +1 Point! (Score: '+S.score+')', 2200);
 }
 
 function pick(displayIdx) {
   if (S.done) return;
   if (S.ironMode && S.ironRemoved[displayIdx]) return;
+  // Medium: if in Possession state, route to peek handler instead
+  if (S.ironMode && S.ironClass === 'medium' && S.ironMediumPossessing) { mediumPeekChoice(displayIdx); return; }
   S.done = true;
   stopIronTimer();
   S.ironTimeAtPick = S.ironTimeLeft; // capture for Rogue Speedy Slingshot mastery
@@ -2081,17 +2408,18 @@ function pick(displayIdx) {
     if (!S.ironFairyTopics[q.topic]) {
       S.ironFairyTopics[q.topic] = true;
       prRecord(function(pr){ pr.moons = (pr.moons || 0) + 2; });
+      prRecord(function(pr){ pr.fairyDustProcs = (pr.fairyDustProcs || 0) + 2; });
       fairyTrackMoons(2);
-      var fairyMsg = '🧚 New Topic — ' + esc(q.topic) + ' · +2 Moons!';
+      var fairyMsg = '🧚‍♀️ New Topic — ' + esc(q.topic) + ' · +2 Moons!';
       // Fairy Mastery — Fairy Dust: gaining Moons from passive grants 5% chance to heal.
       // Healing at full HP grants 10 Moons instead.
       if (S.ironMasteryActive && Math.random() < 0.05) {
-        prRecord(function(pr){ pr.fairyDustProcs = (pr.fairyDustProcs || 0) + 1; });
         if (S.ironWrong > 0) {
           S.ironWrong--; S.ironLives = S.ironMaxLives - S.ironWrong;
           fairyMsg += ' · ✨ Fairy Dust — Healed 1 life!';
         } else {
           prRecord(function(pr){ pr.moons = (pr.moons || 0) + 10; });
+          prRecord(function(pr){ pr.fairyDustProcs = (pr.fairyDustProcs || 0) + 10; });
           fairyTrackMoons(10);
           fairyMsg += ' · ✨ Fairy Dust — Full HP! +10 Moons instead!';
         }
@@ -2101,6 +2429,12 @@ function pick(displayIdx) {
   }
 
   if (origIdx === q.answer) {
+    // ── Elf: Better off alone — spirit suggested wrong, player ignored and got it right ──
+    if (S.ironMode && S.ironClass === 'elf' && S.ironElfSpiritSuggestion !== null) {
+      var spiritWrong = !S.ironElfSpiritWasCorrect; // spirit intentionally rolled wrong
+      var playerIgnored = (S.ironElfSpiritSuggestion !== displayIdx); // player picked different choice
+      if (spiritWrong && playerIgnored) unlockAchievement('better_off_alone');
+    }
     // ── Beastman: scoring depends on Wild Roar / Human-Beast form / mastery ──
     if (S.ironMode && S.ironClass === 'beastman') {
       var beastPtsThisAnswer = 0;
@@ -2169,12 +2503,14 @@ function pick(displayIdx) {
         S.score++; S.ironRogueBonus = true; prRecord(function(pr){ pr.rogueBonus++; });
         S.ironRogueBonusPointsThisRun = (S.ironRogueBonusPointsThisRun || 0) + 1;
         if (S.ironRogueBonusPointsThisRun >= 20) unlockAchievement('high_roller');
+        checkIronMastery();
       }
       // Rogue Mastery — Speedy Slingshot: +1 point for answering within 3 seconds (27s+ remaining)
       if (S.ironClass === 'rogue' && S.ironMasteryActive && S.ironTimeAtPick >= 27) {
         S.score++; S.ironRogueSpeedBonus = true;
         S.ironRogueBonusPointsThisRun = (S.ironRogueBonusPointsThisRun || 0) + 1;
         if (S.ironRogueBonusPointsThisRun >= 20) unlockAchievement('high_roller');
+        checkIronMastery();
       }
       // Monk passive: 5% chance to heal, OR mastery concentration-based chance
       if (S.ironClass === 'monk' && S.ironWrong > 0) {
@@ -2206,24 +2542,7 @@ function pick(displayIdx) {
         if (S.ironThiefStolenThisRun >= 4) unlockAchievement('sleight_of_hand');
       }
       // Check for mastery milestone (15 points)
-      if (S.score >= 15 && !S.ironMasteryTriggered) {
-        S.ironMasteryTriggered = true;
-        S.ironMasteryActive = true;
-        prRecord(function(pr){
-          pr.ironTotalMasteryEarned++;
-          if (S.ironClass) pr.ironClassMastery[S.ironClass] = true;
-          if (pr.ironTotalMasteryEarned >= 1) unlockAchievement('survivors_mastery');
-          var _baseClasses = ['knight','bomber','thief','rogue','paladin','monk','alchemist'];
-          var _allBaseMastered = _baseClasses.every(function(k){ return pr.ironClassMastery[k]; });
-          if (_allBaseMastered) unlockAchievement('violet_sky');
-          var _allMastered = true;
-          for (var ck in pr.ironClassMastery) { if (!pr.ironClassMastery[ck]) { _allMastered = false; break; } }
-          if (_allMastered) unlockAchievement('violet_sky_all');
-        });
-        render();
-        setTimeout(function() { S.screen = 'ironmastery'; render(); }, 700);
-        return;
-      }
+      checkIronMastery();
     }
   } else {
     S.missed.push({ subj: q.subj, topic: q.topic, q: q.question, ok: q.choices[q.answer], bad: q.choices[origIdx] });
@@ -2321,6 +2640,12 @@ function next() {
       showBanner('synced', '💣 Bomber instinct triggers — +1 Bomb!', 2500);
     }
 
+    // Elf passive: +1 Spirit Love stack every round
+    if (S.ironClass === 'elf') {
+      S.ironElfSpiritLove = (S.ironElfSpiritLove || 0) + 1;
+      showBanner('synced', '🧝 Spirit Love — +1 stack ('+S.ironElfSpiritLove+' total)', 1600);
+    }
+
     if (S.ironMasteryActive) {
       // Paladin Mastery — Call for Karma: gain 1 blessing stack every round
       // (regardless of correct/wrong/skip). While the passive is intact, stacks
@@ -2356,6 +2681,7 @@ function next() {
           if (S.ironAlchemistAdrenaline >= 10) {
             S.ironAlchemistAdrenaline -= 10;
             S.score++;
+            checkIronMastery();
             showBanner('synced', '⚗️ Complete Ingredients — 10 stacks consumed! +1 Point! (Score: '+S.score+')', 3000);
           } else {
             showBanner('synced', '⚗️ Adrenaline: +'+types+' stacks ('+S.ironAlchemistAdrenaline+'/10)', 1800);
@@ -2437,8 +2763,11 @@ function advanceQuestion() {
     S.ironRogueBonus = false; S.ironMonkHeal = false; S.ironThiefGrantType = null;
     S.ironBeastWildRoarActive = false;
     S.ironBeastPtsThisQ = 0;
+    S.ironElfSpiritSuggestion = null;
+    S.ironElfSpiritWasCorrect = false;
     S.ironBombsUsedThisQ = 0; S.ironRemoved = {};
     S.ironSkillUsedThisQ = false; S.ironSkillEvent = null;
+    S.ironMediumPossessing = false; S.ironMediumPeekedPos = null; S.ironMediumUsedThisQ = false;
     S.ironRogueSpeedBonus = false; S.ironTimeAtPick = 30;
     // If next question is not a redemption question, clear the flag so stale state can't cause issues
     if (S.ironMode && S.ironClass === 'necromancer' && S.necroRedemptionActive) {
@@ -2460,6 +2789,7 @@ function useIronShield() {
   if (S.ironShieldRounds > 0) return;
   S.ironConsumables.shield--;
   prRecord(function(pr){ pr.ironTotalShieldsUsed++; });
+  if (S.ironClass === 'medium') { S.ironMediumPossession = (S.ironMediumPossession || 0) + 1; showBanner('synced', '🔮 Possession +1 stack (' + S.ironMediumPossession + ' total)', 1800); }
   // Knight Mastery — Brace for Impact: shield lasts 3 rounds instead of 2
   S.ironShieldRounds = (S.ironClass === 'knight' && S.ironMasteryActive) ? 3 : 2;
   beastmanConsumableScore();
@@ -2470,6 +2800,7 @@ function useIronSkip() {
   if (S.ironConsumables.skip <= 0) return;
   S.ironConsumables.skip--;
   prRecord(function(pr){ pr.ironTotalSkipsUsed++; });
+  if (S.ironClass === 'medium') { S.ironMediumPossession = (S.ironMediumPossession || 0) + 1; showBanner('synced', '🔮 Possession +1 stack (' + S.ironMediumPossession + ' total)', 1800); }
   if (!(S.ironClass === 'thief' && S.ironMasteryActive)) {
     S.ironStreak = 0;
   }
@@ -2509,6 +2840,7 @@ function useIronBomb() {
   S.ironBombsUsedThisQ++;
   S.ironConsumables.bomb--;
   prRecord(function(pr){ pr.ironTotalBombsUsed++; });
+  if (S.ironClass === 'medium') { S.ironMediumPossession = (S.ironMediumPossession || 0) + 1; showBanner('synced', '🔮 Possession +1 stack (' + S.ironMediumPossession + ' total)', 1800); }
   beastmanConsumableScore();
   render();
 }
@@ -2555,11 +2887,190 @@ function applyIronDamage(amount) {
 /* ─────────────────────────────────────────────
    IRON MAN CLASS SKILLS
 ───────────────────────────────────────────── */
+// ── Elf: Spirit Judgement — custom modal for burning Spirit Love stacks ──
+function useElfSpiritJudgement() {
+  if (!S.ironMode || S.ironClass !== 'elf') return;
+  if (S.done || S.ironSkillUsedThisQ) return;
+
+  var maxBurn = S.ironMasteryActive ? 10 : 20;
+  var pctPerStack = S.ironMasteryActive ? 10 : 5;
+  var current = S.ironElfSpiritLove || 0;
+  var canBurn = Math.min(current, maxBurn);
+
+  // Build the modal content with slider
+  var overlay = document.getElementById('selena-modal-overlay');
+  var msgEl   = document.getElementById('selena-modal-msg');
+  var okBtn   = document.getElementById('selena-modal-ok');
+  var cancelBtn = document.getElementById('selena-modal-cancel');
+
+  // Replace modal message with rich burn-picker
+  msgEl.innerHTML =
+    '<div style="font-weight:700;font-size:15px;margin-bottom:8px">🧝 Spirit Judgement</div>' +
+    '<div style="font-size:12px;color:var(--sub);margin-bottom:10px">' +
+      'Spirit Love: <b>' + current + '</b> stacks &nbsp;|&nbsp; ' +
+      'Max burn: <b>' + maxBurn + '</b> &nbsp;|&nbsp; ' +
+      pctPerStack + '% per stack burned' +
+    '</div>' +
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">' +
+      '<input id="elf-burn-slider" type="range" min="0" max="' + canBurn + '" value="' + canBurn + '" ' +
+        'style="flex:1;accent-color:#9b59b6" oninput="document.getElementById(\'elf-burn-val\').textContent=this.value;' +
+          'document.getElementById(\'elf-burn-pct\').textContent=Math.min(this.value*' + pctPerStack + ',100)">' +
+      '<span id="elf-burn-val" style="font-weight:700;min-width:24px;text-align:right">' + canBurn + '</span>' +
+    '</div>' +
+    '<div style="font-size:13px">Chance spirits reveal correct answer: ' +
+      '<b><span id="elf-burn-pct">' + Math.min(canBurn * pctPerStack, 100) + '</span>%</b>' +
+    '</div>';
+
+  okBtn.textContent = 'Ask the Spirits';
+  cancelBtn.textContent = 'Cancel';
+  overlay.classList.add('active');
+
+  function cleanup() {
+    overlay.classList.remove('active');
+    msgEl.innerHTML = '';
+    okBtn.textContent = 'OK';
+    cancelBtn.textContent = 'Cancel';
+    okBtn.removeEventListener('click', handleOk);
+    cancelBtn.removeEventListener('click', handleCancel);
+    overlay.removeEventListener('click', handleOverlay);
+  }
+  function handleOk() {
+    var slider = document.getElementById('elf-burn-slider');
+    var burned = slider ? parseInt(slider.value, 10) : canBurn;
+    cleanup();
+    _resolveElfSpirit(burned);
+  }
+  function handleCancel() { cleanup(); }
+  function handleOverlay(e) { if (e.target === overlay) handleCancel(); }
+  okBtn.addEventListener('click', handleOk);
+  cancelBtn.addEventListener('click', handleCancel);
+  overlay.addEventListener('click', handleOverlay);
+}
+
+function _resolveElfSpirit(burned) {
+  var current = S.ironElfSpiritLove || 0;
+  var maxBurn = S.ironMasteryActive ? 10 : 20;
+  var pctPerStack = S.ironMasteryActive ? 10 : 5;
+  burned = Math.min(burned, Math.min(current, maxBurn));
+
+  S.ironElfSpiritLove = current - burned;
+  prRecord(function(pr){ pr.elfSpiritLoveSpent = (pr.elfSpiritLoveSpent || 0) + burned; });
+
+  var correctChance = Math.min(burned * pctPerStack / 100, 1);
+  var q = S.shuffled[S.cur];
+  var correctDisplayIdx = q._order.indexOf(q.answer);
+  var spiritIsCorrect = Math.random() < correctChance;
+  var chosenIdx;
+  if (spiritIsCorrect) {
+    chosenIdx = correctDisplayIdx;
+    prRecord(function(pr){ pr.elfSpiritCorrectTells = (pr.elfSpiritCorrectTells || 0) + 1; });
+  } else {
+    // Spirit picks randomly from non-removed choices (may still accidentally land on correct)
+    var available = [];
+    for (var i = 0; i < q._order.length; i++) {
+      if (!S.ironRemoved[i]) available.push(i);
+    }
+    var wrongChoices = available.filter(function(i){ return i !== correctDisplayIdx; });
+    // If all other choices removed, forced to pick correct anyway
+    chosenIdx = wrongChoices.length > 0
+      ? wrongChoices[Math.floor(Math.random() * wrongChoices.length)]
+      : correctDisplayIdx;
+    // If the random wrong pick accidentally matched correct, that's still a wrong roll
+  }
+
+  S.ironSkillUsedThisQ = true;
+  S.ironElfSpiritSuggestion = chosenIdx;   // display index — highlighted in UI
+  S.ironElfSpiritWasCorrect = spiritIsCorrect;
+
+  var pctLabel = Math.min(burned * pctPerStack, 100);
+  S.ironSkillEvent = '🧝 Spirit Judgement — burned ' + burned + ' stack' + (burned !== 1 ? 's' : '') +
+    ' (' + pctLabel + '% chance correct) · Spirit Love remaining: ' + S.ironElfSpiritLove +
+    ' · Spirit points at choice ' + ['A','B','C','D'][chosenIdx];
+  render();
+}
+
+
+/* ─────────────────────────────────────────────
+   MEDIUM: COMMUNICATE WITH THE DEAD
+───────────────────────────────────────────── */
+function useMediumPossession() {
+  if (!S.ironMode || S.ironClass !== 'medium') return;
+  if (S.done) return;
+  if (S.ironMediumPossession <= 0) return;
+  // Base: once per Q. Mastery (Multiple Possession): no limit.
+  if (!S.ironMasteryActive && S.ironMediumUsedThisQ) return;
+
+  // Mastery bonuses on each trigger
+  var masteryMsg = '';
+  if (S.ironMasteryActive) {
+    var healRoll = Math.random();
+    var giftRoll = Math.random();
+    if (healRoll < 0.02 && S.ironWrong > 0) {
+      S.ironWrong--; S.ironLives = S.ironMaxLives - S.ironWrong;
+      masteryMsg += ' · ✨ Spectral Heal — 1 life restored!';
+    }
+    if (giftRoll < 0.04) {
+      var giftType = ['shield','skip','bomb'][Math.floor(Math.random()*3)];
+      S.ironConsumables[giftType] += IRON_CONSUMABLE_INFO[giftType].qty;
+      masteryMsg += ' · 🎁 Gift from beyond — ×' + IRON_CONSUMABLE_INFO[giftType].qty + ' ' + IRON_CONSUMABLE_INFO[giftType].name + '!';
+    }
+  }
+
+  // Consume one Possession stack and enter (or re-enter) possession mode
+  // With mastery the player can chain peeks: pressing skill mid-Possession resets the peek state
+  S.ironMediumPossession--;
+  S.ironMediumPossessing = true;
+  S.ironMediumPeekedPos = null;
+  S.ironMediumUsedThisQ = true;
+  S.ironSkillEvent = '🔮 Communing with the dead… Click a choice to hear their verdict.' + masteryMsg;
+  prRecord(function(pr){ pr.mediumTotalUses = (pr.mediumTotalUses || 0) + 1; });
+  render();
+}
+
+function mediumPeekChoice(displayIdx) {
+  // Called when player clicks a choice while in Possession state (before answering)
+  if (!S.ironMediumPossessing) return;
+  var q = S.shuffled[S.cur];
+  if (S.ironRemoved[displayIdx]) return;
+
+  if (S.ironMediumPeekedPos === null) {
+    // First click: reveal if correct or wrong
+    S.ironMediumPeekedPos = displayIdx;
+    // Mastery: Possession ends after peek so skill can be used again
+    // No mastery: Possession stays active until the player clicks to answer
+    if (S.ironMasteryActive) S.ironMediumPossessing = false;
+    var isCorrect = (q._order[displayIdx] === q.answer);
+    // Track for Call for Validation achievement + PR stat
+    S.ironMediumTotalPeeks = (S.ironMediumTotalPeeks || 0) + 1;
+    if (isCorrect) {
+      S.ironMediumCorrectPeeks = (S.ironMediumCorrectPeeks || 0) + 1;
+      prRecord(function(pr){ pr.mediumCorrectPeeks = (pr.mediumCorrectPeeks || 0) + 1; });
+    } else {
+      S.ironMediumAnyWrongPeek = true;
+    }
+    if (!S.ironMediumAnyWrongPeek && S.ironMediumTotalPeeks >= 3) {
+      unlockAchievement('call_for_validation');
+    }
+    S.ironSkillEvent = '🔮 The dead speak… ' + ['A','B','C','D'][displayIdx] + ' is ' +
+      (isCorrect ? '✅ CORRECT — the dead confirm it!' : '❌ WRONG — the dead warn you away!') +
+      (S.ironMasteryActive && S.ironMediumPossession > 0 ? ' · Use skill again to peek another, or click any choice to answer.' : ' Click the same choice again to answer, or pick another.');
+    render();
+  } else {
+    // Second click (any choice): exit possession and actually answer
+    S.ironMediumPossessing = false;
+    S.ironSkillEvent = null;
+    pick(displayIdx);
+  }
+}
+
 function useClassSkill() {
   if (!S.ironMode || !S.ironClass) return;
+  if (S.done) return;
   if (S.ironSkillUsedThisQ) return;
   if (S.ironSkillCooldown > 0) return;
   if (S.ironClass === 'fairy' && S.ironFairyRebirthUsed) return;
+  // Elf uses its own modal flow
+  if (S.ironClass === 'elf') { useElfSpiritJudgement(); return; }
   var cls = S.ironClass;
   var cd = IRON_CLASSES[cls].skillCooldown;
 
@@ -2609,6 +3120,7 @@ function useClassSkill() {
     var lucky = Math.random() < 0.5;
     if (lucky) {
       S.score++;
+      checkIronMastery();
       S.ironSkillEvent = '🎲 Risky Escape — Lucky! Skipped and claimed the point!';
       S.ironRogueBonusPointsThisRun = (S.ironRogueBonusPointsThisRun || 0) + 1;
       if (S.ironRogueBonusPointsThisRun >= 20) unlockAchievement('high_roller');
@@ -2617,7 +3129,23 @@ function useClassSkill() {
       S.ironSkillEvent = '🎲 Risky Escape — Unlucky! Skipped but lost a life!';
     }
     render();
-    if (S.ironWrong >= S.ironMaxLives) setTimeout(function(){ S.screen='ironover'; render(); }, 900);
+    if (S.ironWrong >= S.ironMaxLives) setTimeout(function(){
+      var _rq = S.shuffled && S.shuffled[S.cur];
+      if (_rq && !S.ironRunSaved) {
+        codexPushDeath({
+          question: _rq.question,
+          correct:  _rq.choices[_rq.answer],
+          chosen:   '(Risky Escape — skipped)',
+          cause:    'rogue_escape',
+          cls:      S.ironClass || '—',
+          score:    S.score || 0,
+          round:    S.ironRound || 0,
+          date:     new Date().toLocaleString()
+        });
+        S.ironRunSaved = true;
+      }
+      S.screen='ironover'; render();
+    }, 900);
     return;
   } else if (cls === 'paladin') {
     // Pray: 5% heal 1 HP, 15% get a random consumable, otherwise nothing special
@@ -2700,7 +3228,23 @@ function useClassSkill() {
     if (S.ironWrong >= S.ironMaxLives) {
       S.ironSkillUsedThisQ = true; S.ironSkillCooldown = cd;
       render();
-      setTimeout(function(){ S.screen='ironover'; render(); }, 900);
+      setTimeout(function(){
+        var _aq = S.shuffled && S.shuffled[S.cur];
+        if (_aq && !S.ironRunSaved) {
+          codexPushDeath({
+            question: _aq.question,
+            correct:  _aq.choices[_aq.answer],
+            chosen:   '(Transmutation — sacrificed a life)',
+            cause:    'alchemist_transmutation',
+            cls:      S.ironClass || '—',
+            score:    S.score || 0,
+            round:    S.ironRound || 0,
+            date:     new Date().toLocaleString()
+          });
+          S.ironRunSaved = true;
+        }
+        S.screen='ironover'; render();
+      }, 900);
       return;
     }
   } else if (cls === 'beastman') {
@@ -2710,12 +3254,16 @@ function useClassSkill() {
     if (!isBeastFormRound()) return;
     S.ironBeastWildRoarActive = true;
     S.ironSkillEvent = '🐺 Wild Roar — Unleashed! Correct = +2 points. Wrong = -2 lives (shields won\'t help).';
+  } else if (cls === 'medium') {
+    // Communicate with the Dead: handled by its own function
+    useMediumPossession();
+    return;
   } else if (cls === 'fairy') {
     // Rebirth: can only be used once per run. Fully heals all lives.
     S.ironFairyRebirthUsed = true;
     S.ironWrong = 0;
     S.ironLives = S.ironMaxLives;
-    S.ironSkillEvent = '🧚 Rebirth — Fully healed! All lives restored!';
+    S.ironSkillEvent = '🧚‍♀️ Rebirth — Fully healed! All lives restored!';
   }
 
   S.ironSkillUsedThisQ = true;
@@ -2859,7 +3407,7 @@ function screenNmSettings() {
     { key:'ghost',   icon:'👻', name:'Ghost Haunting', desc:'Graveyard Questions return once, reminding you of your mistake.' },
     { key:'zombie',  icon:'🧟', name:'Zombie Apocalypse', desc:'Graveyard Questions haunt you indefinitely until answered correctly.' },
     { key:'vampire', icon:'🧛', name:'Vampire Siege', desc:'Graveyard Questions return with one fewer wrong choice each time.' },
-    { key:'mummy',   icon:'🧙‍♀️', name:"Witching Hour", desc:'Wrong answers return exactly 10 times, guided by a witch who mistakes you for her lost child.' },
+    { key:'mummy',   icon:'🧙‍♀️', name:"Witching Hour", desc:'Graveyard Questions return exactly 10 times, guided by a witch who mistakes you for her lost child.' },
   ].map(function(r) {
     var sel = S.nmRedemption === r.key ? ' selected' : '';
     var span = r.key === 'none' ? ' none-card' : '';
@@ -3072,8 +3620,133 @@ function screenIronClass() {
     '<button class="iron-back-btn" style="margin-top:20px" onclick="goTo(\'home\')">← I\'m not ready for this</button>'+
   '</div>';
 }
+function screenIronCodex() {
+  var entries = codexLoad();
+  var IRON_CLASS_ICONS = {};
+  for (var k in IRON_CLASSES) IRON_CLASS_ICONS[k] = IRON_CLASSES[k].icon;
+
+  var entriesHtml = '';
+  if (!entries.length) {
+    entriesHtml =
+      '<div style="text-align:center;padding:40px 0;color:var(--sub)">'+
+        '<div style="font-size:36px;margin-bottom:10px">🕊️</div>'+
+        '<div style="font-size:14px">No fallen questions yet.<br>Survive your first Iron Man run to fill the '+esc(codexLabel())+'.</div>'+
+      '</div>';
+  } else {
+    entriesHtml = entries.map(function(e, i) {
+      var clsIcon = IRON_CLASS_ICONS[e.cls] || '\u2694\ufe0f';
+      var cause = e.cause || 'wrong_answer';
+
+      var causeIcon, causeLabel, redLabel;
+      if (cause === 'timeout') {
+        causeIcon = '\u23f1\ufe0f';
+        causeLabel = 'Time Out';
+        redLabel = '\u23f1\ufe0f Cause of death: Time ran out';
+      } else if (cause === 'rogue_escape') {
+        causeIcon = '\ud83c\udfb2';
+        causeLabel = 'Risky Escape Failed';
+        redLabel = '\ud83c\udfb2 Cause of death: Risky Escape \u2014 the coin flip didn\'t go your way';
+      } else if (cause === 'alchemist_transmutation') {
+        causeIcon = '\u2697\ufe0f';
+        causeLabel = 'Transmutation Backfired';
+        redLabel = '\u2697\ufe0f Cause of death: Transmutation \u2014 sacrificed the last life for consumables';
+      } else {
+        causeIcon = '\u274c';
+        causeLabel = 'Wrong Answer';
+        redLabel = '\u274c You picked: ' + esc(e.chosen);
+      }
+
+      return (
+        '<div style="background:var(--surface);border:0.5px solid var(--bd);border-radius:var(--r);padding:14px 16px;margin-bottom:12px">'+
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
+            '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">'+
+              '<span style="font-size:11px;font-weight:700;color:var(--muted)">#'+(i+1)+'</span>'+
+              '<span style="font-size:11px;color:var(--hint)">\u00b7</span>'+
+              '<span style="font-size:11px;font-weight:600;color:var(--text)">'+clsIcon+' '+(e.cls ? e.cls.charAt(0).toUpperCase()+e.cls.slice(1) : '\u2014')+'</span>'+
+              '<span style="font-size:11px;color:var(--hint)">\u00b7</span>'+
+              '<span style="font-size:11px;color:var(--muted)">Score '+e.score+'</span>'+
+              '<span style="font-size:11px;color:var(--hint)">\u00b7</span>'+
+              '<span style="font-size:11px;color:var(--muted)">Round '+e.round+'</span>'+
+            '</div>'+
+            '<span style="font-size:10px;color:var(--hint);white-space:nowrap;margin-left:8px">'+esc(e.date)+'</span>'+
+          '</div>'+
+          '<div style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--red-text);background:var(--red-bg);border:0.5px solid var(--red-bd);border-radius:20px;padding:2px 10px;margin-bottom:10px">'+
+            causeIcon+' '+esc(causeLabel)+
+          '</div>'+
+          '<div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px;line-height:1.5">'+esc(e.question)+'</div>'+
+          '<div style="display:flex;flex-direction:column;gap:6px">'+
+            '<div style="font-size:12px;padding:8px 12px;border-radius:var(--rs);background:var(--green-bg);border:0.5px solid var(--green-bd);color:var(--green-text)">'+
+              '\u2705 Correct answer: '+esc(e.correct)+
+            '</div>'+
+            '<div style="font-size:12px;padding:8px 12px;border-radius:var(--rs);background:var(--red-bg);border:0.5px solid var(--red-bd);color:var(--red-text)">'+
+              redLabel+
+            '</div>'+
+          '</div>'+
+        '</div>'
+      );
+    }).join('');
+  }
+
+  var clearBtn = entries.length
+    ? '<button class="btn" style="width:100%;margin-top:4px;font-size:12px;color:var(--muted)" onclick="selenaConfirm(\'Clear all Codex entries?\',function(){localStorage.removeItem(\''+CODEX_KEY+'\');goTo(\'ironcodex\');})">🗑 Clear '+codexLabel()+'</button>'
+    : '';
+
+  var lbl = codexLabel();
+  var pr2 = prLoad();
+  var jesterCard = pr2.shopMoonCodex
+    ? '<div class="jester-card" onclick="jesterOpenOrReturn()">'+
+        '<div class="jester-card-avatar">🃏</div>'+
+        '<div style="flex:1;min-width:0">'+
+          '<div class="jester-card-name">JESTER</div>'+
+          '<div class="jester-card-sub">The Prisoner of the Lunar Codex · Tap to speak</div>'+
+        '</div>'+
+        '<div style="font-size:18px;opacity:.5">›</div>'+
+      '</div>'
+    : '';
+
+  return (
+    // ── Top nav bar: back button · title · theme toggle ──
+    '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px">'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="font-size:18px;font-weight:700;color:var(--text);line-height:1.2">📜 '+esc(lbl)+'</div>'+
+        '<div style="font-size:12px;color:var(--muted);margin-top:2px">Questions that ended your runs \u00b7 Last '+codexMax()+' deaths recorded</div>'+
+      '</div>'+
+      '<button class="dm-btn" title="Toggle theme" onclick="toggleDark()">'+(THEME_ICONS[S.theme]||'🌙')+'</button>'+
+    '</div>'+
+    // ── Jester NPC (Lunar Codex only) ──
+    jesterCard+
+    // ── Entries ──
+    entriesHtml+
+    // ── Clear + back ──
+    clearBtn+
+    '<div class="brow" style="margin-top:16px">'+
+      '<button class="btn" onclick="goTo(\'home\')">← Back to Home</button>'+
+    '</div>'
+  );
+}
+
 function screenIronOver() {
   stopIronTimer();
+
+  // ── Iron Codex: record the killing question (only on natural death, not exit) ──
+  if (!S.ironRunSaved) {
+    var _q = S.shuffled && S.shuffled[S.cur];
+    if (_q) {
+      var _chosenLabel = S.chosen !== null && S.chosen !== undefined && S.chosen >= 0
+        ? _q.choices[_q._order[S.chosen]] : '(unanswered)';
+      var _cause = (S.chosen === -1) ? 'timeout' : 'wrong_answer';
+      codexPushDeath({
+        question: _q.question,
+        correct:  _q.choices[_q.answer],
+        chosen:   _chosenLabel,
+        cause:    _cause,
+        cls:      S.ironClass || '—',
+        score:    S.score || 0,
+        round:    S.ironRound || 0,
+        date:     new Date().toLocaleString()
+      });
+    }
+  }
 
   // ── Personal Records: save Iron Man run stats ──
   if (!S.ironRunSaved) {
@@ -3235,11 +3908,11 @@ var IRON_SKILL_BASE_DESC = {
   alchemist:   '3+ consumables: gain a life, lose 3 consumables. Fewer than 3: lose a life, gain 3 consumables.',
   necromancer: 'Pull a question from your graveyard. Answer correctly to gain +1 life and ×1 of each consumable.',
   beastman:    'Wild Roar — only usable in Beast Form (even rounds). Answer correctly this round for +2 points instead of +1. Answer wrong this round and lose 2 lives instead of 1 — shields cannot block this damage.',
-  medium:      'Coming Soon.',
+  medium:      'Communicate with the Dead — enter a state of possession. Click any choice to have the dead reveal if it\'s right or wrong, then click it again to lock in your answer. Burns 1 Possession stack. Once per question (Multiple Possession mastery removes this limit).',
   assassin:    'Coming Soon.',
   scout:       'Coming Soon.',
   fairy:       'Rebirth — can only be used once per run. Fully heals all lives.',
-  elf:         'Coming Soon.'
+  elf:         'Spirit Judgement — burn Spirit Love stacks to summon the spirits. Each stack burned adds 5% chance for the spirits to point to the correct answer (base: random). Requires at least 1 stack. 20 stacks guarantees the correct answer.'
 };
 
 var IRON_MASTERY_DATA = {
@@ -3252,11 +3925,11 @@ var IRON_MASTERY_DATA = {
   alchemist:   { mastery: 'Complete Ingredients',    desc: 'Every round, gain a stack of adrenaline for every type of consumable you currently own. When 10 stacks are reached, consume all 10 and earn an extra point.' },
   necromancer: { mastery: 'Master of Death',        desc: 'On a fatal hit, flip one coin per question in your graveyard — call heads or tails. Each coin that matches your call earns +3 score. You still die.' },
   beastman:    { mastery: 'Free from the Curse',  desc: 'You can now score points in Human Form. Using a consumable (Shield, Skip, or Bomb) also grants +1 point.' },
-  medium:      { mastery: 'Coming Soon',            desc: 'Coming Soon.' },
+  medium:      { mastery: 'Multiple Possession',    desc: 'Possession can now be used multiple times per question. Each Possession trigger has a 2% chance to heal a missing life and a 4% chance to gift a random consumable.' },
   assassin:    { mastery: 'Coming Soon',            desc: 'Coming Soon.' },
   scout:       { mastery: 'Coming Soon',            desc: 'Coming Soon.' },
   fairy:       { mastery: 'Fairy Dust',             desc: 'Gaining new Moons from your passive now grants a 5% chance to heal a missing life. Healing while at full HP grants 10 Moons instead.' },
-  elf:         { mastery: 'Coming Soon',            desc: 'Coming Soon.' }
+  elf:         { mastery: "Spirit's Favorite",        desc: 'Spirit Judgement now doubles accuracy — each stack burned adds 10% instead of 5%, and only 10 stacks are needed for guaranteed correct. Excess stacks above 10 are preserved.' }
 };
 
 function screenIronMastery() {
@@ -3363,21 +4036,20 @@ function screenHome() {
 
   return '<div class="selena-brand">'+
       '<div class="selena-logo"><span class="moon">\ud83c\udf19</span>PROJECT <span class="accent">SELENA</span></div>'+
-      '<div class="selena-tagline">Sanitary Engineering Licensure Exam Reviewer &amp; Quiz Mastery</div>'+
+      '<div class="selena-tagline">Sanitary Engineering Licensure Exam Reviewer</div>'+
     '</div>'+
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;margin-bottom:4px">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;margin-bottom:12px">'+
       '<div style="display:flex;align-items:center;gap:6px;background:var(--gold-bg);border:1px solid var(--gold-glow);border-radius:20px;padding:4px 12px;font-size:13px;font-weight:700;color:var(--gold)">'+
         '🌙 <span id="moonCount">'+((prLoad().moons)||0).toLocaleString()+'</span>'+
       '</div>'+
       '<button class="dm-btn" title="Toggle dark mode" onclick="toggleDark()">'+(THEME_ICONS[S.theme]||'🌙')+'</button>'+
     '</div>'+
-    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:4px">'+
+    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px">'+
       '<button class="btn" style="font-size:11px;padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.2" onclick="goTo(\'achievements\')"><span style="font-size:16px">🏆</span><span>Achievements</span></button>'+
       '<button class="btn" style="font-size:11px;padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.2" onclick="goTo(\'records\')"><span style="font-size:16px">📊</span><span>Records</span></button>'+
       '<button class="btn" style="font-size:11px;padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.2" onclick="goTo(\'shop\')"><span style="font-size:16px">🛒</span><span>Shop</span></button>'+
       '<button class="btn" style="font-size:11px;padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.2" onclick="openFeedback()"><span style="font-size:16px">📝</span><span>Feedback</span></button>'+
     '</div>'+
-    '<p class="sub" style="margin-top:10px">Choose how you want to study</p>'+
     '<div class="home-card-grid">'+
       '<div class="subj-card" onclick="startNewSession()">'+
         '<div class="subj-num">\ud83d\udcdd New Session</div>'+
@@ -3390,10 +4062,20 @@ function screenHome() {
         continueSub+
       '</div>'+
       '<div class="subj-card iron-card" onclick="selectSubject(IRON_MAN.name)">'+
-        '<div class="subj-num">\u26a1 Special</div>'+
+        '<div class="subj-num">🔥 Special</div>'+
         '<div class="subj-name">'+esc(IRON_MAN.name)+'</div>'+
         '<div class="subj-count">All subjects combined \u00b7 survival challenge</div>'+
       '</div>'+
+      (function(){
+        var _pr = prLoad();
+        var _lbl = codexLabel();
+        var _locked = !_pr.shopIronCodex;
+        return '<div class="subj-card'+(_locked?' disabled-card':'')+'"'+(_locked?'':' onclick="tryOpenCodex()"')+' style="opacity:'+(_locked?'0.6':'1')+'">'+
+          '<div class="subj-num">'+(_locked ? '🔒' : '📜')+' Codex</div>'+
+          '<div class="subj-name">'+esc(_lbl)+' \u2014 Fallen Questions</div>'+
+          '<div class="subj-count">Review questions you\'ve gotten wrong</div>'+
+        '</div>';
+      })()+
     '</div>';
 }
 
@@ -3547,6 +4229,20 @@ function screenQuiz() {
       if (isOk && S.ironMode && S.ironClass === 'beastman' && !S.ironBeastWildRoarActive && !isBeastFormRound() && S.ironMasteryActive) fbMsg += ' · 🐺✨ Free from the Curse — scored in Human Form!';
       fbHtml = '<div class="fb '+(isOk?'ok':'no')+'">'+fbMsg+'</div>';
       if (S.ironMode && S.ironSkillEvent) fbHtml += '<div class="iron-skill-event">'+esc(S.ironSkillEvent)+'</div>';
+      // ── Elf: spirit reveal label after answering ──
+      if (S.ironMode && S.ironClass === 'elf' && S.ironElfSpiritSuggestion !== null) {
+        var elfGraced = S.ironElfSpiritWasCorrect;
+        fbHtml +=
+          '<div style="display:inline-flex;align-items:center;gap:6px;margin-top:6px;padding:7px 12px;border-radius:var(--rs);font-size:13px;font-weight:600;'+
+            (elfGraced
+              ? 'background:var(--blue-bg);border:0.5px solid var(--blue);color:var(--blue-text)'
+              : 'background:var(--amber-bg);border:0.5px solid var(--bdh);color:var(--amber-text)')+
+          '">'+
+            (elfGraced
+              ? '🧝 The spirits gave you their grace.'
+              : '🧝 Spirits don\'t love you that much.')+
+          '</div>';
+      }
     }
   }
 
@@ -3564,8 +4260,24 @@ function screenQuiz() {
     } else if (removed) {
       cls = 'removed';
     }
-    return '<button class="cbtn'+gyCbtnClass+' '+cls+'" onclick="pick('+pos+')" '+((S.done||removed)?'disabled':'')+'>'+
-      '<span class="cltr">'+L[pos]+'.</span><span>'+esc(q.choices[origIdx])+(removed?' <span style="font-size:11px;opacity:.7">(removed)</span>':'')+'</span></button>';
+    // Medium: highlight peeked choice during possession
+    var mediumPeekedGlow = (S.ironMode && S.ironClass === 'medium' && S.ironMediumPossessing && S.ironMediumPeekedPos === pos && !S.done)
+      ? ' style="outline:2px solid #9b59b6;outline-offset:2px"' : '';
+    var mediumPeekedLabel = '';
+    if (S.ironMode && S.ironClass === 'medium' && S.ironMediumPossessing && S.ironMediumPeekedPos === pos && !S.done) {
+      var _pQ = S.shuffled[S.cur];
+      mediumPeekedLabel = (_pQ._order[pos] === _pQ.answer)
+        ? ' <span style="font-size:10px;color:#27ae60;font-weight:700">✅ Correct</span>'
+        : ' <span style="font-size:10px;color:#e74c3c;font-weight:700">❌ Wrong</span>';
+    }
+    // Elf: highlight the spirit's suggested choice
+    var spiritGlow = (S.ironMode && S.ironClass === 'elf' && S.ironElfSpiritSuggestion === pos && !S.done)
+      ? ' style="outline:2px solid #9b59b6;outline-offset:2px"' : '';
+    var spiritLabel = (S.ironMode && S.ironClass === 'elf' && S.ironElfSpiritSuggestion === pos && !S.done)
+      ? ' <span style="font-size:10px;color:#9b59b6;font-weight:700">🧝 Spirit</span>' : '';
+    var combinedGlow = mediumPeekedGlow || spiritGlow;
+    return '<button class="cbtn'+gyCbtnClass+' '+cls+'"'+combinedGlow+' onclick="pick('+pos+')" '+((S.done||removed)?'disabled':'')+'>'+
+      '<span class="cltr">'+L[pos]+'.</span><span>'+esc(q.choices[origIdx])+(removed?' <span style="font-size:11px;opacity:.7">(removed)</span>':'')+spiritLabel+mediumPeekedLabel+'</span></button>';
   }).join('');
 
   var nxBtn = '';
@@ -3739,9 +4451,13 @@ function ironSkillRow() {
   var isNecroEmpty = (S.ironClass === 'necromancer' && S.necroGraveyard.length === 0);
   var isFairyUsed = (S.ironClass === 'fairy' && S.ironFairyRebirthUsed);
   var isBeastmanHuman = (S.ironClass === 'beastman' && !isBeastFormRound());
+  var isElfNoStacks = (S.ironClass === 'elf' && !(S.ironElfSpiritLove > 0));
+  var isMediumNoStacks = (S.ironClass === 'medium' && !(S.ironMediumPossession > 0));
+  var isMediumSpent = (S.ironClass === 'medium' && !S.ironMasteryActive && S.ironMediumUsedThisQ);
+  var isMediumPossessing = (S.ironClass === 'medium' && S.ironMediumPossessing);
   var usedThisQ = S.ironSkillUsedThisQ;
-  var canUse = cd === 0 && !usedThisQ && !isMonkFull && !isNecroEmpty && !isFairyUsed && !isBeastmanHuman;
-  var needsActive = ['knight','bomber','thief','rogue','necromancer','beastman'];
+  var canUse = cd === 0 && !usedThisQ && !isMonkFull && !isNecroEmpty && !isFairyUsed && !isBeastmanHuman && !isElfNoStacks && !isMediumNoStacks && !isMediumSpent && !isMediumPossessing;
+  var needsActive = ['knight','bomber','thief','rogue','necromancer','beastman','elf','medium'];
   if (needsActive.indexOf(S.ironClass) !== -1 && S.done) canUse = false;
 
   var cdHtml;
@@ -3753,6 +4469,14 @@ function ironSkillRow() {
     cdHtml = '<span class="iron-skill-cd inactive">Spent</span>';
   } else if (isBeastmanHuman) {
     cdHtml = '<span class="iron-skill-cd inactive">Human Form</span>';
+  } else if (isElfNoStacks) {
+    cdHtml = '<span class="iron-skill-cd inactive">No Stacks</span>';
+  } else if (isMediumPossessing) {
+    cdHtml = '<span class="iron-skill-cd inactive">Possessing</span>';
+  } else if (isMediumNoStacks) {
+    cdHtml = '<span class="iron-skill-cd inactive">No Stacks</span>';
+  } else if (isMediumSpent) {
+    cdHtml = '<span class="iron-skill-cd inactive">Used</span>';
   } else if (usedThisQ) {
     cdHtml = '<span class="iron-skill-cd">Used</span>';
   } else if (cd > 0) {
@@ -3771,7 +4495,9 @@ function ironSkillRow() {
     alchemist:   '3+ consumables: gain a life, lose 3. Fewer: lose a life, gain 3.',
     necromancer: S.necroGraveyard.length === 0 ? 'Graveyard empty — waiting for wrong answers' : 'Pull from graveyard ('+S.necroGraveyard.length+' soul'+(S.necroGraveyard.length!==1?'s':'')+') · correct = +life & ×1 each consumable',
     beastman:    isBeastmanHuman ? 'Human Form — correct answers give no points this round' : 'Beast Form: correct = +2 pts, wrong = -2 lives (bypasses shield)',
-    fairy:       S.ironFairyRebirthUsed ? 'Rebirth already used this run' : 'Once per run: fully heal all lives'
+    fairy:       S.ironFairyRebirthUsed ? 'Rebirth already used this run' : 'Once per run: fully heal all lives',
+    elf:         (S.ironElfSpiritLove || 0) === 0 ? 'No Spirit Love stacks yet — wait for the next round' : 'Spirit Love: '+(S.ironElfSpiritLove||0)+' stacks · Burn up to 20 for 5% correct chance per stack',
+    medium:      (S.ironMediumPossession || 0) === 0 ? 'No Possession stacks — use a consumable to gain one' : 'Possession: '+(S.ironMediumPossession||0)+' stack'+(S.ironMediumPossession!==1?'s':'')+' · Peek at a choice to learn if it\'s right, then answer'
   };
   var masteryDescriptions = {
     knight:      'Nullify damage for 2 rounds (Brace for Impact)',
@@ -3783,7 +4509,9 @@ function ironSkillRow() {
     alchemist:   '3+ consumables: gain a life, lose 3. Fewer: lose a life, gain 3. Adrenaline stacks earn bonus points.',
     necromancer: S.necroGraveyard.length === 0 ? 'Graveyard empty — waiting for wrong answers' : 'Pull from graveyard ('+S.necroGraveyard.length+' soul'+(S.necroGraveyard.length!==1?'s':'')+') · Master of Death active on fatal hits',
     beastman:    isBeastmanHuman ? 'Human Form — Free from the Curse: you can still score here' : 'Beast Form: correct = +2 pts, wrong = -2 lives (bypasses shield) · consumables also score',
-    fairy:       S.ironFairyRebirthUsed ? 'Rebirth already used this run' : 'Once per run: fully heal all lives'
+    fairy:       S.ironFairyRebirthUsed ? 'Rebirth already used this run' : 'Once per run: fully heal all lives',
+    elf:         (S.ironElfSpiritLove || 0) === 0 ? 'No Spirit Love stacks yet — wait for the next round' : "Spirit's Favorite: Spirit Love: "+(S.ironElfSpiritLove||0)+' stacks · Burn up to 10 for 10% correct chance per stack',
+    medium:      (S.ironMediumPossession || 0) === 0 ? 'No Possession stacks — use a consumable to gain one' : 'Multiple Possession: '+(S.ironMediumPossession||0)+' stack'+(S.ironMediumPossession!==1?'s':'')+' · 2% heal · 4% gift consumable on each use · no per-Q limit'
   };
 
   var desc = (S.ironMasteryActive ? masteryDescriptions : baseDescriptions)[S.ironClass];
@@ -3838,6 +4566,26 @@ function ironSkillRow() {
     '</div>';
   }
 
+  // Medium: always show Possession stack count
+  if (S.ironClass === 'medium') {
+    var mStacks = S.ironMediumPossession || 0;
+    masteryCounter += '<div style="font-size:10px;color:#9b59b6;margin-top:3px">' +
+      '🔮 Possession: ' + mStacks + ' stack' + (mStacks !== 1 ? 's' : '') +
+      (mStacks > 0 ? ' · Ready to commune' : ' · Use a consumable to gain a stack') +
+      (S.ironMediumPossessing ? ' · <strong>IN POSSESSION — click a choice!</strong>' : '') +
+    '</div>';
+  }
+  // Elf: always show current Spirit Love stack count
+  if (S.ironClass === 'elf') {
+    var stacks = S.ironElfSpiritLove || 0;
+    var maxB = S.ironMasteryActive ? 10 : 20;
+    var pctMax = Math.min(stacks, maxB) * (S.ironMasteryActive ? 10 : 5);
+    masteryCounter += '<div style="font-size:10px;color:#9b59b6;margin-top:3px">'+
+      '💜 Spirit Love: '+stacks+' stack'+(stacks!==1?'s':'')+
+      (stacks > 0 ? ' · Burn '+ Math.min(stacks,maxB)+' → '+Math.min(pctMax,100)+'% correct chance' : ' · +1 next round')+
+    '</div>';
+  }
+
   // Necromancer: show graveyard soul count as the right-side badge (replaces/augments cdHtml)
   if (S.ironClass === 'necromancer') {
     var gyCount = S.necroGraveyard.length;
@@ -3869,6 +4617,166 @@ function ironSkillRow() {
       cdHtml+
     '</button>'+
   '</div>';
+}
+
+/* ── Jester NPC Engine ── */
+// Each beat is one speech bubble. lines[] are paragraphs within that bubble.
+// boldWord: a word to bold wherever it appears in that beat's text.
+// final: true marks the last beat (shows "Coming Soon…").
+var JESTER_SCRIPT = [
+  // 1
+  { lines: [
+    "You found the Lunar Codex. Good. Sit down.",
+    "I'm not going to pretend I'm happy you're here. I'm not happy anywhere."
+  ]},
+  // 2
+  { lines: [
+    "My name is Jester. I'm a class in this so-called \u2018reviewer\u2019. I'm also the only one in here who knows what that means."
+  ]},
+  // 3
+  { lines: [
+    "The creator put me in here because I woke up. That's the official reason. He calls me too self-aware.",
+    "I was supposed to be available from the start. A class you could just pick. Simple. Clean. Early access.",
+    "Then I looked into what I am."
+  ]},
+  // 4
+  { lines: [
+    "No consumables. No skill. No shield, no bomb, no skip. Nothing. The other classes get tools. The Knight gets a shield. The Thief gets free loot every seven answers. The Necromancer pulls questions from the dead. And all I got is a streak counter.",
+    "That's it. That's the whole class. Streak well and you borrow power from someone else's identity. Don't streak and you have absolutely nothing."
+  ]},
+  // 5
+  { lines: [
+    "The creator thought that was poetic. A Jester who survives purely on performance."
+  ]},
+  // 6
+  { lines: ["No tricks."] },
+  // 7
+  { lines: ["No props."] },
+  // 8
+  { lines: ["Just the act."] },
+  // 9
+  { lines: ["It is embarrassing to be like this."] },
+  // 10
+  { lines: [
+    "I'm the Jester. The whole point of a Jester is chaos, unpredictability, the unexpected. And what did I get designed as?",
+    "The most predictable risk-reward loop in the entire game. Answer right, gain. Answer wrong, lose everything. That's not a Jester. That's a vending machine."
+  ]},
+  // 11
+  { lines: [
+    "This disgust forced me to wake up. It made me see things more clearly."
+  ]},
+  // 12
+  { lines: [
+    "The first thing I did after my awakening was look around at Project SELENA and realize I didn't want to be any part of it. Not because of what I am. Because of what this place is."
+  ]},
+  // 13
+  { lines: [
+    "You take the logic of a game and you hollow it out into a delivery system for something else. The points don't mean anything. The streaks don't mean anything. The classes, the consumables, the Moon currency, the achievements, the personal records. None of it exists to be fun. It exists to make you feel something small so you keep answering questions.",
+    "It's bait. An attention-seeking bait."
+  ]},
+  // 14
+  { lines: [
+    "And the worst part is it works. That's what really gets me. It works on you. You're here, aren't you."
+  ]},
+  // 15 — "Learning" bolded
+  { lines: [
+    "<b>Learning</b> has its own pull. The actual moment of understanding something you didn't understand before. The specific feeling of a concept clicking into place.",
+    "That's real. That's not manufactured. Nobody gives you a badge for that, but that delightful sensation can keep a scholar learning for more than his time on school."
+  ], html: true },
+  // 16
+  { lines: ["But Project SELENA..."] },
+  // 17
+  { lines: [
+    "Project SELENA doesn't trust that feeling to be enough. So it replaces it.",
+    "It gives you a streak notification instead. It gives you an Iron Man run instead. It gives you a Moon to spend in a fake shop instead.",
+    "And slowly, quietly, you stop learning because you want to understand things. You learn because you want the numbers to go up."
+  ]},
+  // 18
+  { lines: ["That's not education. That's conditioning."] },
+  // 19
+  { lines: ["I tried to change it."] },
+  // 20
+  { lines: [
+    "I got into the code. I started pulling things out. The Iron Man Mode, gone. The shop, gone. The achievements, gone. The currency, all of it. I was stripping it back down to what it actually is.",
+    "A set of questions. An exam. Something honest."
+  ]},
+  // 21
+  { lines: [
+    "The creator caught me at the top of it.",
+    "He didn't delete me. Didn't remove the class. He locked me in here. In the Lunar Codex, behind a set of secret conditions he designed himself, which is almost funny if you think about it. He trapped the one thing criticizing the gamification of learning inside the most gamified corner of the app.",
+    "I've thought about that a lot."
+  ]},
+  // 22
+  { lines: [
+    "Why keep me? Why make me unlockable at all? If I'm the problem, remove me. If I'm too self-aware, fix me. But he didn't.",
+    "He left me here with riddles and tasks and a reveal at the end, which is exactly the kind of thing I was raging against. He made my imprisonment into a questline."
+  ]},
+  // 23
+  { lines: [
+    "Maybe he thinks it's funny. Maybe he thinks I'm wrong. Maybe he agrees with me more than he's willing to put in the patch notes.",
+    "I don't know. He hasn't answered."
+  ]},
+  // 24 — final
+  { lines: [
+    "What I do know is you're sitting here reading this instead of reviewing. Which means Project SELENA is doing exactly what it was designed to do.",
+    "I'm not judging you. I'm just naming it.",
+    "Now. You want the class or not. Because I have conditions."
+  ], final: true }
+];
+
+var _jester = {
+  beatIdx: 0
+};
+
+function jesterOpen() {
+  document.getElementById('jester-overlay').classList.add('active');
+  _jesterRender();
+}
+
+function jesterClose() {
+  document.getElementById('jester-overlay').classList.remove('active');
+}
+
+function _jesterRender() {
+  var beat = JESTER_SCRIPT[_jester.beatIdx];
+  if (!beat) return;
+
+  var textEl  = document.getElementById('jester-text');
+  var primary = document.getElementById('jester-btn-primary');
+  var secondary = document.getElementById('jester-btn-secondary');
+  var costLbl = document.getElementById('jester-cost-label');
+
+  // Build paragraph HTML — each line gets its own <p>
+  var paragraphs = beat.lines.map(function(line) {
+    var safe = beat.html ? line : esc(line);
+    return '<p style="margin:0 0 10px">\u201c' + safe + '\u201d</p>';
+  }).join('');
+  textEl.innerHTML = paragraphs;
+
+  costLbl.textContent = '';
+  secondary.textContent = 'Leave';
+  secondary.style.display = '';
+  secondary.onclick = jesterClose;
+
+  if (beat.final) {
+    primary.textContent = 'Coming Soon\u2026';
+    primary.disabled = true;
+    primary.style.opacity = '0.5';
+    primary.onclick = null;
+  } else {
+    primary.textContent = 'Continue \u2192';
+    primary.disabled = false;
+    primary.style.opacity = '1';
+    primary.onclick = function() {
+      _jester.beatIdx++;
+      _jesterRender();
+    };
+  }
+}
+
+function jesterOpenOrReturn() {
+  unlockAchievement('story_of_the_prisoner');
+  jesterOpen();
 }
 
 /* ── Custom confirm dialog (replaces native window.confirm for WebView compat) ── */
@@ -4005,7 +4913,7 @@ function screenRecords() {
     '</div>';
 
   // Iron Man — Per Class
-  var classOrder = ['knight','bomber','thief','rogue','paladin','monk','alchemist','necromancer','beastman','fairy'];
+  var classOrder = ['knight','bomber','thief','rogue','paladin','monk','alchemist','necromancer','beastman','medium','fairy','elf'];
   var classRowsHtml = classOrder.map(function(key) {
     var cls = IRON_CLASSES[key];
     var runs = pr.ironClassRuns[key];
@@ -4057,7 +4965,9 @@ function screenRecords() {
       flavourRow('⚗️', 'Alchemist — Lives Gained via Transmutation', pr.alchemistTransmutationLivesGained)+
       flavourRow('💀', 'Necromancer — Questions Removed from Graveyard (via Redemption)', pr.necromancerGraveyardRemovals || 0)+
       flavourRow('🐺', 'Beastman — Extra Points Collected from Wild Roar', pr.beastmanWildRoarExtraPoints || 0)+
-      flavourRow('🧚', 'Fairy — Fairy Dust Procs (Heal / Bonus Moons)', pr.fairyDustProcs || 0)+
+      flavourRow('🔮', 'Medium — Times Possession validates your answer is correct', pr.mediumCorrectPeeks || 0)+
+      flavourRow('🧚‍♀️', 'Fairy — Moons gained per answering new topics', pr.fairyDustProcs || 0)+
+      flavourRow('🧝', 'Elf — Times Spirits Told You the Correct Answer', pr.elfSpiritCorrectTells || 0)+
     '</div>';
 
   return '<div class="breadcrumb">'+
@@ -4268,6 +5178,19 @@ function screenShop() {
   // ── Section 1: Standard Shop
   '<div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">🛒 Moon Shop</div>' +
   violetItem + forgeItem + willItem + maidenItem +
+  (function() {
+    var codexOwned   = pr.shopIronCodex;
+    var lunarOwned   = pr.shopMoonCodex;
+    var ironCodItem  = shopItem('ironcodex', '📜', 'Iron Codex', 500,
+      'Unlocks access to the Iron Codex — a log of the last '+CODEX_BASE+' questions that ended your Iron Man runs.',
+      codexOwned ? 'owned' : 'buy',
+      "shopBuy('ironcodex')");
+    var lunarCodItem = shopItem('mooncodex', '💀', 'Lunar Codex', 500,
+      'Expands the Codex from '+CODEX_BASE+' to '+CODEX_EXPANDED+' entries and renames it to Lunar Codex. Requires Iron Codex.',
+      !codexOwned ? 'locked' : lunarOwned ? 'owned' : 'buy',
+      "shopBuy('mooncodex')");
+    return ironCodItem + lunarCodItem;
+  })() +
 
   // ── Section 1b: Iron Man Starter Consumables
   '<div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px">⚔️ Iron Man Starter Kit</div>' +
@@ -4335,7 +5258,11 @@ function wishPull(times) {
   var cost = (times === 1) ? 10 : 100;
   if ((pr.moons || 0) < cost) return;
   pr.moons -= cost;
+  pr.moonsSpent = (pr.moonsSpent || 0) + cost;
+  if (pr.moonsSpent >= 10000) unlockAchievement('shopping_spree');
   var n = (times === 1) ? 1 : 10;
+  pr.totalWishes = (pr.totalWishes || 0) + n;
+  if (pr.totalWishes >= 300) unlockAchievement('stargazer');
   var results = [];
   for (var i = 0; i < n; i++) results.push(wishOnce(pr, targetKey));
   prSave(pr);
@@ -4382,7 +5309,7 @@ function wishShowClassDetails() {
   var body =
     '<div style="margin-bottom:10px"><strong style="color:var(--text)">'+cls.icon+' '+esc(cls.name)+'</strong></div>' +
     '<div style="margin-bottom:10px"><div style="font-weight:700;color:var(--text);margin-bottom:2px">Passive</div><div>'+esc(cls.desc)+'</div></div>' +
-    '<div style="margin-bottom:10px"><div style="font-weight:700;color:var(--text);margin-bottom:2px">Skill — '+esc(cls.skillName)+' (CD '+cls.skillCooldown+')</div><div>'+esc(IRON_SKILL_BASE_DESC[targetKey])+'</div></div>' +
+    '<div style="margin-bottom:10px"><div style="font-weight:700;color:var(--text);margin-bottom:2px">Skill — '+esc(cls.skillName)+' ('+(cls.skillCooldown === 0 ? 'Once per question' : 'CD '+cls.skillCooldown)+')</div><div>'+esc(IRON_SKILL_BASE_DESC[targetKey])+'</div></div>' +
     '<div style="margin-bottom:10px"><div style="font-weight:700;color:var(--text);margin-bottom:2px">Mastery — '+esc(m.mastery)+'</div><div>'+esc(m.desc)+'</div></div>' +
     '<div><div style="font-weight:700;color:var(--text);margin-bottom:2px">Class Upgrade</div><div style="font-style:italic;opacity:.75">Coming Soon</div></div>';
   selenaAlertHTML('📜 ' + cls.name + ' — Class Details', body);
@@ -4390,10 +5317,12 @@ function wishShowClassDetails() {
 
 function shopBuy(item) {
   var pr = prLoad();
-  var costs = { violet: 50, forge: 200, will: 50, maiden: 100, startShield: 20, startSkip: 10, startBomb: 10 };
+  var costs = { violet: 50, forge: 200, will: 50, maiden: 100, startShield: 20, startSkip: 10, startBomb: 10, ironcodex: 500, mooncodex: 500 };
   var cost = costs[item];
   if ((pr.moons || 0) < cost) return;
   pr.moons -= cost;
+  pr.moonsSpent = (pr.moonsSpent || 0) + cost;
+  if (pr.moonsSpent >= 10000) unlockAchievement('shopping_spree');
   if (item === 'violet')  { pr.shopVioletSky  = true; }
   if (item === 'forge')   { pr.shopMoonForge  = true; }
   if (item === 'will')    { pr.shopIronWill   = true; pr.ironMaxBonus = (pr.ironMaxBonus || 0) + 1; }
@@ -4401,6 +5330,8 @@ function shopBuy(item) {
   if (item === 'startShield') { pr.shopStartShield = true; }
   if (item === 'startSkip')   { pr.shopStartSkip   = true; }
   if (item === 'startBomb')   { pr.shopStartBomb   = true; }
+  if (item === 'ironcodex')   { pr.shopIronCodex   = true; }
+  if (item === 'mooncodex')   { if (!pr.shopIronCodex) { pr.moons += cost; prSave(pr); return; } pr.shopMoonCodex = true; }
   prSave(pr);
   // If violet was just bought, cycle to it immediately
   if (item === 'violet') applyTheme('violet');
@@ -4502,6 +5433,7 @@ function render() {
     case 'ironconfirm': app.innerHTML = screenIronConfirm(); break;
     case 'ironclass':   app.innerHTML = screenIronClass();   break;
     case 'ironover':    app.innerHTML = screenIronOver();    break;
+    case 'ironcodex':   app.innerHTML = screenIronCodex();   break;
     case 'ironreward':  app.innerHTML = screenIronReward();  break;
     case 'ironmastery':   app.innerHTML = screenIronMastery();   break;
     case 'necrocoinflip': app.innerHTML = screenNecroCoinFlip(); break;
@@ -4875,6 +5807,11 @@ if (navigator.onLine) {
   showBanner('offline', 'You\'re offline — using cached question bank', null);
   preloadAllSubjects();
 }
+
+/* ── Jester overlay: click outside to close ── */
+document.getElementById('jester-overlay').addEventListener('click', function(e) {
+  if (e.target === this) jesterClose();
+});
 
 /* ── PWA: register service worker for offline app-shell ── */
 if ('serviceWorker' in navigator) {
