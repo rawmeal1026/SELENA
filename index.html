@@ -1154,7 +1154,7 @@ var IRON_CLASSES = {
   necromancer: { name: 'Necromancer', icon: '\ud83d\udc80',     desc: 'Wrong answers are stored in your graveyard.', skillName: 'Redemption',         skillCooldown: 40 },
   beastman:    { name: 'Beastman',    icon: '\ud83d\udc3a',     desc: 'Odd rounds: Human Form — correct answers give no points. Even rounds: Beast Form — your skill is available.', skillName: 'Wild Roar', skillCooldown: 0 },
   medium:      { name: 'Medium',      icon: '\ud83d\udd2e',     desc: 'Using consumables gives you a Possession stack. Use your skill to peek at any choice to learn if it\'s correct before you answer.', skillName: 'Communicate with the Dead', skillCooldown: 0 },
-  assassin:    { name: 'Assassin',    icon: '\ud83d\udde1\ufe0f', desc: 'Coming Soon.', skillName: '???', skillCooldown: 0 },
+  assassin:    { name: 'Assassin',    icon: '\ud83d\udde1\ufe0f', desc: 'Correct answers stack Exposure on their topic. Stab a topic to permanently remove one wrong choice from all its questions.', skillName: 'Stab', skillCooldown: 0 },
   scout:       { name: 'Scout',       icon: '\ud83c\udff9',     desc: 'Coming Soon.', skillName: '???', skillCooldown: 0 },
   fairy:       { name: 'Fairy',       icon: '\ud83e\uddda',     desc: 'Get 2 Moons for every unique topic answered per run.', skillName: 'Rebirth',           skillCooldown: 0 },
   elf:         { name: 'Elf',         icon: '\ud83e\udddd',     desc: 'Each round gives you a stack of Spirit Love. Summon the spirits to answer for you — burn stacks for a better chance at the truth.', skillName: 'Spirit Judgement', skillCooldown: 0 }
@@ -1179,7 +1179,7 @@ var WISH_ENABLED = {
   elf:         true,
   beastman:    true,
   medium:      true,
-  assassin:    false,
+  assassin:    true,
   scout:       false
 };
 function getWishTargetClass() {
@@ -1248,9 +1248,9 @@ var PR_DEFAULTS = {
   ironTotalBombsUsed: 0,
 
   // Iron Man — Per Class
-  ironClassRuns:    { knight:0, bomber:0, thief:0, rogue:0, paladin:0, monk:0, alchemist:0, necromancer:0, beastman:0, medium:0, fairy:0, elf:0 },
-  ironClassBest:    { knight:0, bomber:0, thief:0, rogue:0, paladin:0, monk:0, alchemist:0, necromancer:0, beastman:0, medium:0, fairy:0, elf:0 },
-  ironClassMastery: { knight:false, bomber:false, thief:false, rogue:false, paladin:false, monk:false, alchemist:false, necromancer:false, beastman:false, medium:false, fairy:false, elf:false },
+  ironClassRuns:    { knight:0, bomber:0, thief:0, rogue:0, paladin:0, monk:0, alchemist:0, necromancer:0, beastman:0, medium:0, assassin:0, fairy:0, elf:0 },
+  ironClassBest:    { knight:0, bomber:0, thief:0, rogue:0, paladin:0, monk:0, alchemist:0, necromancer:0, beastman:0, medium:0, assassin:0, fairy:0, elf:0 },
+  ironClassMastery: { knight:false, bomber:false, thief:false, rogue:false, paladin:false, monk:false, alchemist:false, necromancer:false, beastman:false, medium:false, assassin:false, fairy:false, elf:false },
 
   // Iron Man — Class Gameplay Stats
   knightRoundsShieldActive: 0,
@@ -1266,6 +1266,8 @@ var PR_DEFAULTS = {
   fairyDustProcs: 0,
   elfSpiritLoveSpent: 0,
   elfSpiritCorrectTells: 0,
+  assassinSuccessfulStabs: 0,
+  assassinSecondStabs: 0,
   moonsSpent: 0,
   totalWishes: 0,
 };
@@ -1402,6 +1404,10 @@ var ACHIEVEMENTS = [
     desc:'As Beastman, earn 4 or more points in a single question. Combine Wild Roar (+2), correct answer scoring, and consumables with Free from the Curse mastery to reach the threshold.' },
   { id:'call_for_validation', icon:'🔮', cat:'Class', title:'Call for Validation',
     desc:'As Medium, use Possession 3 or more times in a single run and have every single peek reveal that your choice is correct.' },
+  { id:'contract_fulfilled', icon:'🗡️', cat:'Class', title:'Contract Fulfilled',
+    desc:'As Assassin, successfully stab 3 different topics in one Iron Man run.' },
+  { id:'lucky_hitman', icon:'🗡️', cat:'Class', title:'Lucky Hitman',
+    desc:'As Assassin, successfully stab 2 different topics by burning only 1 stack of Exposure each, in one Iron Man run.' },
   { id:'winker_bell',     icon:'🧚‍♀️', cat:'Class', title:'Winker Bell',
     desc:'As Fairy, get 30 Moons in one Iron Man run.' },
   { id:'better_off_alone', icon:'🧝', cat:'Class', title:'Better off Alone',
@@ -1975,6 +1981,12 @@ function startQuiz() {
     S.ironMediumCorrectPeeks = 0;
     S.ironMediumTotalPeeks = 0;
     S.ironMediumAnyWrongPeek = false;
+    // Assassin state
+    S.ironAssassinExposure = {};      // topic → exposure stack count
+    S.ironAssassinStabbed = {};       // topic → number of successful stabs (1 or 2 with mastery)
+    S.ironAssassinStabResult = null;  // null | 'success' | 'fail' for current Q feedback
+    S.ironAssassinSecondStabsThisRun = 0;
+    S.ironAssassinLuckyStabsThisRun = 0; // counts successful stabs where exposure burned was exactly 1
   }
   S.skipped = false;
 
@@ -2541,6 +2553,11 @@ function pick(displayIdx) {
         S.ironThiefStolenThisRun = (S.ironThiefStolenThisRun || 0) + (IRON_CONSUMABLE_INFO[S.ironThiefGrantType] ? IRON_CONSUMABLE_INFO[S.ironThiefGrantType].qty : 0);
         if (S.ironThiefStolenThisRun >= 4) unlockAchievement('sleight_of_hand');
       }
+      // Assassin passive: correct answer → +1 Exposure on current topic
+      if (S.ironClass === 'assassin' && q.topic) {
+        S.ironAssassinExposure[q.topic] = (S.ironAssassinExposure[q.topic] || 0) + 1;
+        showBanner('synced', '🗡️ Exposure — ' + esc(q.topic) + ': ' + S.ironAssassinExposure[q.topic] + ' stack' + (S.ironAssassinExposure[q.topic] !== 1 ? 's' : ''), 1600);
+      }
       // Check for mastery milestone (15 points)
       checkIronMastery();
     }
@@ -2769,6 +2786,7 @@ function advanceQuestion() {
     S.ironSkillUsedThisQ = false; S.ironSkillEvent = null;
     S.ironMediumPossessing = false; S.ironMediumPeekedPos = null; S.ironMediumUsedThisQ = false;
     S.ironRogueSpeedBonus = false; S.ironTimeAtPick = 30;
+    S.ironAssassinStabResult = null;
     // If next question is not a redemption question, clear the flag so stale state can't cause issues
     if (S.ironMode && S.ironClass === 'necromancer' && S.necroRedemptionActive) {
       var _nextQ = S.shuffled[S.cur];
@@ -3063,6 +3081,122 @@ function mediumPeekChoice(displayIdx) {
   }
 }
 
+/* ─────────────────────────────────────────────
+   ASSASSIN: STAB
+───────────────────────────────────────────── */
+function useAssassinStab() {
+  if (!S.ironMode || S.ironClass !== 'assassin') return;
+  if (S.done || S.ironSkillUsedThisQ) return;
+
+  var q = S.shuffled[S.cur];
+  var topic = q ? q.topic : null;
+  if (!topic) return;
+
+  var stabbedCount = S.ironAssassinStabbed[topic] || 0;
+  var maxStabs = S.ironMasteryActive ? 2 : 1;
+  if (stabbedCount >= maxStabs) {
+    S.ironSkillEvent = '🗡️ Stab — ' + esc(topic) + ' has already been stabbed to its limit.';
+    S.ironSkillUsedThisQ = true;
+    render();
+    return;
+  }
+
+  var exposure = S.ironAssassinExposure[topic] || 0;
+  if (exposure === 0) {
+    S.ironSkillEvent = '🗡️ Stab — No Exposure stacks on this topic yet. Answer more questions from it correctly first.';
+    S.ironSkillUsedThisQ = true;
+    render();
+    return;
+  }
+
+  // Determine stab chance
+  var isSecondStab = (stabbedCount === 1);
+  var pctPerStack = isSecondStab ? 0.05 : 0.25;
+  var stabChance = Math.min(exposure * pctPerStack, 1);
+
+  // Consume ALL exposure stacks for this topic
+  S.ironAssassinExposure[topic] = 0;
+
+  var success = Math.random() < stabChance;
+  S.ironSkillUsedThisQ = true;
+  S.ironAssassinStabResult = success ? 'success' : 'fail';
+
+  if (success) {
+    S.ironAssassinStabbed[topic] = stabbedCount + 1;
+
+    // Check achievement: 3 different topics stabbed
+    var distinctStabs = 0;
+    for (var sk in S.ironAssassinStabbed) { if (S.ironAssassinStabbed[sk] >= 1) distinctStabs++; }
+    if (distinctStabs >= 3) unlockAchievement('contract_fulfilled');
+    // Check achievement: Lucky Hitman — stab succeeded burning only 1 stack
+    if (exposure === 1) {
+      S.ironAssassinLuckyStabsThisRun = (S.ironAssassinLuckyStabsThisRun || 0) + 1;
+      if (S.ironAssassinLuckyStabsThisRun >= 2) unlockAchievement('lucky_hitman');
+    }
+    prRecord(function(pr){ pr.assassinSuccessfulStabs = (pr.assassinSuccessfulStabs || 0) + 1; });
+    if (isSecondStab) prRecord(function(pr){ pr.assassinSecondStabs = (pr.assassinSecondStabs || 0) + 1; });
+
+    // Apply: for every question in the run belonging to this topic,
+    // permanently remove one wrong-answer choice from its _order.
+    // We remove the last wrong choice in display order (arbitrary but consistent).
+    for (var qi = 0; qi < S.shuffled.length; qi++) {
+      var tq = S.shuffled[qi];
+      if (!tq || tq.topic !== topic) continue;
+      if (!tq._order || tq._order.length <= 1) continue;
+      // Find a wrong-answer position among remaining _order entries
+      var removedPos = -1;
+      for (var pi = tq._order.length - 1; pi >= 0; pi--) {
+        if (tq._order[pi] !== tq.answer) { removedPos = pi; break; }
+      }
+      if (removedPos === -1) continue; // only the correct answer remains
+      tq._order.splice(removedPos, 1);
+      // For the current question: ironRemoved is keyed by display index.
+      // After splice, the old removedPos no longer exists in _order, so we
+      // simply clear ironRemoved entirely and re-mark only positions that are
+      // genuinely absent from _order (i.e. were removed by bombs earlier).
+      // The spliced wrong choice is gone from _order itself — no entry needed.
+      if (qi === S.cur) {
+        // Rebuild ironRemoved: mark display indices whose original choice index
+        // is not present in the current _order (bomb-removed choices).
+        var newRemoved = {};
+        var originalChoiceCount = tq.choices.length;
+        for (var oi = 0; oi < originalChoiceCount; oi++) {
+          if (tq._order.indexOf(oi) === -1) {
+            // This original index is gone — find what display slot it occupied
+            // before splice. Since it's already gone from _order we can't find
+            // its new slot; instead keep ironRemoved synced by display position.
+          }
+        }
+        // Simpler: ironRemoved entries that existed BEFORE this stab pointed to
+        // display positions in the OLD _order. The splice shifted positions at
+        // and after removedPos by -1. Remap them.
+        var remapped = {};
+        for (var rk in S.ironRemoved) {
+          if (!S.ironRemoved[rk]) continue;
+          var oldPos = parseInt(rk, 10);
+          if (oldPos === removedPos) continue; // this was the spliced slot — gone
+          var newPos = oldPos > removedPos ? oldPos - 1 : oldPos;
+          remapped[newPos] = true;
+        }
+        S.ironRemoved = remapped;
+      }
+    }
+
+    // Mastery second-stab bonus: +1 life
+    if (isSecondStab) {
+      S.ironAssassinSecondStabsThisRun = (S.ironAssassinSecondStabsThisRun || 0) + 1;
+      if (S.ironWrong > 0) { S.ironWrong--; S.ironLives = S.ironMaxLives - S.ironWrong; }
+      S.ironSkillEvent = '🗡️ Stab — SECOND STAB SUCCESS! ' + esc(topic) + ' stabbed again — one less wrong choice for all its questions! +1 Life! (burned ' + exposure + ' stack' + (exposure !== 1 ? 's' : '') + ' at ' + Math.round(stabChance * 100) + '% chance)';
+    } else {
+      S.ironSkillEvent = '🗡️ Stab — SUCCESS! ' + esc(topic) + ' exposed — one less wrong choice for all its questions! (burned ' + exposure + ' stack' + (exposure !== 1 ? 's' : '') + ' at ' + Math.round(stabChance * 100) + '% chance)';
+    }
+  } else {
+    S.ironSkillEvent = '🗡️ Stab — FAILED. The target evaded. Burned ' + exposure + ' stack' + (exposure !== 1 ? 's' : '') + ' (' + Math.round(stabChance * 100) + '% chance). Keep building Exposure.';
+  }
+
+  render();
+}
+
 function useClassSkill() {
   if (!S.ironMode || !S.ironClass) return;
   if (S.done) return;
@@ -3071,6 +3205,8 @@ function useClassSkill() {
   if (S.ironClass === 'fairy' && S.ironFairyRebirthUsed) return;
   // Elf uses its own modal flow
   if (S.ironClass === 'elf') { useElfSpiritJudgement(); return; }
+  // Assassin uses its own flow
+  if (S.ironClass === 'assassin') { useAssassinStab(); return; }
   var cls = S.ironClass;
   var cd = IRON_CLASSES[cls].skillCooldown;
 
@@ -3909,7 +4045,7 @@ var IRON_SKILL_BASE_DESC = {
   necromancer: 'Pull a question from your graveyard. Answer correctly to gain +1 life and ×1 of each consumable.',
   beastman:    'Wild Roar — only usable in Beast Form (even rounds). Answer correctly this round for +2 points instead of +1. Answer wrong this round and lose 2 lives instead of 1 — shields cannot block this damage.',
   medium:      'Communicate with the Dead — enter a state of possession. Click any choice to have the dead reveal if it\'s right or wrong, then click it again to lock in your answer. Burns 1 Possession stack. Once per question (Multiple Possession mastery removes this limit).',
-  assassin:    'Coming Soon.',
+  assassin:    'Stab — burn all Exposure stacks on the current topic. Each stack gives 25% stab chance. On success, all questions in the topic permanently lose one wrong choice. Each topic can only be stabbed once. Usable once per question, before answering.',
   scout:       'Coming Soon.',
   fairy:       'Rebirth — can only be used once per run. Fully heals all lives.',
   elf:         'Spirit Judgement — burn Spirit Love stacks to summon the spirits. Each stack burned adds 5% chance for the spirits to point to the correct answer (base: random). Requires at least 1 stack. 20 stacks guarantees the correct answer.'
@@ -3926,7 +4062,7 @@ var IRON_MASTERY_DATA = {
   necromancer: { mastery: 'Master of Death',        desc: 'On a fatal hit, flip one coin per question in your graveyard — call heads or tails. Each coin that matches your call earns +3 score. You still die.' },
   beastman:    { mastery: 'Free from the Curse',  desc: 'You can now score points in Human Form. Using a consumable (Shield, Skip, or Bomb) also grants +1 point.' },
   medium:      { mastery: 'Multiple Possession',    desc: 'Possession can now be used multiple times per question. Each Possession trigger has a 2% chance to heal a missing life and a 4% chance to gift a random consumable.' },
-  assassin:    { mastery: 'Coming Soon',            desc: 'Coming Soon.' },
+  assassin:    { mastery: 'Bounty Collection',    desc: 'Topics can now be stabbed twice. The second stab chance is only 5% per Exposure stack burned. Each successful second stab grants +1 life.' },
   scout:       { mastery: 'Coming Soon',            desc: 'Coming Soon.' },
   fairy:       { mastery: 'Fairy Dust',             desc: 'Gaining new Moons from your passive now grants a 5% chance to heal a missing life. Healing while at full HP grants 10 Moons instead.' },
   elf:         { mastery: "Spirit's Favorite",        desc: 'Spirit Judgement now doubles accuracy — each stack burned adds 10% instead of 5%, and only 10 stacks are needed for guaranteed correct. Excess stacks above 10 are preserved.' }
@@ -4225,6 +4361,9 @@ function screenQuiz() {
       if (!isOk && S.ironMode && S.ironClass === 'necromancer' && q._necroRedemption) fbMsg += ' · 💀 Soul lingers — redemption failed';
       if (isOk && S.ironMode && S.ironClass === 'beastman' && S.ironBeastWildRoarActive) fbMsg += ' · 🐺 Wild Roar — Double score! (+2 points)';
       if (!isOk && S.ironMode && S.ironClass === 'beastman' && S.ironBeastWildRoarActive) fbMsg += ' · 🐺 Wild Roar — Lost 2 lives! Shields offered no protection.';
+      if (isOk && S.ironMode && S.ironClass === 'assassin' && S.ironAssassinStabResult === 'success') fbMsg += ' · 🗡️ Stab landed! −1 wrong choice on all ' + esc(q.topic) + ' questions!';
+      if (isOk && S.ironMode && S.ironClass === 'assassin' && S.ironAssassinStabResult === 'fail') fbMsg += ' · 🗡️ Stab missed — exposure burned';
+      if (isOk && S.ironMode && S.ironClass === 'assassin') fbMsg += ' · 🗡️ Exposure: ' + esc(q.topic) + ' +1 stack (' + (S.ironAssassinExposure[q.topic] || 0) + ' total)';
       if (isOk && S.ironMode && S.ironClass === 'beastman' && !S.ironBeastWildRoarActive && !isBeastFormRound() && !S.ironMasteryActive) fbMsg += ' · 🧍 Human Form — no points this round';
       if (isOk && S.ironMode && S.ironClass === 'beastman' && !S.ironBeastWildRoarActive && !isBeastFormRound() && S.ironMasteryActive) fbMsg += ' · 🐺✨ Free from the Curse — scored in Human Form!';
       fbHtml = '<div class="fb '+(isOk?'ok':'no')+'">'+fbMsg+'</div>';
@@ -4455,9 +4594,18 @@ function ironSkillRow() {
   var isMediumNoStacks = (S.ironClass === 'medium' && !(S.ironMediumPossession > 0));
   var isMediumSpent = (S.ironClass === 'medium' && !S.ironMasteryActive && S.ironMediumUsedThisQ);
   var isMediumPossessing = (S.ironClass === 'medium' && S.ironMediumPossessing);
+  var isAssassinDone = (S.ironClass === 'assassin' && S.done);
+  var isAssassinNoExposure = (S.ironClass === 'assassin' && !S.done && !S.ironSkillUsedThisQ && (function(){
+    var q = S.shuffled[S.cur]; return !q || !q.topic || !(S.ironAssassinExposure[q.topic] > 0);
+  })());
+  var isAssassinMaxStabbed = (S.ironClass === 'assassin' && !S.done && !S.ironSkillUsedThisQ && (function(){
+    var q = S.shuffled[S.cur]; if (!q || !q.topic) return false;
+    var maxStabs = S.ironMasteryActive ? 2 : 1;
+    return (S.ironAssassinStabbed[q.topic] || 0) >= maxStabs;
+  })());
   var usedThisQ = S.ironSkillUsedThisQ;
-  var canUse = cd === 0 && !usedThisQ && !isMonkFull && !isNecroEmpty && !isFairyUsed && !isBeastmanHuman && !isElfNoStacks && !isMediumNoStacks && !isMediumSpent && !isMediumPossessing;
-  var needsActive = ['knight','bomber','thief','rogue','necromancer','beastman','elf','medium'];
+  var canUse = cd === 0 && !usedThisQ && !isMonkFull && !isNecroEmpty && !isFairyUsed && !isBeastmanHuman && !isElfNoStacks && !isMediumNoStacks && !isMediumSpent && !isMediumPossessing && !isAssassinDone && !isAssassinNoExposure && !isAssassinMaxStabbed;
+  var needsActive = ['knight','bomber','thief','rogue','necromancer','beastman','elf','medium','assassin'];
   if (needsActive.indexOf(S.ironClass) !== -1 && S.done) canUse = false;
 
   var cdHtml;
@@ -4477,6 +4625,10 @@ function ironSkillRow() {
     cdHtml = '<span class="iron-skill-cd inactive">No Stacks</span>';
   } else if (isMediumSpent) {
     cdHtml = '<span class="iron-skill-cd inactive">Used</span>';
+  } else if (isAssassinNoExposure) {
+    cdHtml = '<span class="iron-skill-cd inactive">No Exposure</span>';
+  } else if (isAssassinMaxStabbed) {
+    cdHtml = '<span class="iron-skill-cd inactive">Max Stabs</span>';
   } else if (usedThisQ) {
     cdHtml = '<span class="iron-skill-cd">Used</span>';
   } else if (cd > 0) {
@@ -4497,7 +4649,17 @@ function ironSkillRow() {
     beastman:    isBeastmanHuman ? 'Human Form — correct answers give no points this round' : 'Beast Form: correct = +2 pts, wrong = -2 lives (bypasses shield)',
     fairy:       S.ironFairyRebirthUsed ? 'Rebirth already used this run' : 'Once per run: fully heal all lives',
     elf:         (S.ironElfSpiritLove || 0) === 0 ? 'No Spirit Love stacks yet — wait for the next round' : 'Spirit Love: '+(S.ironElfSpiritLove||0)+' stacks · Burn up to 20 for 5% correct chance per stack',
-    medium:      (S.ironMediumPossession || 0) === 0 ? 'No Possession stacks — use a consumable to gain one' : 'Possession: '+(S.ironMediumPossession||0)+' stack'+(S.ironMediumPossession!==1?'s':'')+' · Peek at a choice to learn if it\'s right, then answer'
+    medium:      (S.ironMediumPossession || 0) === 0 ? 'No Possession stacks — use a consumable to gain one' : 'Possession: '+(S.ironMediumPossession||0)+' stack'+(S.ironMediumPossession!==1?'s':'')+' · Peek at a choice to learn if it\'s right, then answer',
+    assassin:    (function(){
+      var q = S.shuffled[S.cur];
+      var t = q && q.topic;
+      if (!t) return 'No topic — cannot stab';
+      var exp = S.ironAssassinExposure[t] || 0;
+      var stabs = S.ironAssassinStabbed[t] || 0;
+      if (stabs >= 1) return esc(t) + ': already stabbed · ' + (exp > 0 ? exp + ' stack' + (exp!==1?'s':'') + ' built for second stab (5%/stack with mastery)' : 'build Exposure for second stab');
+      if (exp === 0) return esc(t) + ': no Exposure — answer correctly to build stacks (25%/stack stab chance)';
+      return esc(t) + ': ' + exp + ' stack' + (exp!==1?'s':'') + ' → ' + Math.min(exp*25,100) + '% stab chance · burns all stacks on use';
+    })()
   };
   var masteryDescriptions = {
     knight:      'Nullify damage for 2 rounds (Brace for Impact)',
@@ -4511,7 +4673,21 @@ function ironSkillRow() {
     beastman:    isBeastmanHuman ? 'Human Form — Free from the Curse: you can still score here' : 'Beast Form: correct = +2 pts, wrong = -2 lives (bypasses shield) · consumables also score',
     fairy:       S.ironFairyRebirthUsed ? 'Rebirth already used this run' : 'Once per run: fully heal all lives',
     elf:         (S.ironElfSpiritLove || 0) === 0 ? 'No Spirit Love stacks yet — wait for the next round' : "Spirit's Favorite: Spirit Love: "+(S.ironElfSpiritLove||0)+' stacks · Burn up to 10 for 10% correct chance per stack',
-    medium:      (S.ironMediumPossession || 0) === 0 ? 'No Possession stacks — use a consumable to gain one' : 'Multiple Possession: '+(S.ironMediumPossession||0)+' stack'+(S.ironMediumPossession!==1?'s':'')+' · 2% heal · 4% gift consumable on each use · no per-Q limit'
+    medium:      (S.ironMediumPossession || 0) === 0 ? 'No Possession stacks — use a consumable to gain one' : 'Multiple Possession: '+(S.ironMediumPossession||0)+' stack'+(S.ironMediumPossession!==1?'s':'')+' · 2% heal · 4% gift consumable on each use · no per-Q limit',
+    assassin:    (function(){
+      var q = S.shuffled[S.cur];
+      var t = q && q.topic;
+      if (!t) return 'No topic — cannot stab';
+      var exp = S.ironAssassinExposure[t] || 0;
+      var stabs = S.ironAssassinStabbed[t] || 0;
+      if (stabs >= 2) return esc(t) + ': max stabs reached (2/2)';
+      if (stabs === 1) {
+        if (exp === 0) return esc(t) + ': stabbed once · build Exposure for second stab (5%/stack)';
+        return esc(t) + ': stabbed once · ' + exp + ' stack' + (exp!==1?'s':'') + ' → ' + Math.min(exp*5,100) + '% second stab chance · success = +1 life';
+      }
+      if (exp === 0) return esc(t) + ': no Exposure — answer correctly to build stacks (25%/stack)';
+      return esc(t) + ': ' + exp + ' stack' + (exp!==1?'s':'') + ' → ' + Math.min(exp*25,100) + '% stab chance · second stab also available after first';
+    })()
   };
 
   var desc = (S.ironMasteryActive ? masteryDescriptions : baseDescriptions)[S.ironClass];
@@ -4575,6 +4751,26 @@ function ironSkillRow() {
       (S.ironMediumPossessing ? ' · <strong>IN POSSESSION — click a choice!</strong>' : '') +
     '</div>';
   }
+  // Assassin: always show current topic's Exposure + stab status
+  if (S.ironClass === 'assassin') {
+    var aq = S.shuffled[S.cur];
+    var at = aq && aq.topic;
+    var aExp = at ? (S.ironAssassinExposure[at] || 0) : 0;
+    var aStabs = at ? (S.ironAssassinStabbed[at] || 0) : 0;
+    var aMaxStabs = S.ironMasteryActive ? 2 : 1;
+    var aStabPct = aStabs === 0 ? Math.min(aExp * 25, 100) : Math.min(aExp * 5, 100);
+    var aStabLabel = aStabs >= aMaxStabs
+      ? (S.ironMasteryActive ? '🗡️ Both stabs used' : '🗡️ Stabbed')
+      : (aStabs === 1 ? '🗡️ Stabbed ×1 · ' + aExp + ' stack' + (aExp!==1?'s':'') + ' → ' + aStabPct + '% 2nd stab' : '🗡️ ' + aExp + ' Exposure → ' + aStabPct + '% stab chance');
+    masteryCounter += '<div style="font-size:10px;color:#c0392b;margin-top:3px">' + aStabLabel + '</div>';
+    // Also show stab result if fresh
+    if (S.ironAssassinStabResult === 'success') {
+      masteryCounter += '<div style="font-size:10px;color:#4caf8a;margin-top:2px;font-weight:700">✔ Stab landed! All ' + esc(at || '') + ' questions: −1 wrong choice</div>';
+    } else if (S.ironAssassinStabResult === 'fail') {
+      masteryCounter += '<div style="font-size:10px;color:#e07070;margin-top:2px">✘ Stab missed — exposure burned</div>';
+    }
+  }
+
   // Elf: always show current Spirit Love stack count
   if (S.ironClass === 'elf') {
     var stacks = S.ironElfSpiritLove || 0;
@@ -4913,7 +5109,7 @@ function screenRecords() {
     '</div>';
 
   // Iron Man — Per Class
-  var classOrder = ['knight','bomber','thief','rogue','paladin','monk','alchemist','necromancer','beastman','medium','fairy','elf'];
+  var classOrder = ['knight','bomber','thief','rogue','paladin','monk','alchemist','necromancer','beastman','medium','assassin','fairy','elf'];
   var classRowsHtml = classOrder.map(function(key) {
     var cls = IRON_CLASSES[key];
     var runs = pr.ironClassRuns[key];
@@ -4966,6 +5162,7 @@ function screenRecords() {
       flavourRow('💀', 'Necromancer — Questions Removed from Graveyard (via Redemption)', pr.necromancerGraveyardRemovals || 0)+
       flavourRow('🐺', 'Beastman — Extra Points Collected from Wild Roar', pr.beastmanWildRoarExtraPoints || 0)+
       flavourRow('🔮', 'Medium — Times Possession validates your answer is correct', pr.mediumCorrectPeeks || 0)+
+      flavourRow('🗡️', 'Assassin — Topics Successfully Stabbed', pr.assassinSuccessfulStabs || 0)+
       flavourRow('🧚‍♀️', 'Fairy — Moons gained per answering new topics', pr.fairyDustProcs || 0)+
       flavourRow('🧝', 'Elf — Times Spirits Told You the Correct Answer', pr.elfSpiritCorrectTells || 0)+
     '</div>';
