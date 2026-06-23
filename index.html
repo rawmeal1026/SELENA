@@ -1207,7 +1207,7 @@ var CODEX_KEY = 'SELENA_codex';
 
 var PR_DEFAULTS = {
   // Currency
-  moons: 100000,
+  moons: 0,
 
   // Shop purchases
   feedbackClaimed: false, // 300-moon bonus for first feedback form visit
@@ -1307,17 +1307,6 @@ function prMigrateAchievements(pr) {
 
 function prSave(pr) {
   try { localStorage.setItem(PR_KEY, JSON.stringify(pr)); } catch(e) {}
-}
-
-function resetProgressCheat() {
-  try { localStorage.removeItem(PR_KEY); } catch(e) {}
-  try { localStorage.removeItem(ACHV_KEY); } catch(e) {}
-  try { localStorage.removeItem(SAVE_KEY); } catch(e) {}
-  // Seed 100,000 Moons on fresh profile
-  var fresh = JSON.parse(JSON.stringify(PR_DEFAULTS));
-  fresh.moons = 100000;
-  prSave(fresh);
-  goTo('records');
 }
 
 function prRecord(fn) {
@@ -4990,7 +4979,7 @@ function screenRecords() {
   '<p class="sub">Your all-time stats — persists across HTML updates automatically.</p>'+
   normalHtml+ironGenHtml+ironConsHtml+ironClassHtml+flavourHtml+
   '<div style="text-align:center;margin-top:8px">'+
-    '<button class="pr-reset-btn" onclick="selenaConfirm(\'Reset ALL progress? This will wipe your records, achievements, Moon balance, and last session save. This cannot be undone.\',function(){resetProgressCheat();})">Reset All Progress</button>'+
+    '<button class="pr-reset-btn" onclick="selenaConfirm(\'Reset ALL progress? This will wipe your records, achievements, Moon balance, and last session save. This cannot be undone.\',function(){localStorage.removeItem(\''+PR_KEY+'\');localStorage.removeItem(\''+ACHV_KEY+'\');localStorage.removeItem(\''+SAVE_KEY+'\');goTo(\'records\');})">Reset All Progress</button>'+
   '</div>'+
   '<div class="brow" style="margin-top:16px"><button class="btn" onclick="goTo(\'home\')">← Back to Home</button></div>';
 }
