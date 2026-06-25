@@ -1250,7 +1250,7 @@ var PR_DEFAULTS = {
   moons: 0,
 
   // Shop purchases
-  feedbackClaimed: false, // 15000-moon bonus for first feedback form visit
+  feedbackClaimed: false, // 300-moon bonus for first feedback form visit
   shopVioletSky: false,   // Violet Sky Theme unlocked
   shopMoonForge: false,   // Moon Forge: 2 moons per correct answer
   shopIronWill: false,    // Iron Will purchased (unlocks Iron Maiden)
@@ -5712,13 +5712,13 @@ function openFeedback() {
     '<strong style="display:block;margin-bottom:8px;font-size:15px">📝 Feedback & Suggestions</strong>' +
     '<p style="font-size:13px;color:var(--muted);margin-bottom:14px">' +
       'Have suggestions, topic requests, or bug reports? Send them through the link below' +
-      (unclaimed ? ' and earn <strong style="color:var(--gold)">🌙 15,000 Moons</strong> as a thank-you!' : '.') +
+      (unclaimed ? ' and earn <strong style="color:var(--gold)">🌙 300 Moons</strong> as a thank-you!' : '.') +
     '</p>' +
     '<button onclick="__feedbackGo()" style="' +
       'width:100%;padding:10px 14px;border-radius:8px;border:1.5px solid var(--blue);' +
       'background:var(--blue-bg);color:var(--blue-text);font-size:13px;font-weight:700;cursor:pointer;' +
       'display:flex;align-items:center;justify-content:center;gap:6px' +
-    '">🔗 Open Feedback Form' + (unclaimed ? '  &nbsp;+&nbsp;🌙 15,000' : '') + '</button>';
+    '">🔗 Open Feedback Form' + (unclaimed ? '  &nbsp;+&nbsp;🌙 300' : '') + '</button>';
 
   msgEl.innerHTML = bodyHtml;
   cancelBtn.style.display = 'none';
@@ -5742,7 +5742,7 @@ function openFeedback() {
     if (unclaimed) {
       prRecord(function(pr) {
         pr.feedbackClaimed = true;
-        pr.moons = (pr.moons || 0) + 15000;
+        pr.moons = (pr.moons || 0) + 300;
       });
       unclaimed = false;
       // Update button to reflect claimed state
@@ -5752,7 +5752,7 @@ function openFeedback() {
         btn.style.opacity = '0.7';
       }
       var para = msgEl.querySelector('p');
-      if (para) para.innerHTML = 'Thanks for your support! <strong style="color:var(--gold)">🌙 15,000 Moons</strong> have been added to your balance.';
+      if (para) para.innerHTML = 'Thanks for your support! <strong style="color:var(--gold)">🌙 300 Moons</strong> have been added to your balance.';
       render(); // refresh moon count in background
     }
   };
