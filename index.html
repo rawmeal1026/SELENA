@@ -1465,7 +1465,7 @@ var ACHIEVEMENTS = [
     desc:'As Necromancer, earn a total of +15 score from Master of Death coin flips in one Iron Man run.' },
   { id:'howling_moon',    icon:'🌕', cat:'Class', title:'Howling Moon',
     desc:'As Beastman, earn 4 or more points in a single question. Combine Wild Roar (+2), correct answer scoring, and consumables with Free from the Curse mastery to reach the threshold.' },
-  { id:'call_for_validation', icon:'🔮', cat:'Class', title:'Call for Validation',
+  { id:'call_for_validation', icon:'✨', cat:'Class', title:'Call for Validation',
     desc:'As Medium, use Possession 3 or more times in a single run and have every single peek reveal that your choice is correct.' },
   { id:'lucky_hitman', icon:'🗡️', cat:'Class', title:'Lucky Hitman',
     desc:'As Assassin, successfully stab 2 different topics by burning only 1 stack of Exposure each, in one Iron Man run.' },
@@ -1475,7 +1475,7 @@ var ACHIEVEMENTS = [
     desc:'As Fairy, get 30 Moons in one Iron Man run.' },
   { id:'better_off_alone', icon:'🧝', cat:'Class', title:'Better off Alone',
     desc:'As Elf, use Spirit Judgement but the spirit points to the wrong answer — then ignore it and answer correctly yourself.' },
-  { id:'spellcaster',     icon:'🪄', cat:'Class', title:'Spellcaster',
+  { id:'spellcaster',     icon:'✨', cat:'Class', title:'Spellcaster',
     desc:'As Mage, heal 1 life with Lumina and remove 7 wrong choices with Umbra in one Iron Man run.' },
 
   // ── Misc ──
@@ -2672,7 +2672,7 @@ function pick(displayIdx) {
       // Mage passive: +3 Mana on correct answer
       if (S.ironClass === 'mage') {
         S.ironMageMana = (S.ironMageMana || 0) + 3;
-        showBanner('synced', '🪄 Mana +3 (' + S.ironMageMana + ' total)', 1400);
+        showBanner('synced', '✨ Mana +3 (' + S.ironMageMana + ' total)', 1400);
       }
     }
   } else {
@@ -2736,7 +2736,7 @@ function pick(displayIdx) {
       // Mage passive: +2 Mana on wrong answer
       if (S.ironClass === 'mage') {
         S.ironMageMana = (S.ironMageMana || 0) + 2;
-        showBanner('synced', '🪄 Mana +2 (' + S.ironMageMana + ' total)', 1400);
+        showBanner('synced', '✨ Mana +2 (' + S.ironMageMana + ' total)', 1400);
       }
       // Monk Focus: wrong answer on the armed question burns the buff with no effect
       if (S.ironClass === 'monk' && S.ironMonkFocusActive && !S.ironSkillUsedThisQ) {
@@ -2804,7 +2804,7 @@ function next() {
     // Mage Mastery — Mana Surge: +1 Mana every round
     if (S.ironClass === 'mage' && S.ironMasteryActive) {
       S.ironMageMana = (S.ironMageMana || 0) + 1;
-      showBanner('synced', '🪄 Mana Surge — +1 Mana (' + S.ironMageMana + ' total)', 1400);
+      showBanner('synced', '✨ Mana Surge — +1 Mana (' + S.ironMageMana + ' total)', 1400);
     }
 
     if (S.ironMasteryActive) {
@@ -2963,7 +2963,7 @@ function advanceQuestion() {
       }
       S.ironMageUmbraWrongRemoveRoundsLeft--;
       if (S.ironMageUmbraWrongRemoveRoundsLeft <= 0) {
-        showBanner('synced', '🪄 Umbra — the dark veil lifts. Wrong choice removal has ended.', 2500);
+        showBanner('synced', '✨ Umbra — the dark veil lifts. Wrong choice removal has ended.', 2500);
       }
     }
     // If next question is not a redemption question, clear the flag so stale state can't cause issues
@@ -2987,7 +2987,7 @@ function useIronShield() {
   S.ironConsumables.shield--;
   prRecord(function(pr){ pr.ironTotalShieldsUsed++; });
   S.ironUsedConsumableThisRound = true;
-  if (S.ironClass === 'medium') { S.ironMediumPossession = (S.ironMediumPossession || 0) + 1; showBanner('synced', '🔮 Possession +1 stack (' + S.ironMediumPossession + ' total)', 1800); }
+  if (S.ironClass === 'medium') { S.ironMediumPossession = (S.ironMediumPossession || 0) + 1; showBanner('synced', '✨ Possession +1 stack (' + S.ironMediumPossession + ' total)', 1800); }
   // Knight Mastery — Brace for Impact: shield lasts 3 rounds instead of 2
   S.ironShieldRounds = (S.ironClass === 'knight' && S.ironMasteryActive) ? 3 : 2;
   beastmanConsumableScore();
@@ -2999,7 +2999,7 @@ function useIronSkip() {
   S.ironConsumables.skip--;
   prRecord(function(pr){ pr.ironTotalSkipsUsed++; });
   S.ironUsedConsumableThisRound = true;
-  if (S.ironClass === 'medium') { S.ironMediumPossession = (S.ironMediumPossession || 0) + 1; showBanner('synced', '🔮 Possession +1 stack (' + S.ironMediumPossession + ' total)', 1800); }
+  if (S.ironClass === 'medium') { S.ironMediumPossession = (S.ironMediumPossession || 0) + 1; showBanner('synced', '✨ Possession +1 stack (' + S.ironMediumPossession + ' total)', 1800); }
   if (!(S.ironClass === 'thief' && S.ironMasteryActive)) {
     S.ironStreak = 0;
   }
@@ -3011,7 +3011,7 @@ function useIronSkip() {
   // Mage passive: +3 Mana on skip
   if (S.ironClass === 'mage') {
     S.ironMageMana = (S.ironMageMana || 0) + 3;
-    showBanner('synced', '🪄 Mana +3 (' + S.ironMageMana + ' total)', 1400);
+    showBanner('synced', '✨ Mana +3 (' + S.ironMageMana + ' total)', 1400);
   }
   beastmanConsumableScore();
   _checkLuminaStreakBreak();
@@ -3046,7 +3046,7 @@ function useIronBomb() {
   S.ironConsumables.bomb--;
   prRecord(function(pr){ pr.ironTotalBombsUsed++; });
   S.ironUsedConsumableThisRound = true;
-  if (S.ironClass === 'medium') { S.ironMediumPossession = (S.ironMediumPossession || 0) + 1; showBanner('synced', '🔮 Possession +1 stack (' + S.ironMediumPossession + ' total)', 1800); }
+  if (S.ironClass === 'medium') { S.ironMediumPossession = (S.ironMediumPossession || 0) + 1; showBanner('synced', '✨ Possession +1 stack (' + S.ironMediumPossession + ' total)', 1800); }
   beastmanConsumableScore();
   render();
 }
@@ -3069,7 +3069,7 @@ function applyIronDamage(amount) {
   // Mage Lumina immunity (3-incantation streak reward): block damage once when streak breaks
   if (S.ironClass === 'mage' && S.ironMageLuminaImmune) {
     S.ironMageLuminaImmune = false;
-    showBanner('synced', '🪄 Lumina — Immunity! Damage blocked by the Light Incantation!', 2500);
+    showBanner('synced', '✨ Lumina — Immunity! Damage blocked by the Light Incantation!', 2500);
     return;
   }
   var wouldBeWrong = S.ironWrong + amount;
@@ -3234,7 +3234,7 @@ function useMediumPossession() {
   S.ironMediumPossessing = true;
   S.ironMediumPeekedPos = null;
   S.ironMediumUsedThisQ = true;
-  S.ironSkillEvent = '🔮 Communing with the dead… Click a choice to hear their verdict.' + masteryMsg;
+  S.ironSkillEvent = '✨ Communing with the dead… Click a choice to hear their verdict.' + masteryMsg;
   prRecord(function(pr){ pr.mediumTotalUses = (pr.mediumTotalUses || 0) + 1; });
   render();
 }
@@ -3263,7 +3263,7 @@ function mediumPeekChoice(displayIdx) {
     if (!S.ironMediumAnyWrongPeek && S.ironMediumTotalPeeks >= 3) {
       unlockAchievement('call_for_validation');
     }
-    S.ironSkillEvent = '🔮 The dead speak… ' + ['A','B','C','D'][displayIdx] + ' is ' +
+    S.ironSkillEvent = '✨ The dead speak… ' + ['A','B','C','D'][displayIdx] + ' is ' +
       (isCorrect ? '✅ CORRECT — the dead confirm it!' : '❌ WRONG — the dead warn you away!') +
       (S.ironMasteryActive && S.ironMediumPossession > 0 ? ' · Use skill again to peek another, or click any choice to answer.' : ' Click the same choice again to answer, or pick another.');
     render();
@@ -3599,8 +3599,8 @@ function useClassSkill() {
     if (_theme === 'light') {
       // ── Lumina ──
       var _luminaCost = 6;
-      if ((S.ironMageMana || 0) < _luminaCost) { S.ironSkillEvent = '🪄 Lumina — Not enough Mana! (' + (S.ironMageMana||0) + '/' + _luminaCost + ')'; render(); return; }
-      if ((S.ironMageLuminaStreak || 0) >= 5) { S.ironSkillEvent = '🪄 Lumina — Max incantations reached (5)! End your streak to claim your reward.'; render(); return; }
+      if ((S.ironMageMana || 0) < _luminaCost) { S.ironSkillEvent = '✨ Lumina — Not enough Mana! (' + (S.ironMageMana||0) + '/' + _luminaCost + ')'; render(); return; }
+      if ((S.ironMageLuminaStreak || 0) >= 5) { S.ironSkillEvent = '✨ Lumina — Max incantations reached (5)! End your streak to claim your reward.'; render(); return; }
       S.ironMageMana -= _luminaCost;
       S.ironMageLuminaStreak = (S.ironMageLuminaStreak || 0) + 1;
       S.ironMageLuminaCastThisRound = true;
@@ -3608,22 +3608,22 @@ function useClassSkill() {
       // At 3 incantations, bank immunity for the break question
       if (S.ironMageLuminaStreak === 3) S.ironMageLuminaImmune = true;
       var _luminaTier = ['🌙 +5 Moons','⭐ +1 Point','🛡️ Immunity on break','🎁 Random Consumable','❤️ Heal 1 Life'];
-      S.ironSkillEvent = '🪄 Lumina — Incantation ' + S.ironMageLuminaStreak + '/5! Next reward: ' + (_luminaTier[S.ironMageLuminaStreak] || 'Max reached') + '. Answer without casting to trigger!';
+      S.ironSkillEvent = '✨ Lumina — Incantation ' + S.ironMageLuminaStreak + '/5! Next reward: ' + (_luminaTier[S.ironMageLuminaStreak] || 'Max reached') + '. Answer without casting to trigger!';
     } else if (_theme === 'dark') {
       // ── Umbra (streak-based, mirrors Lumina) ──
       var _umbraCost = 6;
-      if ((S.ironMageMana || 0) < _umbraCost) { S.ironSkillEvent = '🪄 Umbra — Not enough Mana! (' + (S.ironMageMana||0) + '/' + _umbraCost + ')'; render(); return; }
-      if ((S.ironMageUmbraStreak || 0) >= 5) { S.ironSkillEvent = '🪄 Umbra — Max incantations reached (5)! End your streak to claim your reward.'; render(); return; }
+      if ((S.ironMageMana || 0) < _umbraCost) { S.ironSkillEvent = '✨ Umbra — Not enough Mana! (' + (S.ironMageMana||0) + '/' + _umbraCost + ')'; render(); return; }
+      if ((S.ironMageUmbraStreak || 0) >= 5) { S.ironSkillEvent = '✨ Umbra — Max incantations reached (5)! End your streak to claim your reward.'; render(); return; }
       S.ironMageMana -= _umbraCost;
       S.ironMageUmbraStreak = (S.ironMageUmbraStreak || 0) + 1;
       S.ironMageUmbraCastThisRound = true;
       prRecord(function(pr){ pr.mageSpellsCast = (pr.mageSpellsCast || 0) + 1; });
       var _umbraTier = ['🌙 +5 Moons','⭐ +1 Point','👁️ Reveal Next Answer','💣 +3 Bombs','❌ Remove 1 wrong/round ×7'];
-      S.ironSkillEvent = '🪄 Umbra — Incantation ' + S.ironMageUmbraStreak + '/5! Next reward: ' + (_umbraTier[S.ironMageUmbraStreak - 1] || 'Max reached') + '. Answer without casting to trigger!';
+      S.ironSkillEvent = '✨ Umbra — Incantation ' + S.ironMageUmbraStreak + '/5! Next reward: ' + (_umbraTier[S.ironMageUmbraStreak - 1] || 'Max reached') + '. Answer without casting to trigger!';
     } else {
       // ── Vespera (violet) ──
       var _vespCost = 30;
-      if ((S.ironMageMana || 0) < _vespCost) { S.ironSkillEvent = '🪄 Vespera — Not enough Mana! (' + (S.ironMageMana||0) + '/' + _vespCost + ')'; render(); return; }
+      if ((S.ironMageMana || 0) < _vespCost) { S.ironSkillEvent = '✨ Vespera — Not enough Mana! (' + (S.ironMageMana||0) + '/' + _vespCost + ')'; render(); return; }
       S.ironMageMana -= _vespCost;
       prRecord(function(pr){ pr.mageSpellsCast = (pr.mageSpellsCast || 0) + 1; });
       var _streak = S.ironStreak || 0;
@@ -3636,7 +3636,7 @@ function useClassSkill() {
       // Heal chance
       var _vHeal = _healChance > 0 && Math.random() < _healChance && S.ironWrong > 0;
       if (_vHeal) { S.ironWrong--; S.ironLives = S.ironMaxLives - S.ironWrong; }
-      var _vMsg = '🪄 Vespera — Streak ' + _streak + ': +' + _pts + ' pts, +' + _moons + ' 🌙' + (_vHeal ? ', ❤️ Healed!' : '') + '!';
+      var _vMsg = '✨ Vespera — Streak ' + _streak + ': +' + _pts + ' pts, +' + _moons + ' 🌙' + (_vHeal ? ', ❤️ Healed!' : '') + '!';
       if (_streak < 15) {
         // Lose 1 life — bypasses shield and Paladin passive
         S.ironWrong++;
@@ -3712,29 +3712,29 @@ function _fireLuminaReward() {
       _checkMageSpellcaster();
     }
     checkIronMastery();
-    showBanner('synced', '🪄 Lumina — ' + streak + ' incantations! ✨ Heal +1 Life!', 3200);
+    showBanner('synced', '✨ Lumina — ' + streak + ' incantations! ✨ Heal +1 Life!', 3200);
   } else if (streak === 4) {
     // Get a random consumable
     var _lType = shuf(['shield','skip','bomb'])[0];
     S.ironConsumables[_lType] += IRON_CONSUMABLE_INFO[_lType].qty;
-    showBanner('synced', '🪄 Lumina — ' + streak + ' incantations! 🎁 Random Consumable: ' + IRON_CONSUMABLE_INFO[_lType].name + '!', 3000);
+    showBanner('synced', '✨ Lumina — ' + streak + ' incantations! 🎁 Random Consumable: ' + IRON_CONSUMABLE_INFO[_lType].name + '!', 3000);
   } else if (streak === 3) {
     // Immunity: the damage on the question that broke the streak is negated (applied retroactively via flag)
     // The immune flag was already set when cast — if this fires it means the streak just broke naturally
     // We award the immunity message; damage bypass is handled in applyIronDamage via ironMageLuminaImmune
     // Since the streak break means no more casts, the immunity is a retroactive shield on the break question
-    showBanner('synced', '🪄 Lumina — ' + streak + ' incantations! 🛡️ Damage on this question is negated!', 3000);
+    showBanner('synced', '✨ Lumina — ' + streak + ' incantations! 🛡️ Damage on this question is negated!', 3000);
   } else if (streak === 2) {
     // +1 point
     S.score++;
     checkIronMastery();
-    showBanner('synced', '🪄 Lumina — ' + streak + ' incantations! ⭐ +1 Point! (Score: ' + S.score + ')', 2800);
+    showBanner('synced', '✨ Lumina — ' + streak + ' incantations! ⭐ +1 Point! (Score: ' + S.score + ')', 2800);
   } else if (streak === 1) {
     // +5 Moons
     prRecord(function(pr){ pr.moons = (pr.moons || 0) + 5; });
     var _mc2 = document.getElementById('moonCount');
     if (_mc2) _mc2.textContent = (prLoad().moons || 0).toLocaleString();
-    showBanner('synced', '🪄 Lumina — 1 incantation! 🌙 +5 Moons!', 2500);
+    showBanner('synced', '✨ Lumina — 1 incantation! 🌙 +5 Moons!', 2500);
   }
 }
 
@@ -3746,26 +3746,26 @@ function _fireUmbraReward() {
     // Remove 1 wrong choice per round for 7 questions
     S.ironMageUmbraWrongRemoveRoundsLeft = 7;
     _checkMageSpellcaster();
-    showBanner('synced', '🪄 Umbra — ' + streak + ' incantations! ❌ Remove 1 wrong choice/round for 7 questions!', 3200);
+    showBanner('synced', '✨ Umbra — ' + streak + ' incantations! ❌ Remove 1 wrong choice/round for 7 questions!', 3200);
   } else if (streak === 4) {
     // +3 Bombs
     S.ironConsumables.bomb = (S.ironConsumables.bomb || 0) + 3;
-    showBanner('synced', '🪄 Umbra — ' + streak + ' incantations! 💣 +3 Bombs!', 3000);
+    showBanner('synced', '✨ Umbra — ' + streak + ' incantations! 💣 +3 Bombs!', 3000);
   } else if (streak === 3) {
     // Reveal next question's answer
     S.ironMageUmbraRevealActive = true;
-    showBanner('synced', '🪄 Umbra — ' + streak + ' incantations! 👁️ The answer to the next question will be revealed!', 3000);
+    showBanner('synced', '✨ Umbra — ' + streak + ' incantations! 👁️ The answer to the next question will be revealed!', 3000);
   } else if (streak === 2) {
     // +1 point
     S.score++;
     checkIronMastery();
-    showBanner('synced', '🪄 Umbra — ' + streak + ' incantations! ⭐ +1 Point! (Score: ' + S.score + ')', 2800);
+    showBanner('synced', '✨ Umbra — ' + streak + ' incantations! ⭐ +1 Point! (Score: ' + S.score + ')', 2800);
   } else if (streak === 1) {
     // +5 Moons
     prRecord(function(pr){ pr.moons = (pr.moons || 0) + 5; });
     var _mc = document.getElementById('moonCount');
     if (_mc) _mc.textContent = (prLoad().moons || 0).toLocaleString();
-    showBanner('synced', '🪄 Umbra — 1 incantation! 🌙 +5 Moons!', 2500);
+    showBanner('synced', '✨ Umbra — 1 incantation! 🌙 +5 Moons!', 2500);
   }
 }
 
@@ -3826,7 +3826,7 @@ function startIronTimer() {
       // Mage passive: +3 Mana on timeout (treated same as wrong answer but intentional skip)
       if (S.ironClass === 'mage') {
         S.ironMageMana = (S.ironMageMana || 0) + 3;
-        showBanner('synced', '🪄 Mana +3 (' + S.ironMageMana + ' total)', 1400);
+        showBanner('synced', '✨ Mana +3 (' + S.ironMageMana + ' total)', 1400);
       }
       if (S.ironClass === 'beastman' && S.ironBeastWildRoarActive) {
         // Wild Roar: a wrong answer (including timeout) costs 2 lives; shields cannot block this
@@ -4166,7 +4166,7 @@ function screenIronCodex() {
       } else if (cause === 'alchemist_transmutation') {
         causeIcon = '⚗️'; causeLabel = 'Transmutation Backfired'; redLabel = '⚗️ Cause of death: Transmutation — sacrificed the last life for consumables';
       } else if (cause === 'mage_vespera') {
-        causeIcon = '🪄'; causeLabel = 'Vespera Consumed You'; redLabel = '🪄 Cause of death: Vespera — streak was below 15, the forbidden magic claimed your last life';
+        causeIcon = '✨'; causeLabel = 'Vespera Consumed You'; redLabel = '✨ Cause of death: Vespera — streak was below 15, the forbidden magic claimed your last life';
       } else {
         causeIcon = '❌'; causeLabel = 'Wrong Answer'; redLabel = '❌ You picked: ' + esc(e.chosen);
       }
@@ -4269,7 +4269,7 @@ function screenIronOver() {
     var _q = S.shuffled && S.shuffled[S.cur];
     if (_q) {
       var _chosenLabel = S.chosen !== null && S.chosen !== undefined && S.chosen >= 0
-        ? _q.choices[_q._order[S.chosen]] : '(unanswered)';
+        ? _q.choices[S.chosen] : '(unanswered)';
       var _cause = (S.chosen === -1) ? 'timeout' : 'wrong_answer';
       codexPushDeath({
         question: _q.question,
@@ -4824,7 +4824,7 @@ function screenQuiz() {
     var umbraRevealGlow = (S.ironMode && S.ironClass === 'mage' && (S.theme||'dark') === 'dark' && S.ironMageUmbraRevealAnswer === pos && !S.done)
       ? ' style="outline:2px solid #8e44ad;outline-offset:2px"' : '';
     var umbraRevealLabel = (S.ironMode && S.ironClass === 'mage' && (S.theme||'dark') === 'dark' && S.ironMageUmbraRevealAnswer === pos && !S.done)
-      ? ' <span style="font-size:10px;color:#8e44ad;font-weight:700">🪄 Umbra</span>' : '';
+      ? ' <span style="font-size:10px;color:#8e44ad;font-weight:700">✨ Umbra</span>' : '';
     var combinedGlow = mediumPeekedGlow || spiritGlow || umbraRevealGlow;
     return '<button class="cbtn'+gyCbtnClass+' '+cls+'"'+combinedGlow+' onclick="pick('+pos+')" '+((S.done||removed)?'disabled':'')+'>'+
       '<span class="cltr">'+L[pos]+'.</span><span>'+esc(q.choices[origIdx])+(removed?' <span style="font-size:11px;opacity:.7">(removed)</span>':'')+spiritLabel+umbraRevealLabel+mediumPeekedLabel+'</span></button>';
@@ -5676,12 +5676,12 @@ function screenRecords() {
       flavourRow('⚗️', 'Alchemist — Lives Gained via Transmutation', pr.alchemistTransmutationLivesGained)+
       flavourRow('💀', 'Necromancer — Questions Removed from Graveyard (via Redemption)', pr.necromancerGraveyardRemovals || 0)+
       flavourRow('🐺', 'Beastman — Extra Points Collected from Wild Roar', pr.beastmanWildRoarExtraPoints || 0)+
-      flavourRow('🔮', 'Medium — Times Possession validates your answer is correct', pr.mediumCorrectPeeks || 0)+
+      flavourRow('✨', 'Medium — Times Possession validates your answer is correct', pr.mediumCorrectPeeks || 0)+
       flavourRow('🗡️', 'Assassin — Topics Successfully Stabbed', pr.assassinSuccessfulStabs || 0)+
       flavourRow('🏹', 'Scout — Points Gained from Ready Up', pr.scoutReadyUpPoints || 0)+
       flavourRow('🧚‍♀️', 'Fairy — Moons gained per answering new topics', pr.fairyDustProcs || 0)+
       flavourRow('🧝', 'Elf — Times Spirits Told You the Correct Answer', pr.elfSpiritCorrectTells || 0)+
-      flavourRow('🪄', 'Mage — Lumina/Umbra Incantations Cast & Vespera Uses', pr.mageSpellsCast || 0)+
+      flavourRow('✨', 'Mage — Lumina/Umbra Incantations Cast & Vespera Uses', pr.mageSpellsCast || 0)+
     '</div>';
 
   // Moon Shop Records
