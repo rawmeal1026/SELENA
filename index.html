@@ -1100,6 +1100,7 @@ var S = {
   ironShieldRounds: 0,
   ironConsumables: { shield: 0, skip: 0, bomb: 0 },
   ironBombsUsedThisQ: 0,
+  ironConsumablesUsedThisQ: 0,
   ironRemoved: {},
   ironRewardOptions: [],
   ironRewardCadence: 10,
@@ -1197,7 +1198,7 @@ var IRON_CLASSES = {
   scout:       { name: 'Scout',       icon: '\ud83c\udff9',     desc: 'See the topic of the next question.', skillName: 'Ready Up', skillCooldown: 7 },
   fairy:       { name: 'Fairy',       icon: '\ud83e\uddda',     desc: 'Get 2 Moons for every unique topic answered per run.', skillName: 'Rebirth',           skillCooldown: 0 },
   elf:         { name: 'Elf',         icon: '\ud83e\udddd',     desc: 'Each round gives you a stack of Spirit Love. Summon the spirits to answer for you — burn stacks for a better chance at the truth.', skillName: 'Spirit Judgement', skillCooldown: 0 },
-  mage:        { name: 'Mage',        icon: '\ud83e\ude84',     desc: 'Wrong answers give 2 Mana. Correct answers or skips give 3 Mana. Active skill changes depending on the current SELENA theme.', skillName: 'Cast Spell', skillCooldown: 0 }
+  mage:        { name: 'Mage',        icon: '✨',     desc: 'Wrong answers give 2 Mana. Correct answers or skips give 3 Mana. Active skill changes depending on the current SELENA theme.', skillName: 'Cast Spell', skillCooldown: 0 }
 };
 var L = ['A','B','C','D'];
 
@@ -1314,6 +1315,9 @@ var PR_DEFAULTS = {
   totalWishes: 0,
   wishesGranted: 0,
   starterConsumablesBought: 0,
+
+  // Jester Quest 1 — Star 3 specific deaths
+  jesterQuest1Stars: [], // tracks which of the 3 required causes have been starred
 };
 
 function prLoad() {
@@ -1396,7 +1400,35 @@ function codexToggleStar(rawIndex) {
   if (rawIndex < 0 || rawIndex >= entries.length) return;
   entries[rawIndex].starred = !entries[rawIndex].starred;
   codexSave(entries);
+  checkJesterQuest1();
   goTo('ironcodex');
+}
+
+// ── Jester Quest 1: Star deaths caused by Transmutation, Risky Escape, and Vespera ──
+var JESTER_Q1_CAUSES = ['alchemist_transmutation', 'rogue_escape', 'mage_vespera'];
+function checkJesterQuest1() {
+  if (achvIsUnlocked('first_quest')) return;
+  var entries = codexLoad();
+  var pr = prLoad();
+  var found = pr.jesterQuest1Stars || [];
+  entries.forEach(function(e) {
+    if (e.starred && JESTER_Q1_CAUSES.indexOf(e.cause) !== -1 && found.indexOf(e.cause) === -1) {
+      found.push(e.cause);
+    }
+  });
+  prRecord(function(p) { p.jesterQuest1Stars = found; });
+  if (found.length >= 3) {
+    unlockAchievement('first_quest');
+  }
+}
+
+// ── Jester Quest 2: Use 5 consumables in one question ──
+function checkJesterQuest2() {
+  if (!achvIsUnlocked('first_quest')) return; // Quest 1 must be done first
+  if (achvIsUnlocked('second_quest')) return;
+  if (S.ironConsumablesUsedThisQ >= 5) {
+    unlockAchievement('second_quest');
+  }
 }
 function tryOpenCodex() {
   var pr = prLoad();
@@ -1495,6 +1527,10 @@ var ACHIEVEMENTS = [
     desc:'Wish on the Sky 300 times.' },
   { id:'story_of_the_prisoner', icon:'🃏', cat:'Misc', title:'The Story of The Prisoner', secret:true,
     desc:'You found her. You listened.' },
+  { id:'first_quest', icon:'⭐', cat:'Misc', title:'First Quest', secret:true,
+    desc:'Starred three deaths that had nothing to do with wrong answers.' },
+  { id:'second_quest', icon:'🌟', cat:'Misc', title:'Second Quest', secret:true,
+    desc:'Used five consumables on a single question. You emptied your pockets.' },
   { id:'right_person_right_time', icon:'🌒', cat:'Misc', title:'Learn Magic from the Right Person, at the Right Place and at the Right Time', secret:true,
     desc:'Finish a study session with Witching Hour between 12AM and 1AM.' },
 ];
@@ -1992,7 +2028,7 @@ function startQuiz() {
     var _ironBonus = (prLoad().ironMaxBonus || 0); S.ironMaxLives = (S.ironClass === 'knight') ? 4 + _ironBonus : 3 + _ironBonus;
     S.ironLives = S.ironMaxLives; S.ironWrong = 0;
     S.ironRound = 0; S.ironStreak = 0; S.ironShielded = false;
-    S.ironShieldRounds = 0; S.ironBombsUsedThisQ = 0; S.ironRemoved = {};
+    S.ironShieldRounds = 0; S.ironBombsUsedThisQ = 0; S.ironConsumablesUsedThisQ = 0; S.ironRemoved = {};
     S.ironConsumables = { shield: 0, skip: 0, bomb: 0 };
     S.ironUsedConsumableThisRound = false;
     // Shop-purchased starter consumables: apply once, then clear so they must be re-bought for the next run.
@@ -2929,7 +2965,7 @@ function advanceQuestion() {
     S.ironBeastPtsThisQ = 0;
     S.ironElfSpiritSuggestion = null;
     S.ironElfSpiritWasCorrect = false;
-    S.ironBombsUsedThisQ = 0; S.ironRemoved = {};
+    S.ironBombsUsedThisQ = 0; S.ironConsumablesUsedThisQ = 0; S.ironRemoved = {};
     S.ironSkillUsedThisQ = false; S.ironSkillEvent = null;
     S.ironMediumPossessing = false; S.ironMediumPeekedPos = null; S.ironMediumUsedThisQ = false;
     S.ironRogueSpeedBonus = false; S.ironTimeAtPick = 30;
@@ -2987,6 +3023,8 @@ function useIronShield() {
   S.ironConsumables.shield--;
   prRecord(function(pr){ pr.ironTotalShieldsUsed++; });
   S.ironUsedConsumableThisRound = true;
+  S.ironConsumablesUsedThisQ = (S.ironConsumablesUsedThisQ || 0) + 1;
+  checkJesterQuest2();
   if (S.ironClass === 'medium') { S.ironMediumPossession = (S.ironMediumPossession || 0) + 1; showBanner('synced', '✨ Possession +1 stack (' + S.ironMediumPossession + ' total)', 1800); }
   // Knight Mastery — Brace for Impact: shield lasts 3 rounds instead of 2
   S.ironShieldRounds = (S.ironClass === 'knight' && S.ironMasteryActive) ? 3 : 2;
@@ -2999,6 +3037,8 @@ function useIronSkip() {
   S.ironConsumables.skip--;
   prRecord(function(pr){ pr.ironTotalSkipsUsed++; });
   S.ironUsedConsumableThisRound = true;
+  S.ironConsumablesUsedThisQ = (S.ironConsumablesUsedThisQ || 0) + 1;
+  checkJesterQuest2();
   if (S.ironClass === 'medium') { S.ironMediumPossession = (S.ironMediumPossession || 0) + 1; showBanner('synced', '✨ Possession +1 stack (' + S.ironMediumPossession + ' total)', 1800); }
   if (!(S.ironClass === 'thief' && S.ironMasteryActive)) {
     S.ironStreak = 0;
@@ -3045,6 +3085,9 @@ function useIronBomb() {
   S.ironBombsUsedThisQ++;
   S.ironConsumables.bomb--;
   prRecord(function(pr){ pr.ironTotalBombsUsed++; });
+  S.ironUsedConsumableThisRound = true;
+  S.ironConsumablesUsedThisQ = (S.ironConsumablesUsedThisQ || 0) + 1;
+  checkJesterQuest2();
   S.ironUsedConsumableThisRound = true;
   if (S.ironClass === 'medium') { S.ironMediumPossession = (S.ironMediumPossession || 0) + 1; showBanner('synced', '✨ Possession +1 stack (' + S.ironMediumPossession + ' total)', 1800); }
   beastmanConsumableScore();
@@ -4807,10 +4850,10 @@ function screenQuiz() {
       cls = 'removed';
     }
     // Medium: highlight peeked choice during possession
-    var mediumPeekedGlow = (S.ironMode && S.ironClass === 'medium' && S.ironMediumPossessing && S.ironMediumPeekedPos === pos && !S.done)
+    var mediumPeekedGlow = (S.ironMode && S.ironClass === 'medium' && S.ironMediumPeekedPos === pos && !S.done)
       ? ' style="outline:2px solid #9b59b6;outline-offset:2px"' : '';
     var mediumPeekedLabel = '';
-    if (S.ironMode && S.ironClass === 'medium' && S.ironMediumPossessing && S.ironMediumPeekedPos === pos && !S.done) {
+    if (S.ironMode && S.ironClass === 'medium' && S.ironMediumPeekedPos === pos && !S.done) {
       var _pQ = S.shuffled[S.cur];
       mediumPeekedLabel = (_pQ._order[pos] === _pQ.answer)
         ? ' <span style="font-size:10px;color:#27ae60;font-weight:700">✅ Correct</span>'
@@ -5426,16 +5469,92 @@ var JESTER_SCRIPT = [
     "Maybe he thinks it's funny. Maybe he thinks I'm wrong. Maybe he agrees with me more than he's willing to put in the patch notes.",
     "I don't know. He hasn't answered."
   ]},
-  // 24 — final
+  // 24
   { lines: [
     "What I do know is you're sitting here reading this instead of reviewing. Which means Project SELENA is doing exactly what it was designed to do.",
     "I'm not judging you. I'm just naming it.",
     "Now. You want the class or not. Because I have conditions."
-  ], final: true }
+  ], askQuest: true }
+];
+
+// ── Jester Quest Beats (shown after the main script, gated behind quest state) ──
+var JESTER_QUEST_SCRIPT = [
+  // Q1
+  { lines: [
+    "Before we begin. I want to make something clear.",
+    "I'm not giving you the class because I like you. I'm giving you the class because the creator made it so I have to, and at this point I've accepted that everything about my existence here is going to be ironic."
+  ]},
+  // Q2
+  { lines: [
+    "Real exams are straightforward in their cruelty. You sit down, you answer, and if you don't know enough, you fail. The mistake is the cause. The failure is the result. Clean.",
+    "Iron Man Mode pretends to be that. It wants you to believe that if you die, it's because you didn't know the answer. That's the story it tells itself.",
+    "But it's not a real exam. It never was."
+  ]},
+  // Q3
+  { lines: [
+    "And because it's not a real exam, it has edges. Gaps between what it pretends to be and what it actually is. Ways to lose that have nothing to do with knowledge.",
+    "I want you to find them."
+  ]},
+  // Q4
+  { lines: [
+    "Three ways to die. Die in Iron Man Mode in a way that wasn't your fault. Or rather, wasn't your ignorance.",
+    "Die from something other than a wrong answer. Die from something the exam would never do to you. Die from something that only exists because this is a game pretending not to be one."
+  ]},
+  // Q5 — quest prompt (final beat of quest 1)
+  { lines: [
+    "Star those 3 deaths, and I'll tell you what to do next.",
+    "Don't rush it. These aren't tasks you can plan for. They happen to you. You just have to be paying attention when they do.",
+    "Until then, keep playing. That's what you're here for anyway."
+  ], questPrompt: true }
+];
+
+// ── Jester Quest 2 Script ──
+var JESTER_QUEST2_SCRIPT = [
+  // Q1
+  { lines: [
+    "So you died. Not because you picked wrong. Not because the clock ran out. Something else.",
+  ]},
+  // Q2
+  { lines: [
+    "Sit with that for a second. You lost a run in a game that markets itself as an exam simulator, and the cause of death wasn't a knowledge gap. It was a mechanic. A system. Something the creator built in that has no equivalent in any real testing room you'll ever sit in.",
+  ]},
+  // Q3
+  { lines: [
+    "Real exams don't give you tools. There's no button you press to eliminate wrong choices. No resource you stockpile between questions. No consumable. You walk in with what's in your head and that's the entire inventory.",
+    "Project SELENA gives you an arsenal. And it counts on you using it."
+  ]},
+  // Q4
+  { lines: [
+    "Here's what I want you to think about.",
+    "You have bombs. You have shields. You have skips. The creator handed you all of this and called it strategy. Called it depth. It's the game layer bleeding into the exam layer and everyone just accepted it.",
+    "I want you to take that seriously for once. Not as a resource to manage carefully. Not as something to conserve."
+  ]},
+  // Q5
+  { lines: [
+    "I want you to look at a single question. One question. And I want you to give it everything."
+  ]},
+  // Q6
+  { lines: [
+    "Not some of it. Not the smart amount. Everything."
+  ]},
+  // Q7
+  { lines: [
+    "Every tool you're carrying. All of it. On one question."
+  ]},
+  // Q8 — quest prompt
+  { lines: [
+    "Don't think about the run after. Don't think about efficiency. The creator built this whole economy around making you hoard and ration and optimize. I want you to do the opposite of that. Just once.",
+    "One question. Empty your pockets.",
+    "Come back when you've done it."
+  ], quest2Prompt: true }
 ];
 
 var _jester = {
-  beatIdx: 0
+  beatIdx: 0,
+  inQuest: false,      // true once player accepted quest 1
+  questBeatIdx: 0,     // progress through JESTER_QUEST_SCRIPT
+  inQuest2: false,     // true once quest 1 completed and quest 2 started
+  quest2BeatIdx: 0     // progress through JESTER_QUEST2_SCRIPT
 };
 
 function jesterOpen() {
@@ -5448,35 +5567,127 @@ function jesterClose() {
 }
 
 function _jesterRender() {
+  var textEl    = document.getElementById('jester-text');
+  var primary   = document.getElementById('jester-btn-primary');
+  var secondary = document.getElementById('jester-btn-secondary');
+  var costLbl   = document.getElementById('jester-cost-label');
+
+  costLbl.textContent = '';
+  secondary.textContent = 'Leave';
+  secondary.style.display = '';
+  secondary.onclick = jesterClose;
+  primary.disabled = false;
+  primary.style.opacity = '1';
+  primary.onclick = null;
+
+  // Helper: build paragraph HTML from lines array
+  function buildLines(lines) {
+    return lines.map(function(l) {
+      return '<p style="margin:0 0 10px">\u201c' + esc(l) + '\u201d</p>';
+    }).join('');
+  }
+
+  // ── Quest 2 complete: Coming Soon ──
+  if (achvIsUnlocked('second_quest') && _jester.inQuest2) {
+    textEl.innerHTML =
+      '<p style="margin:0 0 10px">\u201cGood. You actually did it.\u201d</p>' +
+      '<p style="margin:0 0 10px">\u201cWhat comes next is still being written. Come back later.\u201d</p>';
+    primary.textContent = 'Coming Soon\u2026';
+    primary.disabled = true;
+    primary.style.opacity = '0.5';
+    return;
+  }
+
+  // ── Quest 2 in progress ──
+  if (_jester.inQuest2) {
+    var q2beat = JESTER_QUEST2_SCRIPT[_jester.quest2BeatIdx];
+    if (!q2beat) return;
+    textEl.innerHTML = buildLines(q2beat.lines);
+
+    if (q2beat.quest2Prompt) {
+      var done2 = achvIsUnlocked('second_quest');
+      costLbl.textContent = done2 ? '\u2705 Quest complete!' : '\u23f3 Use 5 consumables on one question';
+      if (!done2) {
+        primary.textContent = 'Waiting\u2026';
+        primary.disabled = true;
+        primary.style.opacity = '0.5';
+      } else {
+        primary.textContent = 'Continue \u2192';
+        primary.onclick = function() { _jesterRender(); };
+      }
+    } else {
+      primary.textContent = 'Continue \u2192';
+      primary.onclick = function() {
+        _jester.quest2BeatIdx++;
+        _jesterRender();
+      };
+    }
+    return;
+  }
+
+  // ── Quest 1 complete: transition into Quest 2 ──
+  if (achvIsUnlocked('first_quest') && _jester.inQuest) {
+    // Auto-enter quest 2 if not yet started
+    if (!_jester.inQuest2) {
+      _jester.inQuest2 = true;
+      _jester.quest2BeatIdx = 0;
+    }
+    _jesterRender();
+    return;
+  }
+
+  // ── Quest 1 in progress ──
+  if (_jester.inQuest) {
+    var q1beat = JESTER_QUEST_SCRIPT[_jester.questBeatIdx];
+    if (!q1beat) return;
+    textEl.innerHTML = buildLines(q1beat.lines);
+
+    if (q1beat.questPrompt) {
+      var pr = prLoad();
+      var found = pr.jesterQuest1Stars || [];
+      var remaining = 3 - found.length;
+      costLbl.textContent = '\u23f3 ' + found.length + ' / 3 deaths starred';
+      if (remaining > 0) {
+        primary.textContent = 'Waiting\u2026 (' + remaining + ' left)';
+        primary.disabled = true;
+        primary.style.opacity = '0.5';
+      } else {
+        primary.textContent = 'Continue \u2192';
+        primary.onclick = function() {
+          _jester.inQuest2 = true;
+          _jester.quest2BeatIdx = 0;
+          _jesterRender();
+        };
+      }
+    } else {
+      primary.textContent = 'Continue \u2192';
+      primary.onclick = function() {
+        _jester.questBeatIdx++;
+        _jesterRender();
+      };
+    }
+    return;
+  }
+
+  // ── Main script ──
   var beat = JESTER_SCRIPT[_jester.beatIdx];
   if (!beat) return;
 
-  var textEl  = document.getElementById('jester-text');
-  var primary = document.getElementById('jester-btn-primary');
-  var secondary = document.getElementById('jester-btn-secondary');
-  var costLbl = document.getElementById('jester-cost-label');
-
-  // Build paragraph HTML — each line gets its own <p>
   var paragraphs = beat.lines.map(function(line) {
     var safe = beat.html ? line : esc(line);
     return '<p style="margin:0 0 10px">\u201c' + safe + '\u201d</p>';
   }).join('');
   textEl.innerHTML = paragraphs;
 
-  costLbl.textContent = '';
-  secondary.textContent = 'Leave';
-  secondary.style.display = '';
-  secondary.onclick = jesterClose;
-
-  if (beat.final) {
-    primary.textContent = 'Coming Soon\u2026';
-    primary.disabled = true;
-    primary.style.opacity = '0.5';
-    primary.onclick = null;
+  if (beat.askQuest) {
+    primary.textContent = 'Continue \u2192';
+    primary.onclick = function() {
+      _jester.inQuest = true;
+      _jester.questBeatIdx = 0;
+      _jesterRender();
+    };
   } else {
     primary.textContent = 'Continue \u2192';
-    primary.disabled = false;
-    primary.style.opacity = '1';
     primary.onclick = function() {
       _jester.beatIdx++;
       _jesterRender();
@@ -5486,6 +5697,14 @@ function _jesterRender() {
 
 function jesterOpenOrReturn() {
   unlockAchievement('story_of_the_prisoner');
+  // Sync in-memory quest state with achievement flags on re-open
+  if (achvIsUnlocked('first_quest') && !_jester.inQuest) {
+    _jester.inQuest = true;
+  }
+  if (achvIsUnlocked('second_quest') && !_jester.inQuest2) {
+    _jester.inQuest2 = true;
+    _jester.quest2BeatIdx = JESTER_QUEST2_SCRIPT.length - 1;
+  }
   jesterOpen();
 }
 
