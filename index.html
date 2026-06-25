@@ -5694,7 +5694,7 @@ function screenRecords() {
   '<p class="sub">Your all-time stats — persists across HTML updates automatically.</p>'+
   normalHtml+ironGenHtml+ironConsHtml+moonShopHtml+ironClassHtml+flavourHtml+
   '<div style="text-align:center;margin-top:8px">'+
-    '<button class="pr-reset-btn" onclick="selenaConfirm(\'Reset ALL progress? This will wipe your records, achievements, Moon balance, and last session save. This cannot be undone.\',function(){localStorage.removeItem(\''+PR_KEY+'\');localStorage.removeItem(\''+ACHV_KEY+'\');localStorage.removeItem(\''+SAVE_KEY+'\');goTo(\'records\');})">Reset All Progress</button>'+
+    '<button class="pr-reset-btn" onclick="selenaConfirm(\'Reset ALL progress? This will wipe your records, achievements, Moon balance, last session save, and all deaths in the Iron and Lunar Codex. This cannot be undone.\',function(){localStorage.removeItem(\''+PR_KEY+'\');localStorage.removeItem(\''+ACHV_KEY+'\');localStorage.removeItem(\''+SAVE_KEY+'\');localStorage.removeItem(\''+CODEX_KEY+'\');goTo(\'records\');})">Reset All Progress</button>'+
   '</div>'+
   '<div class="brow" style="margin-top:16px"><button class="btn" onclick="goTo(\'home\')">← Back to Home</button></div>';
 }
@@ -5901,7 +5901,7 @@ function screenShop() {
       codexOwned ? 'owned' : 'buy',
       "shopBuy('ironcodex')");
     var lunarCodItem = shopItem('mooncodex', '💀', 'Lunar Codex', 500,
-      'Expands the Codex from '+CODEX_BASE+' to '+CODEX_EXPANDED+' entries and renames it to Lunar Codex. Requires Iron Codex.',
+      'Expands the Codex from '+CODEX_BASE+' to '+CODEX_EXPANDED+' entries and renames it to Lunar Codex. You can Star a Death in Lunar Codex. Requires Iron Codex.',
       !codexOwned ? 'locked' : lunarOwned ? 'owned' : 'buy',
       "shopBuy('mooncodex')");
     return ironCodItem + lunarCodItem;
