@@ -2017,6 +2017,7 @@ function startQuiz() {
     S.ironElfSpiritSuggestion = null;
     S.ironElfSpiritWasCorrect = false;
     S.ironMasteryActive = false;
+    S.ironMasteryTriggered = false;
     S.necroGraveyard = [];
     S.necroRedemptionActive = false;
     S.necroCoinFlipPending = false;
@@ -2547,6 +2548,7 @@ function pick(displayIdx) {
       S.score += beastPtsThisAnswer;
       S.ironBeastPtsThisQ = (S.ironBeastPtsThisQ || 0) + beastPtsThisAnswer;
       if (S.ironBeastPtsThisQ >= 4) unlockAchievement('howling_moon');
+      if (beastPtsThisAnswer > 0) checkIronMastery();
     } else {
       S.score++;
     }
@@ -4163,6 +4165,8 @@ function screenIronCodex() {
         causeIcon = '🎲'; causeLabel = 'Risky Escape Failed'; redLabel = '🎲 Cause of death: Risky Escape — the coin flip didn\'t go your way';
       } else if (cause === 'alchemist_transmutation') {
         causeIcon = '⚗️'; causeLabel = 'Transmutation Backfired'; redLabel = '⚗️ Cause of death: Transmutation — sacrificed the last life for consumables';
+      } else if (cause === 'mage_vespera') {
+        causeIcon = '🪄'; causeLabel = 'Vespera Consumed You'; redLabel = '🪄 Cause of death: Vespera — streak was below 15, the forbidden magic claimed your last life';
       } else {
         causeIcon = '❌'; causeLabel = 'Wrong Answer'; redLabel = '❌ You picked: ' + esc(e.chosen);
       }
@@ -5097,7 +5101,12 @@ function ironSkillRow() {
         if (_ls >= 5) return 'Max incantations reached (5) — answer without casting to receive your reward';
         return 'Lumina — cast an incantation for 6 Mana (have ' + _mn + '). Streak incantations to increase the power of Lumina Spell (max: 5).';
       }
-      if (_t === 'violet') return 'Vespera — forbidden magic for 30 Mana (have ' + _mn + '). Gain Moons, Points, and a chance to heal based on current streak. Lose 1 life if streak < 15.';
+      if (_t === 'violet') {
+        var _vStr = S.ironStreak || 0;
+        var _vLives = S.ironLives || 0;
+        var _vWarn = (_vStr < 15 && _vLives <= 1) ? ' ☠️ LETHAL — casting now will kill you!' : (_vStr < 15 ? ' ⚠️ Casting now costs 1 life (streak < 15).' : '');
+        return 'Vespera — forbidden magic for 30 Mana (have ' + _mn + '). Gain Moons, Points, and a chance to heal based on current streak. Lose 1 life if streak < 15.' + _vWarn;
+      }
       var _us = S.ironMageUmbraStreak || 0;
       if (_us >= 5) return 'Max incantations reached (5) — answer without casting to receive your reward';
       return 'Umbra — cast a dark incantation for 6 Mana (have ' + _mn + '). Streak incantations to increase the power of Umbra Spell (max: 5).';
