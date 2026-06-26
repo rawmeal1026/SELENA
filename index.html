@@ -1201,7 +1201,7 @@ var IRON_CLASSES = {
   scout:       { name: 'Scout',       icon: '\ud83c\udff9',     desc: 'See the topic of the next question.', skillName: 'Ready Up', skillCooldown: 7 },
   fairy:       { name: 'Fairy',       icon: '\ud83e\uddda',     desc: 'Get 2 Moons for every unique topic answered per run.', skillName: 'Rebirth',           skillCooldown: 0 },
   elf:         { name: 'Elf',         icon: '\ud83e\udddd',     desc: 'Each round gives you a stack of Spirit Love. Summon the spirits to answer for you — burn stacks for a better chance at the truth.', skillName: 'Spirit Judgement', skillCooldown: 0 },
-  mage:        { name: 'Mage',        icon: '✨',     desc: 'Wrong answers give 2 Mana. Correct answers or skips give 3 Mana. Active skill changes depending on the current SELENA theme.', skillName: 'Cast Spell', skillCooldown: 0 }
+  mage:        { name: 'Mage',        icon: '✨',     desc: 'Wrong answers not chosen turn into Mana. Active skill changes depending on the current SELENA theme.', skillName: 'Cast Spell', skillCooldown: 0 }
 };
 var L = ['A','B','C','D'];
 
@@ -3788,6 +3788,13 @@ function useClassSkill() {
           if (_vq && !S.ironRunSaved) {
             codexPushDeath({ question: _vq.question, correct: _vq.choices[_vq.answer], chosen: '(Vespera — sacrificed a life)', cause: 'mage_vespera', cls: S.ironClass || '—', score: S.score || 0, round: S.ironRound || 0, date: new Date().toLocaleString() });
             S.ironRunSaved = true;
+            // Save high score and run stats (normally done in ironover save block, but ironRunSaved is already true by then)
+            prRecord(function(pr) {
+              pr.ironRoundsSurvivedAllTime += (S.ironTotalRounds || 0);
+              if (S.ironHighStreak > pr.ironLongestStreakEver) pr.ironLongestStreakEver = S.ironHighStreak;
+              if (S.score > pr.ironHighestScore) pr.ironHighestScore = S.score;
+              if (S.ironClass && S.score > pr.ironClassBest[S.ironClass]) pr.ironClassBest[S.ironClass] = S.score;
+            });
           }
           S.screen = 'ironover'; render();
         }, 900);
