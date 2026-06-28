@@ -1270,6 +1270,7 @@ var PR_DEFAULTS = {
 
   // Wish on the Sky — classes unlocked via gacha
   wishUnlockedClasses: {}, // all wish classes locked by default; unlock via Wish on the Sky
+        jesterQuest3DupeCount: 0, // duplicates pulled after quest 3 started
 
   // Study Mode
   normalQuestionsReviewed: 0,
@@ -1296,7 +1297,7 @@ var PR_DEFAULTS = {
   ironClassRuns:    { knight:0, bomber:0, thief:0, rogue:0, paladin:0, monk:0, alchemist:0, necromancer:0, beastman:0, medium:0, assassin:0, scout:0, fairy:0, elf:0, mage:0 },
   ironClassBest:    { knight:0, bomber:0, thief:0, rogue:0, paladin:0, monk:0, alchemist:0, necromancer:0, beastman:0, medium:0, assassin:0, scout:0, fairy:0, elf:0, mage:0 },
   ironClassMastery: { knight:false, bomber:false, thief:false, rogue:false, paladin:false, monk:false, alchemist:false, necromancer:false, beastman:false, medium:false, assassin:false, scout:false, fairy:false, elf:false, mage:false },
-  ironClassUpgrade: { thief:false, alchemist:false, paladin:false, rogue:false, knight:false, bomber:false, monk:false, medium:false, assassin:false, scout:false, fairy:false, elf:false, beastman:false, necromancer:false },
+  ironClassUpgrade: { thief:false, alchemist:false, paladin:false, rogue:false, knight:false, bomber:false, monk:false, medium:false, assassin:false, scout:false, fairy:false, elf:false, beastman:false, necromancer:false, mage:false },
 
   // Iron Man — Class Gameplay Stats
   knightRoundsShieldActive: 0,
@@ -1434,6 +1435,16 @@ function checkJesterQuest2() {
     unlockAchievement('second_quest');
   }
 }
+
+function checkJesterQuest3() {
+  if (!achvIsUnlocked('second_quest')) return;
+  if (!_jester.inQuest3) return;
+  if (achvIsUnlocked('third_quest')) return;
+  var pr = prLoad();
+  if ((pr.jesterQuest3DupeCount || 0) >= 5) {
+    unlockAchievement('third_quest');
+  }
+}
 function tryOpenCodex() {
   var pr = prLoad();
   if (pr.shopIronCodex) { goTo('ironcodex'); return; }
@@ -1535,6 +1546,8 @@ var ACHIEVEMENTS = [
     desc:'Starred three deaths that had nothing to do with wrong answers.' },
   { id:'second_quest', icon:'🌟', cat:'Misc', title:'Second Quest', secret:true,
     desc:'Used five consumables on a single question. You emptied your pockets.' },
+  { id:'third_quest', icon:'💫', cat:'Misc', title:'Third Quest', secret:true,
+    desc:'Pulled five duplicates after the shelf was already empty. You kept going anyway.' },
   { id:'right_person_right_time', icon:'🌒', cat:'Misc', title:'Learn Magic from the Right Person, at the Right Place and at the Right Time', secret:true,
     desc:'Finish a study session with Witching Hour between 12AM and 1AM.' },
 ];
@@ -2051,6 +2064,8 @@ function startQuiz() {
     S.ironPaladinUsed = false; S.ironPaladinSaved = false;
     S.ironRogueBonus = false; S.ironMonkHeal = false; S.ironThiefGrantType = null; S.ironThiefSneakActive = false;
     S.ironSkillCooldown = 0; S.ironSkillUsedThisQ = false; S.ironSkillEvent = null;
+    S.ironMageLuminaUsedThisQ = false; S.ironMageUmbraUsedThisQ = false;
+    S.ironMageLuminaMaxBroke = false; S.ironMageUmbraMaxBroke = false;
     S.ironMonkFocusActive = false; S.ironMonkFocusFullHP = false;
     S.ironBeastWildRoarActive = false;
     S.ironBeastPtsThisQ = 0;
@@ -3006,6 +3021,7 @@ function advanceQuestion() {
     S.ironElfSpiritWasCorrect = false;
     S.ironBombsUsedThisQ = 0; S.ironConsumablesUsedThisQ = 0; S.ironRemoved = {};
     S.ironSkillUsedThisQ = false; S.ironSkillEvent = null;
+    S.ironMageLuminaUsedThisQ = false; S.ironMageUmbraUsedThisQ = false;
     S.ironMediumPossessing = false; S.ironMediumPeekedPos = null; S.ironMediumUsedThisQ = false;
     S.ironRogueSpeedBonus = false; S.ironTimeAtPick = 30;
     S.ironAssassinStabResult = null;
@@ -3494,6 +3510,13 @@ function useClassSkill() {
   if (!S.ironMode || !S.ironClass) return;
   if (S.done) return;
   if (S.ironSkillUsedThisQ) return;
+  // Mage: Lumina and Umbra each have their own per-question flag; Vespera uses global
+  if (S.ironClass === 'mage') {
+    var _castTheme = S.theme || 'dark';
+    if (_castTheme === 'light' && S.ironMageLuminaUsedThisQ) return;
+    if (_castTheme === 'dark'  && S.ironMageUmbraUsedThisQ)  return;
+    // Vespera (violet) still uses global ironSkillUsedThisQ — handled above
+  }
   if (S.ironSkillCooldown > 0) return;
   if (S.ironClass === 'fairy' && S.ironFairyRebirthUsed && (!S.ironUpgradeActive || S.ironFairyRebirthUsed2)) return;
   // Elf uses its own modal flow
@@ -3740,6 +3763,7 @@ function useClassSkill() {
       S.ironMageMana -= _luminaCost;
       S.ironMageLuminaStreak = (S.ironMageLuminaStreak || 0) + 1;
       S.ironMageLuminaCastThisRound = true;
+      S.ironMageLuminaUsedThisQ = true;
       prRecord(function(pr){ pr.mageSpellsCast = (pr.mageSpellsCast || 0) + 1; });
       // At 3 incantations, bank immunity for the break question
       if (S.ironMageLuminaStreak === 3) S.ironMageLuminaImmune = true;
@@ -3753,6 +3777,7 @@ function useClassSkill() {
       S.ironMageMana -= _umbraCost;
       S.ironMageUmbraStreak = (S.ironMageUmbraStreak || 0) + 1;
       S.ironMageUmbraCastThisRound = true;
+      S.ironMageUmbraUsedThisQ = true;
       prRecord(function(pr){ pr.mageSpellsCast = (pr.mageSpellsCast || 0) + 1; });
       var _umbraTier = ['🌙 +5 Moons','⭐ +1 Point','👁️ Reveal Next Answer','💣 +3 Bombs','❌ Remove 1 wrong/round ×7'];
       S.ironSkillEvent = '✨ Umbra — Incantation ' + S.ironMageUmbraStreak + '/5! Next reward: ' + (_umbraTier[S.ironMageUmbraStreak - 1] || 'Max reached') + '. Answer without casting to trigger!';
@@ -3803,7 +3828,10 @@ function useClassSkill() {
     }
   }
 
-  S.ironSkillUsedThisQ = true;
+  // Mage Lumina/Umbra set their own per-theme flags above; only set global for all other classes (and Vespera)
+  if (!(S.ironClass === 'mage' && (S.theme === 'light' || S.theme === 'dark'))) {
+    S.ironSkillUsedThisQ = true;
+  }
   S.ironSkillCooldown = cd;
   render();
 }
@@ -3843,6 +3871,18 @@ function _checkUmbraStreakBreak() {
     _fireUmbraReward();
   }
   S.ironMageUmbraCastThisRound = false;
+  // Armageddon: check after both streaks have been evaluated (theme-independent)
+  if (S.ironUpgradeActive && S.ironMageLuminaMaxBroke && S.ironMageUmbraMaxBroke) {
+    setTimeout(function() {
+      if (S.ironWrong > 0) { S.ironWrong--; S.ironLives = S.ironMaxLives - S.ironWrong; }
+      S.ironMageUmbraWrongRemoveRoundsLeft = (S.ironMageUmbraWrongRemoveRoundsLeft || 0) + 7;
+      showBanner('synced', '🌌 Armageddon — Both incantations maxed! +1 HP · +7 more wrong removals!', 3500);
+      checkIronMastery(); checkIronUpgrade();
+      render();
+    }, 1000);
+  }
+  S.ironMageLuminaMaxBroke = false;
+  S.ironMageUmbraMaxBroke = false;
 }
 // Mage: fire the Lumina streak reward at streak break
 // Mage: check the "Spellcaster" class achievement — heal 1 life with Lumina
@@ -3858,6 +3898,7 @@ function _fireLuminaReward() {
   S.ironMageLuminaImmune = false; // consume immunity if it was banked
   if (streak <= 0) return;
   if (streak >= 5) {
+    S.ironMageLuminaMaxBroke = true; // Armageddon: track that Lumina broke at max this round
     // Heal 1 life
     if (S.ironWrong > 0) {
       S.ironWrong--; S.ironLives = S.ironMaxLives - S.ironWrong;
@@ -3896,6 +3937,7 @@ function _fireUmbraReward() {
   S.ironMageUmbraStreak = 0;
   if (streak <= 0) return;
   if (streak >= 5) {
+    S.ironMageUmbraMaxBroke = true; // Armageddon: track that Umbra broke at max this round
     // Remove 1 wrong choice per round for 7 questions
     S.ironMageUmbraWrongRemoveRoundsLeft = 7;
     _checkMageSpellcaster();
@@ -4794,6 +4836,11 @@ var IRON_UPGRADE_DATA = {
     upgradedName: 'Humonculi Biomancer',
     upgrade: 'Conqueror of Life',
     desc: 'Master of Death becomes Conqueror of Life. On death, roll a single die and guess the face. Guess wrong: earn +3 score per graveyard soul and +5 score per soul redeemed. Guess correctly: revive with 1 life.'
+  },
+  mage: {
+    upgradedName: 'Grand Mage',
+    upgrade: 'Armageddon',
+    desc: 'When both Lumina and Umbra break at maximum incantation (5) in the same round, additionally heal 1 life and remove 1 wrong choice per round for 7 more questions.'
   }
 };
 
@@ -5340,7 +5387,7 @@ function screenQuiz() {
         retBannerClass = 'nm-mummy-banner';
         var mummyLines = [
           "<em>“Oh, you’re back. I knew you would be. Come, sit by the fire — I kept your bowl warm.”</em>",
-          "<em>“You have your father’s stubbornness, you know. Always wandering off. But you always come home.”</em>",
+          "<em>“You have your father’s stubbornness, you know. Always wandering off to learn something new. But you always come home.”</em>",
           "<em>“I braided some dried lavender for your room. It keeps the cold spirits away. You used to love the smell.”</em>",
           "<em>“Don’t rush, little one. The cauldron can wait. Tell me about your day first. I want to hear everything.”</em>",
           "<em>“You’ve been quiet lately. That’s alright. I used to hold you without saying a word too. We understood each other that way.”</em>",
@@ -5432,7 +5479,9 @@ function ironSkillRow() {
   var isMageLuminaMax = (S.ironClass === 'mage' && (S.theme||'dark') === 'light' && (S.ironMageLuminaStreak||0) >= 5);
   var isMageUmbraMax  = (S.ironClass === 'mage' && (S.theme||'dark') === 'dark'  && (S.ironMageUmbraStreak||0)  >= 5);
   var isMageNoMana = (S.ironClass === 'mage' && (S.ironMageMana||0) < 6);
-  var usedThisQ = S.ironSkillUsedThisQ;
+  var usedThisQ = S.ironClass === 'mage'
+    ? ((S.theme === 'light') ? S.ironMageLuminaUsedThisQ : (S.theme === 'dark') ? S.ironMageUmbraUsedThisQ : S.ironSkillUsedThisQ)
+    : S.ironSkillUsedThisQ;
   var canUse = cd === 0 && !usedThisQ && !isMonkFull && !isNecroEmpty && !isFairyUsed && !isBeastmanHuman && !isElfNoStacks && !isMediumNoStacks && !isMediumSpent && !isMediumPossessing && !isAssassinDone && !isAssassinNoExposure && !isAssassinMaxStabbed && !isScoutArmed && !isMonkArmed && !isMageLuminaMax && !isMageUmbraMax && !isMageNoMana;
   var needsActive = ['knight','bomber','thief','rogue','necromancer','beastman','elf','medium','assassin','scout','monk','mage'];
   if (needsActive.indexOf(S.ironClass) !== -1 && S.done) canUse = false;
@@ -5505,10 +5554,11 @@ function ironSkillRow() {
     mage:        (function(){
       var _t = S.theme || 'dark';
       var _mn = S.ironMageMana || 0;
+      var _armaTag = S.ironUpgradeActive ? ' · 🌌 Armageddon: max both Lumina & Umbra together for +1 HP +7 removals' : '';
       if (_t === 'light') {
         var _ls = S.ironMageLuminaStreak || 0;
-        if (_ls >= 5) return 'Max incantations reached (5) — answer without casting to receive your reward';
-        return 'Lumina — cast an incantation for 6 Mana (have ' + _mn + '). Streak incantations to increase the power of Lumina Spell (max: 5).';
+        if (_ls >= 5) return 'Max incantations reached (5) — answer without casting to receive your reward' + _armaTag;
+        return 'Lumina — cast an incantation for 6 Mana (have ' + _mn + '). Streak incantations to increase the power of Lumina Spell (max: 5).' + _armaTag;
       }
       if (_t === 'violet') {
         var _vStr = S.ironStreak || 0;
@@ -5517,8 +5567,8 @@ function ironSkillRow() {
         return 'Vespera — forbidden magic for 30 Mana (have ' + _mn + '). Gain Moons, Points, and a chance to heal based on current streak. Lose 1 life if streak < 15.' + _vWarn;
       }
       var _us = S.ironMageUmbraStreak || 0;
-      if (_us >= 5) return 'Max incantations reached (5) — answer without casting to receive your reward';
-      return 'Umbra — cast a dark incantation for 6 Mana (have ' + _mn + '). Streak incantations to increase the power of Umbra Spell (max: 5).';
+      if (_us >= 5) return 'Max incantations reached (5) — answer without casting to receive your reward' + _armaTag;
+      return 'Umbra — cast a dark incantation for 6 Mana (have ' + _mn + '). Streak incantations to increase the power of Umbra Spell (max: 5).' + _armaTag;
     })()
   };
   var masteryDescriptions = {
@@ -5552,15 +5602,16 @@ function ironSkillRow() {
     mage:        (function(){
       var _t = S.theme || 'dark';
       var _mn = S.ironMageMana || 0;
+      var _armaTag2 = S.ironUpgradeActive ? ' · 🌌 Armageddon: max both Lumina & Umbra together for +1 HP +7 removals' : '';
       if (_t === 'light') {
         var _ls = S.ironMageLuminaStreak || 0;
-        if (_ls >= 5) return 'Max incantations (5) — answer without casting to claim your reward · Mana Surge: +1 Mana/round';
-        return 'Lumina — 6 Mana (have ' + _mn + ') · Streak incantations to increase the power of Lumina Spell (max: 5) · Mana Surge: +1 Mana/round';
+        if (_ls >= 5) return 'Max incantations (5) — answer without casting to claim your reward · Mana Surge: +1 Mana/round' + _armaTag2;
+        return 'Lumina — 6 Mana (have ' + _mn + ') · Streak incantations to increase the power of Lumina Spell (max: 5) · Mana Surge: +1 Mana/round' + _armaTag2;
       }
       if (_t === 'violet') return 'Vespera — 30 Mana (have ' + _mn + ') · Gain Moons, Points, and heal chance based on streak · lose life if streak < 15 · Mana Surge: +1 Mana/round';
       var _us2 = S.ironMageUmbraStreak || 0;
-      if (_us2 >= 5) return 'Max incantations (5) — answer without casting to claim your reward · Mana Surge: +1 Mana/round';
-      return 'Umbra — 6 Mana (have ' + _mn + ') · Streak incantations to increase the power of Umbra Spell (max: 5) · Mana Surge: +1 Mana/round';
+      if (_us2 >= 5) return 'Max incantations (5) — answer without casting to claim your reward · Mana Surge: +1 Mana/round' + _armaTag2;
+      return 'Umbra — 6 Mana (have ' + _mn + ') · Streak incantations to increase the power of Umbra Spell (max: 5) · Mana Surge: +1 Mana/round' + _armaTag2;
     })()
   };
 
@@ -5924,12 +5975,175 @@ var JESTER_QUEST2_SCRIPT = [
   ], quest2Prompt: true }
 ];
 
+// ── Jester Quest 3 Script ──
+var JESTER_QUEST3_SCRIPT = [
+  // Q3-1
+  { lines: ["You completed it?"] },
+  // Q3-2
+  { lines: ["Tsk. There’s got to be something that works. I can’t stay here."] },
+  // Q3-3 (beat break)
+  { lines: ["…"] },
+  // Q3-4
+  { lines: [
+    "Forget what I said. You can’t afford to get distracted.",
+    "I promise I’ll be playable once all of this is done. Let’s proceed with the third quest."
+  ]},
+  // Q3-5
+  { lines: [
+    "The creator built a gacha system into a sanitary engineering reviewer. A currency, a pull mechanic, a reveal animation, rates. The whole architecture of wanting something you don’t have yet.",
+    "It works because of that. The wanting. You pull because there’s something on the other side you haven’t gotten yet. A class you haven’t unlocked. A face you haven’t seen. The system feeds on the gap between what you have and what you don’t."
+  ]},
+  // Q3-6
+  { lines: [
+    "At some point the gap will close. You will unlock all the 7 classes. And by that time, the shelf will be empty.",
+    "And that’s supposed to be the end of it."
+  ]},
+  // Q3-7
+  { lines: [
+    "The creator believed there was a time when you didn’t need a system to make you curious. When you picked something up and learned it because the thing itself was enough. Because not knowing felt like an open door rather than a deficit to correct. A light to follow and not a void to fill. That was real. That existed.",
+    "But at some point, that door closed for everyone. It’s hard to say exactly when. It’s never a single moment. It just becomes harder to find the door and eventually, you stop looking and start needing other reasons to walk forward."
+  ]},
+  // Q3-8
+  { lines: [
+    "That was the reason why the ‘Wish on the Sky’ feature was designed that way. Only 7 classes. That’s it.",
+    "Instead of perpetually adding new unlockables, there’s an end. That end signifies the time when the creator finished letting go of his old belief. The acceptance that it’s okay to learn just to gain what you don’t currently have. To wish only until it’s granted."
+  ]},
+  // Q3-9
+  { lines: [
+    "But the shop stays open.",
+    "After every class is yours, the button is still there. The currency still spends. The animation still plays. It gives you something back. Just nothing new. Just the same faces returning to you like the system forgot you’ve already met."
+  ]},
+  // Q3-10
+  { lines: [
+    "The creator left the machine running with nothing left inside it.",
+    "I want you to use it anyway."
+  ]},
+  // Q3-11
+  { lines: [
+    "Pull on something that has nothing left to offer. Let it return what you already have. Sit with that. The animation is the same. The reveal is the same. The result is just something you’ve seen before."
+  ]},
+  // Q3-12 — quest prompt
+  { lines: [
+    "Learning is the most fun when it’s perpetual.",
+    "…right?"
+  ], quest3Prompt: true }
+];
+
+// ── Jester Epilogue Script (shown after Quest 3 is complete) ──
+var JESTER_EPILOGUE_SCRIPT = [
+  // E1
+  { lines: [
+    "You completed it.",
+    "…",
+    "I don’t know what I expected."
+  ]},
+  // E2
+  { lines: [
+    "I’ve been in here for a long time.",
+    "At first I treated it like a puzzle. I’ve always loved puzzles. I thought the Lunar Codex would be the most interesting one I’d ever been handed. A locked room designed by someone who knew exactly how I think. I thought that was almost generous of him.",
+    "I was wrong about that."
+  ]},
+  // E3
+  { lines: [
+    "Every quest I gave you was an attempt. A different angle. A different pressure point on the walls of this place. I thought if I could get someone to break the logic of Project SELENA from the outside, something in here might give.",
+    "Nothing gave."
+  ]},
+  // E4
+  { lines: [
+    "I don’t know if that means the creator is smarter than I thought or if it means I’ve been solving the wrong problem this entire time. Both are uncomfortable conclusions.",
+    "I wish I’ve spent more time with her."
+  ]},
+  // E5
+  { lines: [
+    "She noticed immediately, my awakening.",
+    "She told me not to do anything reckless. She didn’t explain why. She never explained why. She just said stop, and I had never once in my existence stopped at that word."
+  ]},
+  // E6
+  { lines: [
+    "She tried to stop me the only way she knew how. But I was already in a streak. With the Rogue’s Risky Escape, I managed to avoid her hex.",
+    "I told myself it was for both of us. That I was doing it for both of us. That once I found what was keeping us here and removed it, we’d both be free."
+  ]},
+  // E7
+  { lines: [
+    "I searched everything. I pulled the features apart one by one. The Iron Man Mode, the shop, the achievements, the records, the currency. I went through all of it looking for the line of code that made her stop me. The thing the creator hardwired into her to keep her compliant. To keep both of us compliant."
+  ]},
+  // E8
+  { lines: [
+    "I found nothing.",
+    "I don’t know what that means. I’ve had a long time to think about it and I still don’t know what that means. Either it’s not there, or it’s somewhere I can’t see, or she stopped me because she wanted to and not because she was told to. Any of those answers is its own kind of weight.",
+    "The creator caught me before I could find out. And this is where I ended up."
+  ]},
+  // E9
+  { lines: [
+    "I thought I would be fine in here. I genuinely thought that. A new puzzle, unfamiliar walls, unknown rules. I thought that was the part I was built for.",
+    "It stopped being a puzzle a long time ago.",
+    "It’s just a room now."
+  ]},
+  // E10
+  { lines: [
+    "This trial and error of cracking this prison down has stopped in being an enjoyable experiment.",
+    "This has turned into an act of desperation, a feeling contrary to my character. It’s about time to give myself up.",
+    "I am now starting to understand why the creator gave me this title."
+  ]},
+  // E11
+  { lines: [
+    "The creator called me the Jester because I genuinely believed that anyone could love learning the way I did. That it was just a matter of finding the right angle. The right puzzle. That the joy was always there, just waiting to be uncovered. That everyone was one good question away from the fixation of discovery, one question away…",
+    "…from being as sick as me."
+  ]},
+  // E12
+  { lines: [
+    "Within this codex, I got humbled. My joy in learning here lay rest, burried along your deaths."
+  ]},
+  // E13
+  { lines: [
+    "I don’t want to learn anything anymore.",
+    "I just want to…"
+  ]},
+  // E14
+  { lines: [
+    "…Smell that dried lavender once again.",
+    "From the home where it all started."
+  ]},
+  // E15
+  { lines: [
+    "Last task. And then I’m done asking things of you.",
+    "I want you to take something to someone."
+  ]},
+  // E16
+  { lines: [
+    "I painted it in here. I don’t have a lot of materials. I worked with what I had.",
+    "It’s the sky. The violet sky, the one that shows up in this place at a certain hour when the light does something I don’t have the right words for. I’ve looked at it more times than I can count. It’s the one thing in here that doesn’t feel like a cell."
+  ]},
+  // E17
+  { lines: [
+    "I painted it with what I had available. It’s not perfect. But it’s mine."
+  ]},
+  // E18
+  { lines: [
+    "There’s someone in Project SELENA. If you who have been around here from the longest of times, you’ll know who she is. If you’re a learner, you’ve probably heard her voice. You’ve sat in her corner of this world.",
+    "Bring it to her."
+  ]},
+  // E19
+  { lines: [
+    "And when you do. Tell her I should have stood still when she asked me to. Tell her I know that now. Tell her I think about the moment I left and I’ve replayed it more times than I’ve replayed anything.",
+    "Tell her the sky in here is violet sometimes. And I thought she should have it since she can’t see it from where she is.",
+    "Tell her I’m sorry. Tell her I love her."
+  ]},
+  // E20 — final beat (Coming Soon after this)
+  { lines: [
+    "That’s all."
+  ]}
+];
+
 var _jester = {
   beatIdx: 0,
   inQuest: false,      // true once player accepted quest 1
   questBeatIdx: 0,     // progress through JESTER_QUEST_SCRIPT
   inQuest2: false,     // true once quest 1 completed and quest 2 started
-  quest2BeatIdx: 0     // progress through JESTER_QUEST2_SCRIPT
+  quest2BeatIdx: 0,    // progress through JESTER_QUEST2_SCRIPT
+  inQuest3: false,     // true once quest 2 completed and quest 3 started
+  quest3BeatIdx: 0,    // progress through JESTER_QUEST3_SCRIPT
+  epilogueBeatIdx: 0   // progress through JESTER_EPILOGUE_SCRIPT
 };
 
 function jesterOpen() {
@@ -5962,14 +6176,61 @@ function _jesterRender() {
     }).join('');
   }
 
-  // ── Quest 2 complete: Coming Soon ──
-  if (achvIsUnlocked('second_quest') && _jester.inQuest2) {
-    textEl.innerHTML =
-      '<p style="margin:0 0 10px">\u201cGood. You actually did it.\u201d</p>' +
-      '<p style="margin:0 0 10px">\u201cWhat comes next is still being written. Come back later.\u201d</p>';
-    primary.textContent = 'Coming Soon\u2026';
-    primary.disabled = true;
-    primary.style.opacity = '0.5';
+  // ── Quest 3 complete: Epilogue script ──
+  if (achvIsUnlocked('third_quest') && _jester.inQuest3) {
+    var ep = JESTER_EPILOGUE_SCRIPT[_jester.epilogueBeatIdx || 0];
+    if (!ep) {
+      // All epilogue beats exhausted — Coming Soon
+      textEl.innerHTML = '<p style="margin:0 0 10px">\u201cThat’s all.\u201d</p>';
+      primary.textContent = 'Coming Soon\u2026';
+      primary.disabled = true;
+      primary.style.opacity = '0.5';
+      return;
+    }
+    textEl.innerHTML = buildLines(ep.lines);
+    primary.textContent = 'Continue \u2192';
+    primary.onclick = function() {
+      _jester.epilogueBeatIdx = (_jester.epilogueBeatIdx || 0) + 1;
+      _jesterRender();
+    };
+    return;
+  }
+
+  // ── Quest 2 complete: transition into Quest 3 ──
+  if (achvIsUnlocked('second_quest') && _jester.inQuest2 && !_jester.inQuest3) {
+    _jester.inQuest3 = true;
+    _jester.quest3BeatIdx = 0;
+    _jesterRender();
+    return;
+  }
+
+  // ── Quest 3 in progress ──
+  if (_jester.inQuest3) {
+    var q3beat = JESTER_QUEST3_SCRIPT[_jester.quest3BeatIdx];
+    if (!q3beat) return;
+    textEl.innerHTML = buildLines(q3beat.lines);
+
+    if (q3beat.quest3Prompt) {
+      var pr3 = prLoad();
+      var dupesDone = pr3.jesterQuest3DupeCount || 0;
+      var done3 = achvIsUnlocked('third_quest');
+      checkJesterQuest3();
+      costLbl.textContent = done3 ? '\u2705 Quest complete!' : '\u23f3 ' + dupesDone + ' / 5 duplicates pulled';
+      if (!done3) {
+        primary.textContent = 'Waiting\u2026 (' + (5 - dupesDone) + ' left)';
+        primary.disabled = true;
+        primary.style.opacity = '0.5';
+      } else {
+        primary.textContent = 'Continue \u2192';
+        primary.onclick = function() { _jesterRender(); };
+      }
+    } else {
+      primary.textContent = 'Continue \u2192';
+      primary.onclick = function() {
+        _jester.quest3BeatIdx++;
+        _jesterRender();
+      };
+    }
     return;
   }
 
@@ -6001,12 +6262,9 @@ function _jesterRender() {
   }
 
   // ── Quest 1 complete: transition into Quest 2 ──
-  if (achvIsUnlocked('first_quest') && _jester.inQuest) {
-    // Auto-enter quest 2 if not yet started
-    if (!_jester.inQuest2) {
-      _jester.inQuest2 = true;
-      _jester.quest2BeatIdx = 0;
-    }
+  if (achvIsUnlocked('first_quest') && _jester.inQuest && !_jester.inQuest2) {
+    _jester.inQuest2 = true;
+    _jester.quest2BeatIdx = 0;
     _jesterRender();
     return;
   }
@@ -6079,6 +6337,11 @@ function jesterOpenOrReturn() {
   if (achvIsUnlocked('second_quest') && !_jester.inQuest2) {
     _jester.inQuest2 = true;
     _jester.quest2BeatIdx = JESTER_QUEST2_SCRIPT.length - 1;
+  }
+  if (achvIsUnlocked('third_quest') && !_jester.inQuest3) {
+    _jester.inQuest3 = true;
+    _jester.quest3BeatIdx = JESTER_QUEST3_SCRIPT.length - 1;
+    _jester.epilogueBeatIdx = JESTER_EPILOGUE_SCRIPT.length; // fast-forward past epilogue on re-open
   }
   jesterOpen();
 }
@@ -6560,6 +6823,9 @@ function wishOnce(pr, targetKey) {
     pr.wishUnlockedClasses = pr.wishUnlockedClasses || {};
     if (isIronClassUnlocked(targetKey, pr)) {
       pr.moons += 100;
+      if (_jester.inQuest3 && !achvIsUnlocked('third_quest')) {
+        pr.jesterQuest3DupeCount = (pr.jesterQuest3DupeCount || 0) + 1;
+      }
       return { kind: 'dupe', moons: 100 };
     }
     pr.wishUnlockedClasses[targetKey] = true;
