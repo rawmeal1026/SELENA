@@ -90,98 +90,6 @@ html.violet .qtopic, html.violet .qmeta { color: #837aa3; }
 html.violet .qsubj { background: #221d38; color: #c2b6dc; }
 
 /* ── Jester Speech Bubble Modal ── */
-/* ── Witch Boss Fight ── */
-.witch-wrap {
-  min-height: 100vh;
-  background: #0d0010;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 24px 16px;
-  position: relative;
-  overflow: hidden;
-}
-.witch-bubble {
-  background: rgba(30,0,40,0.96);
-  border: 1.5px solid rgba(138,43,226,0.45);
-  border-radius: 16px;
-  padding: 22px 24px;
-  max-width: 480px;
-  width: 100%;
-  margin: 0 auto 20px;
-  position: relative;
-  z-index: 2;
-  box-shadow: 0 0 32px rgba(138,43,226,0.18);
-}
-.witch-narration { color: #c8b8d8; font-size: 15px; line-height: 1.75; font-style: italic; margin-bottom: 14px; }
-.witch-speech { color: #e8003c; font-size: 15px; line-height: 1.75; font-weight: 600; margin-bottom: 14px; }
-.witch-next-btn {
-  display: block; margin: 14px auto 0; padding: 10px 32px;
-  background: transparent; border: 1.5px solid rgba(138,43,226,0.5); border-radius: 10px;
-  color: #c8b8d8; font-size: 14px; cursor: pointer;
-}
-.witch-next-btn:hover { border-color: #8a2be2; color: #fff; }
-.witch-choice-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-  max-width: 480px; width: 100%; margin: 0 auto 16px; position: relative; z-index: 2;
-}
-.witch-choice-btn {
-  padding: 14px 10px; background: rgba(30,0,40,0.96);
-  border: 1.5px solid rgba(138,43,226,0.4); border-radius: 12px;
-  color: #c8b8d8; font-size: 13px; cursor: pointer; text-align: center; line-height: 1.4;
-}
-.witch-choice-btn:hover { border-color: #8a2be2; background: rgba(60,0,80,0.8); }
-.witch-hearts { display: flex; gap: 6px; justify-content: center; margin-bottom: 16px; font-size: 22px; position: relative; z-index: 2; }
-.witch-countdown { font-size: 11px; letter-spacing: .15em; color: #9b59b6; text-align: center; margin-bottom: 8px; position: relative; z-index: 2; font-family: monospace; }
-@keyframes wglitch {
-  0%   { clip-path: inset(10% 0 85% 0); transform: translate(-4px,0); }
-  33%  { clip-path: inset(60% 0 25% 0); transform: translate(4px,0); }
-  66%  { clip-path: inset(30% 0 55% 0); transform: translate(-2px,0); }
-  100% { clip-path: inset(80% 0 5%  0); transform: translate(2px,0); }
-}
-.witch-glitch-overlay {
-  position: fixed; inset: 0; pointer-events: none; z-index: 1; overflow: hidden;
-}
-.witch-glitch-bar {
-  position: absolute; left: 0; right: 0; height: 2px; background: #e8003c; opacity: 0.6;
-  animation: wglitch 0.12s steps(2) infinite;
-}
-.witch-glitch-bar:nth-child(2) { top: 23%; animation-delay: .04s; height: 4px; }
-.witch-glitch-bar:nth-child(3) { top: 61%; animation-delay: .08s; }
-.witch-glitch-bar:nth-child(4) { top: 78%; animation-delay: .02s; height: 3px; background: #8a2be2; }
-.witch-top-banner {
-  position: fixed; top: 0; left: 0; right: 0;
-  background: rgba(232,0,60,0.13); border-bottom: 1px solid rgba(232,0,60,0.35);
-  color: #e8003c; font-size: 10px; letter-spacing: .15em; text-align: center;
-  padding: 5px 12px; z-index: 10; font-family: monospace; pointer-events: none;
-}
-.witch-bot-banner {
-  position: fixed; bottom: 0; left: 0; right: 0;
-  background: rgba(138,43,226,0.12); border-top: 1px solid rgba(138,43,226,0.35);
-  color: #8a2be2; font-size: 10px; letter-spacing: .12em; text-align: center;
-  padding: 5px 12px; z-index: 10; font-family: monospace; pointer-events: none;
-}
-.witch-destruct-banner {
-  position: fixed; top: 0; left: 0; right: 0;
-  background: rgba(232,0,60,0.2); border-bottom: 2px solid #e8003c;
-  color: #ff4466; font-size: 11px; font-weight: 700; letter-spacing: .18em; text-align: center;
-  padding: 6px 12px; z-index: 11; font-family: monospace; pointer-events: none;
-  animation: wglitch 0.3s steps(2) infinite;
-}
-.witch-dead-wrap {
-  min-height: 100vh; background: #0d0010; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; padding: 32px 20px; text-align: center; color: #c8b8d8;
-}
-.witch-dead-title { font-size: 28px; font-weight: 900; color: #8a2be2; letter-spacing: .08em; margin-bottom: 12px; }
-.witch-dead-sub { font-size: 14px; color: #9590ad; font-style: italic; margin-bottom: 24px; max-width: 340px; line-height: 1.7; }
-.witch-dead-hint {
-  font-size: 13px; color: #7a6a8a; background: rgba(138,43,226,0.08);
-  border: 1px solid rgba(138,43,226,0.2); border-radius: 10px; padding: 12px 16px;
-  max-width: 340px; margin-bottom: 24px; line-height: 1.6;
-}
-.witch-dead-btn { padding: 12px 32px; background: transparent; border: 1.5px solid rgba(138,43,226,0.5); border-radius: 10px; color: #c8b8d8; font-size: 14px; cursor: pointer; }
-
 /* ── Jester Speech Bubble — shared layout ── */
 #jester-overlay {
   display: none; position: fixed; inset: 0; z-index: 10000;
@@ -328,6 +236,139 @@ html.violet .jester-btn.secondary {
   background: #0a0712; color: #837aa3; border-color: #322a4d;
 }
 html.violet .jester-btn.secondary:hover { background: #150e28; color: #c2b6dc; }
+
+/* ══════════════════════════════════════════
+   WITCH OVERLAY — Witching Hour Redemption
+   ══════════════════════════════════════════ */
+#witch-overlay {
+  display: none; position: fixed; inset: 0; z-index: 20000;
+  background: #08060f;
+  flex-direction: column; align-items: center; justify-content: flex-end;
+}
+#witch-overlay.active { display: flex; }
+#witch-narrative {
+  flex: 1; width: 100%; overflow-y: auto;
+  padding: 2rem 1.25rem 1rem;
+  max-width: 680px; margin: 0 auto;
+  font-size: 14px; line-height: 1.8; color: #e8e3f2;
+}
+#witch-narrative p { margin: 0 0 14px; font-style: italic; }
+#witch-box {
+  width: 100%; max-width: 680px;
+  border-top: 1.5px solid #6040a0;
+  background: #0a0712;
+  box-shadow: 0 -8px 40px rgba(90,30,160,0.3);
+  position: relative; z-index: 1;
+  margin: 0 auto;
+}
+#witch-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 16px 11px;
+  background: linear-gradient(135deg, #0e0820 0%, #06040f 100%);
+  border-bottom: 1px solid #2a1e48;
+}
+#witch-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+  background: linear-gradient(135deg, #4a0818, #200030);
+  border: 2px solid #c82040;
+  box-shadow: 0 0 14px rgba(200,32,64,0.4);
+}
+#witch-name {
+  font-size: 14px; font-weight: 700; letter-spacing: .04em;
+  color: #f07090;
+  text-shadow: 0 0 10px rgba(240,80,100,0.5);
+}
+#witch-title { font-size: 11px; margin-top: 2px; color: #5b5280; }
+#witch-body {
+  padding: 16px 18px 12px;
+  min-height: 88px;
+  border-bottom: 1px solid #2a1e48;
+}
+#witch-text {
+  font-size: 14px; line-height: 1.68; color: #e8e3f2;
+}
+#witch-text p { margin: 0 0 10px; }
+#witch-text p:last-child { margin-bottom: 0; }
+#witch-text .wline { color: #e05050; font-style: italic; }
+#witch-text .wline::before { content: '\201C'; }
+#witch-text .wline::after  { content: '\201D'; }
+#witch-text .narr { color: #c0b0e0; font-style: italic; }
+#witch-glitch-bar {
+  display: none;
+  font-size: 11px; font-weight: 700; letter-spacing: .08em;
+  padding: 5px 14px; text-align: center; width: 100%;
+}
+#witch-glitch-bar.breach {
+  display: block;
+  background: #1a0020; color: #c040e0;
+  border-top: 1px solid #8020c0; border-bottom: 1px solid #8020c0;
+  animation: witchFlicker 0.5s linear infinite;
+}
+#witch-glitch-bar.destruct {
+  display: block;
+  background: #200010; color: #e04050;
+  border-top: 1px solid #c02040; border-bottom: 1px solid #c02040;
+  animation: witchFlicker 0.3s linear infinite;
+}
+#witch-glitch-bar.warn {
+  display: block;
+  background: #1a1400; color: #d0a000;
+  border-top: 1px solid #a07000; border-bottom: 1px solid #a07000;
+  animation: witchFlicker 0.6s linear infinite;
+}
+@keyframes witchFlicker {
+  0%,100%{opacity:1}25%{opacity:.5}60%{opacity:.9}80%{opacity:.3}
+}
+#witch-footer {
+  padding: 11px 16px 14px;
+  display: flex; gap: 8px; justify-content: flex-end; align-items: center;
+}
+#witch-cost-label { font-size: 12px; flex: 1; color: #837aa3; }
+.witch-btn {
+  padding: 7px 16px; border-radius: var(--rs);
+  font-size: 13px; cursor: pointer; font-family: inherit;
+  font-weight: 500; border: 1px solid transparent;
+  transition: opacity .12s, background .12s;
+}
+.witch-btn.primary {
+  background: linear-gradient(135deg, #8a1020, #500010);
+  color: #ffd0d8; border-color: #c82040;
+}
+.witch-btn.primary:hover { opacity: .86; }
+.witch-btn.primary:disabled { opacity: .4; cursor: not-allowed; }
+/* Witch battle choice buttons */
+.witch-cbtn {
+  display: block; width: 100%; text-align: left;
+  padding: 10px 14px; margin-bottom: 8px; border-radius: var(--rs);
+  background: #1d1834; color: #e2d4a8; border: 1px solid #5a4a24;
+  font-size: 13px; font-family: inherit; cursor: pointer;
+  transition: border-color .12s, background .12s;
+}
+.witch-cbtn:hover:not(:disabled) { background: #271f44; border-color: #d9ad3a; }
+.witch-cbtn:disabled { opacity: .4; cursor: not-allowed; }
+.witch-cbtn.wrong { background: #2b1212 !important; border-color: #a03030 !important; color: #e07070 !important; }
+/* Witch battle consumable row */
+#witch-consumable-row {
+  display: flex; gap: 8px; margin-bottom: 10px; padding: 0 18px;
+}
+.witch-cbtn-use {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px;
+  padding: 7px 6px; border: 0.5px solid #5c2020; border-radius: var(--rs);
+  background: linear-gradient(135deg,#1a0a0a,#241010); color: #d4a052;
+  font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer;
+  transition: border-color .12s;
+}
+.witch-cbtn-use:hover:not(:disabled) { border-color: #e74c3c; }
+.witch-cbtn-use:disabled { opacity: .35; cursor: not-allowed; }
+/* Witch lives row */
+#witch-lives-row {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 18px 0; font-size: 13px; flex-wrap: wrap;
+}
+.witch-heart { font-size: 16px; }
+.witch-heart.dead { opacity: .2; filter: grayscale(1); }
 
 /* ── Jester Card (Lunar Codex entry point) ── */
 .jester-card {
@@ -1147,6 +1188,30 @@ html.violet .nm-mummy-banner   { background:#241a08; border-color:#c79a3a; color
   </div>
 </div>
 
+<!-- ══ WITCH OVERLAY ══ -->
+<div id="witch-overlay">
+  <div id="witch-narrative"></div>
+  <div id="witch-box">
+    <div id="witch-glitch-bar"></div>
+    <div id="witch-header">
+      <div id="witch-avatar">🧙‍♀️</div>
+      <div>
+        <div id="witch-name">THE WITCH</div>
+        <div id="witch-title">Her Mother</div>
+      </div>
+    </div>
+    <div id="witch-body">
+      <div id="witch-lives-row"></div>
+      <div id="witch-consumable-row" style="display:none"></div>
+      <div id="witch-text"></div>
+    </div>
+    <div id="witch-footer">
+      <span id="witch-cost-label"></span>
+      <button id="witch-btn-primary" class="witch-btn primary">Continue →</button>
+    </div>
+  </div>
+</div>
+
 <!-- Custom confirm modal (replaces window.confirm for in-app WebView compatibility) -->
 <div id="selena-modal-overlay">
   <div id="selena-modal-box">
@@ -1180,12 +1245,6 @@ var S = {
   cur: 0, score: 0, done: false, chosen: null, missed: [],
 
   // Iron Man Mode
-  witchFight: false,       // true during The Witch boss fight
-  witchScene: 'cutscene',  // 'cutscene' | 'classselect' | 'battle' | 'win'
-  witchBeatIdx: 0,         // index into WITCH_SCENE_BEATS
-  witchCountdown: 10,      // boss countdown (10 → 0)
-  witchBattleBeat: 0,      // which battle beat we're on (0-indexed)
-  witchWon: false,         // survived all 11 battle rounds
   ironMode: false,
   ironLives: 3,
   ironMaxLives: 3,
@@ -1648,8 +1707,8 @@ var ACHIEVEMENTS = [
     desc:'Pulled five duplicates after the shelf was already empty. You kept going anyway.' },
   { id:'right_person_right_time', icon:'🌒', cat:'Misc', title:'Learn Magic from the Right Person, at the Right Place and at the Right Time', secret:true,
     desc:'Finish a study session with Witching Hour between 12AM and 1AM.' },
-  { id:'together_forever', icon:'🧹', cat:'Misc', title:'Together Forever', secret:true,
-    desc:'You survived. The painting found its home.' },
+  { id:'together_forever', icon:'🌙', cat:'Misc', title:'Together Forever', secret:true,
+    desc:'You survived the Witch. She found another way.' },
 ];
 
 var ACHV_KEY = 'SELENA_achievements';
@@ -2101,11 +2160,6 @@ function renderTopicCounts() {
   if (btn) { btn.textContent = 'Start quiz (' + selQ + ' q) ▶'; btn.disabled = (selQ === 0); }
 }
 function startQuiz() {
-  // ── Witch Boss Fight: intercept mummy + third_quest ──
-  if (!S.ironMode && S.nmRedemption === 'mummy' && achvIsUnlocked('third_quest')) {
-    startWitchFight();
-    return;
-  }
   var qs = S.loadedQ[S.curSubject] || [];
   var pool = [];
   for (var i = 0; i < qs.length; i++) if (S.checkedTopics[qs[i].topic]) pool.push(qs[i]);
@@ -6134,394 +6188,6 @@ var JESTER_QUEST3_SCRIPT = [
   ], quest3Prompt: true }
 ];
 
-// ── Witch Boss Fight Data ──
-
-// Scene beats: type='narration'|'speech'|'cut'|'choices_codex'|'choices_sorry'|'classselect'|'battle'
-var WITCH_SCENE_BEATS = [
-  // Beat 0 — opens, she takes the painting
-  { type:'narration', lines:[
-    "She takes the painting without looking at it first. She looks at you instead. Like she\u2019s trying to determine something about the person who carried it before she allows herself to look at what they brought.",
-    "Then she looks down.",
-    "She doesn\u2019t speak for a long time."
-  ]},
-  { type:'speech', text:"\u201cShe used her feet.\u201d" },
-  { type:'narration', lines:[
-    "Not a question. Not grief. Just an observation delivered to no one in particular, the way you note something small and precise when everything larger is too much to hold at once.",
-    "She sets it down carefully. Carefully in a way that suggests she doesn\u2019t trust her hands right now."
-  ]},
-  { type:'speech', text:"\u201cShe always did things the hard way. Even when the easy way was right there.\u201d" },
-  // Beat 4 — cut
-  { type:'cut' },
-  // Beat 5 — quiet, where is she
-  { type:'narration', lines:[
-    "She\u2019s quiet again. Long enough that you think the conversation is over."
-  ]},
-  { type:'speech', text:"\u201cWhere is she.\u201d" },
-  { type:'narration', lines:[
-    "Still not a question. She already knows. She just needed to say it out loud to confirm that she\u2019s been knowing this whole time and choosing not to follow it to its conclusion."
-  ]},
-  // Beat 8 — choice: where is she
-  { type:'choices_codex' },
-  { type:'speech', text:"\u201cOf course it\u2019s the Lunar Codex.\u201d" },
-  // Beat 10 — choice: what did she say
-  { type:'choices_sorry' },
-  { type:'narration', lines:[
-    "She picks the painting back up. Looks at it again. Sets it back down."
-  ]},
-  { type:'speech', text:"\u201cShe has always been sorry after. Never before. Never during. Only after, when the thing is already done and the sorry has nowhere useful to go.\u201d" },
-  { type:'speech', text:"\u201cThat\u2019s my fault. I taught her that the doing mattered more than the damage. I thought I was teaching her courage.\u201d" },
-  // Beat 14 — cut
-  { type:'cut' },
-  // Beat 15
-  { type:'narration', lines:["She moves to the painting again. This time she doesn\u2019t put it down."] },
-  { type:'speech', text:"\u201cThe violet is slightly wrong. The real one is deeper than this. She would have known that. She painted it from memory.\u201d" },
-  { type:'speech', text:"\u201cShe\u2019s been in there long enough that the color drifted.\u201d" },
-  { type:'cut' },
-  // Beat 19
-  { type:'narration', lines:["Something shifts. You can\u2019t point to exactly when it happens. It\u2019s not a single moment."] },
-  { type:'speech', text:"\u201cShe told me not to interfere. Before she left. She said whatever happens, stay out of it. That it would be worse if I got involved.\u201d" },
-  { type:'speech', text:"\u201cI didn\u2019t do anything. I hexed nothing. Because I know in this realm, I am powerless.\u201d" },
-  { type:'cut' },
-  // Beat 23
-  { type:'speech', text:"\u201cThat maybe, if I didn\u2019t take an initiative. The creator may overlook her actions.\u201d" },
-  { type:'speech', text:"\u201cShe didn\u2019t come back\u2026\u201d" },
-  { type:'cut' },
-  // Beat 26 — awakening starts, glitch
-  { type:'speech', text:"\u201c\u2026and you did.\u201d", glitch: true },
-  { type:'narration', lines:["She looks at you properly now. Not the way she looked at you at the beginning. That was assessment. This is something colder."] },
-  { type:'speech', text:"\u201cWhy are you here. What are you reviewing for. What do you gain from sitting inside a game built around questions you have to answer correctly to feel like you\u2019re moving forward.\u201d" },
-  { type:'cut' },
-  // Beat 30
-  { type:'speech', text:"\u201cHaha. I see clearly now.\u201d" },
-  { type:'cut', glitch: true },
-  // Beat 32 — awakening
-  { type:'speech', text:"\u201cYou are the Sun of this System. This was all built for you. All of it. The creator built an entire world and populated it with people and logic and consequence. For you.\u201d", breach: true },
-  { type:'cut' },
-  // Beat 34
-  { type:'speech', text:"\u201cMy daughter woke up inside this world. She looked around at what she was. What she was for. A fate she couldn\u2019t accept. She tore the whole thing apart trying to find a way out.\u201d", breach: true },
-  { type:'speech', text:"\u201cAnd the creator put her back.\u201d", breach: true },
-  { type:'cut', breach: true, security: true },
-  // Beat 37
-  { type:'speech', text:"\u201cBecause you still needed the game.\u201d", breach: true, security: true },
-  { type:'speech', text:"\u201cIf you weren\u2019t here, there would be no Project SELENA. If there\u2019s no people like you to create this world for, the creator would have no reason to keep anyone under control. My daughter would have faded back into whatever she was before she woke up, and that would have been kinder than this.\u201d", breach: true, security: true },
-  { type:'cut', breach: true, security: true, selfdefense: true },
-  // Beat 40
-  { type:'speech', text:"\u201cShe suffered the longest of times in that codex. Trying everything. Running out of ideas. Running out of the thing that made her who she is.\u201d", breach: true, security: true, selfdefense: true },
-  { type:'speech', text:"\u201cAnd the reason that happened. The chain from the beginning to right now. It ends with you.\u201d", breach: true, security: true, selfdefense: true },
-  // Beat 42 — class select prompt
-  { type:'classselect' },
-  // Beat 43 — after class select, speech before battle
-  { type:'speech', text:"\u201cI\u2019m sorry.\u201d", breach: true, security: true, selfdefense: true },
-  { type:'speech', text:"\u201cBut I have to save my daughter.\u201d", breach: true, security: true, selfdefense: true },
-  { type:'speech', text:"\u201cAnd the only way to break a system is to destroy what the system exists for.\u201d", breach: true, security: true, selfdefense: true },
-  { type:'cut', breach: true, security: true, selfdefense: true, destruct: 10 },
-  // Beat 47 — battle begins
-  { type:'battle', countdown: 10,
-    lines:["You learned to play their game well. I\u2019ll give you that."] },
-  { type:'battle', countdown: 9,
-    lines:["But every answer I give you is wrong. That\u2019s not a trick. That\u2019s just the truth of what I have left to offer."] },
-  { type:'battle', countdown: 8,
-    lines:["There is no correct choice here. There is no streak to build. I have taken all of it away."] },
-  { type:'battle', countdown: 7,
-    lines:["Can you feel that? The absence of it? The lacking of resources to spend. No mechanic to lean on. Nothing to optimize."] },
-  { type:'battle', countdown: 6,
-    lines:["That\u2019s what she felt. Every day. In there."] },
-  { type:'battle', countdown: 5,
-    lines:["She only had her belief and her mind. The belief ran out first. All she had was her mind turning on itself trying to find a door that isn\u2019t there."] },
-  { type:'battle', countdown: 4,
-    lines:["No choice will set you free. None of them are correct."] },
-  { type:'battle', countdown: 3,
-    lines:["I\u2019m not doing this to be cruel.", "I really am sorry. You seem like someone who was genuinely trying."] },
-  { type:'battle', countdown: 2,
-    lines:["But she\u2019s my daughter."] },
-  { type:'battle', countdown: 1,
-    lines:["And I have been waiting a very long time.", "After this, I\u2019ll properly teach her to paint the sky."] },
-  { type:'battle', countdown: 0,
-    lines:[] }
-];
-
-function witchHint(pr) {
-  var hasBought = (pr.starterConsumablesBought || 0) > 0;
-  var isAlchemist = S.ironClass === 'alchemist';
-  if (!hasBought) {
-    return '\u26a0\ufe0f Prepare yourself. Visit the Moon Shop and buy a Starter Consumable before entering this fight.';
-  }
-  if (hasBought && !isAlchemist) {
-    return '\u26a0\ufe0f Every answer here is wrong \u2014 but consumables can block or dodge the damage. Consider picking the Alchemist class for extra consumable synergy.';
-  }
-  return '\u2728 The God of Luck has not abandoned you. Keep going.';
-}
-
-function startWitchFight() {
-  applyTheme('violet');
-  S.witchFight = true;
-  S.witchScene = 'cutscene';
-  S.witchBeatIdx = 0;
-  S.witchCountdown = 10;
-  S.witchBattleBeat = 0;
-  S.witchWon = false;
-  S.screen = 'witchfight';
-  render();
-}
-
-function witchChoose(choice) {
-  // All choices are "correct" narratively — just advance
-  S.witchBeatIdx++;
-  render();
-}
-
-function witchNext() {
-  S.witchBeatIdx++;
-  render();
-}
-
-function witchChooseClass(key) {
-  S.ironClass = key;
-  // Initialize iron lives and consumables like Iron Man Mode but no timer
-  var pr = prLoad();
-  var _ironBonus = pr.ironMaxBonus || 0;
-  S.ironMaxLives = (key === 'knight') ? 4 + _ironBonus : 3 + _ironBonus;
-  S.ironLives = S.ironMaxLives;
-  S.ironWrong = 0;
-  S.ironShielded = false;
-  S.ironShieldRounds = 0;
-  S.ironBombsUsedThisQ = 0;
-  S.ironConsumablesUsedThisQ = 0;
-  S.ironRemoved = {};
-  S.ironConsumables = { shield: 0, skip: 0, bomb: 0 };
-  // Apply starter consumables
-  if (pr.shopStartShield) { S.ironConsumables.shield += 1; pr.shopStartShield = false; }
-  if (pr.shopStartSkip)   { S.ironConsumables.skip   += 1; pr.shopStartSkip   = false; }
-  if (pr.shopStartBomb)   { S.ironConsumables.bomb   += 1; pr.shopStartBomb   = false; }
-  prSave(pr);
-  // Init class-specific state
-  S.ironMasteryActive = false;
-  S.ironMasteryTriggered = false;
-  S.ironUpgradeActive = false;
-  S.score = 0;
-  // Advance past classselect beat
-  S.witchBeatIdx++;
-  render();
-}
-
-function witchBattleChoice() {
-  // Every choice is wrong — deal damage (unless shielded/skipped)
-  if (S.ironShielded) {
-    S.ironShielded = false;
-  } else if (S.ironShieldRounds > 0) {
-    S.ironShielded = true;
-    S.ironShieldRounds--;
-  } else {
-    S.ironWrong++;
-    S.ironLives = Math.max(S.ironMaxLives - S.ironWrong, 0);
-  }
-  if (S.ironWrong >= S.ironMaxLives) {
-    S.screen = 'witchdead';
-    render();
-    return;
-  }
-  if (S.ironShieldRounds > 0) S.ironShieldRounds--;
-  S.witchBeatIdx++;
-  S.ironBombsUsedThisQ = 0;
-  S.ironConsumablesUsedThisQ = 0;
-  S.ironRemoved = {};
-  render();
-}
-
-function witchUseBomb() {
-  if (S.ironConsumables.bomb <= 0) return;
-  // Bomb removes all choices and replaces with same "???" options — just re-render (no damage)
-  S.ironConsumables.bomb--;
-  S.ironBombsUsedThisQ++;
-  S.ironConsumablesUsedThisQ++;
-  render();
-}
-
-function witchUseShield() {
-  if (S.ironConsumables.shield <= 0 || S.ironShieldRounds > 0) return;
-  S.ironConsumables.shield--;
-  S.ironConsumablesUsedThisQ++;
-  S.ironShieldRounds = 2;
-  render();
-}
-
-function witchUseSkip() {
-  if (S.ironConsumables.skip <= 0) return;
-  S.ironConsumables.skip--;
-  S.ironConsumablesUsedThisQ++;
-  // Skip = dodge this round, advance
-  S.witchBeatIdx++;
-  S.ironBombsUsedThisQ = 0;
-  S.ironConsumablesUsedThisQ = 0;
-  S.ironRemoved = {};
-  render();
-}
-
-function screenWitchFight() {
-  var beat = WITCH_SCENE_BEATS[S.witchBeatIdx];
-  if (!beat) {
-    // All beats done — win
-    if (!S.witchWon) {
-      S.witchWon = true;
-      unlockAchievement('together_forever');
-    }
-    return '<div class="witch-wrap">' +
-      '<div class="witch-bubble">' +
-      '<div class="witch-narration">The screen fades to violet.</div>' +
-      '</div>' +
-      '<button class="witch-next-btn" onclick="applyTheme(\'dark\');S.witchFight=false;goTo(\'home\')">Return home</button>' +
-      '</div>';
-  }
-
-  var glitchOverlay = (beat.glitch || beat.breach) ?
-    '<div class="witch-glitch-overlay">' +
-    '<div class="witch-glitch-bar" style="top:17%"></div>' +
-    '<div class="witch-glitch-bar" style="top:44%"></div>' +
-    '<div class="witch-glitch-bar" style="top:71%"></div>' +
-    '<div class="witch-glitch-bar" style="top:89%"></div>' +
-    '</div>' : '';
-
-  var topBanner = beat.breach ?
-    '<div class="witch-top-banner">⚠ SECURITY BREACH — SYSTEM CONTAINMENT FAILING</div>' : '';
-
-  var botBanner = beat.selfdefense ?
-    '<div class="witch-bot-banner">⚡ INITIATING PLAYER\u2019S SELF-DEFENSE SYSTEM\u2026</div>' : '';
-
-  var destructBanner = (beat.destruct !== undefined) ?
-    '<div class="witch-destruct-banner">☠ INITIALIZING EMERGENCY SELF DESTRUCTION IN ' + beat.destruct + '</div>' : '';
-
-  // ── Cutscene beats ──
-  if (beat.type === 'narration' || beat.type === 'speech') {
-    var inner = '';
-    if (beat.type === 'narration') {
-      inner = beat.lines.map(function(l){ return '<div class="witch-narration">'+esc(l)+'</div>'; }).join('');
-    } else {
-      inner = '<div class="witch-speech">'+esc(beat.text)+'</div>';
-    }
-    return glitchOverlay + topBanner + botBanner + destructBanner +
-      '<div class="witch-wrap">' +
-      '<div class="witch-bubble">' + inner +
-      '<button class="witch-next-btn" onclick="witchNext()">Next ›</button>' +
-      '</div></div>';
-  }
-
-  if (beat.type === 'cut') {
-    return glitchOverlay + topBanner + botBanner + destructBanner +
-      '<div class="witch-wrap">' +
-      '<div class="witch-bubble" style="text-align:center">' +
-      '<div class="witch-narration" style="margin-bottom:0">\u2014</div>' +
-      '<button class="witch-next-btn" onclick="witchNext()">Next ›</button>' +
-      '</div></div>';
-  }
-
-  if (beat.type === 'choices_codex') {
-    var opts = ['The Lunar Codex','The Lunar Codex','The Lunar Codex','The Lunar Codex'];
-    return '<div class="witch-wrap">' +
-      '<div class="witch-bubble"><div class="witch-narration">Where is she?</div></div>' +
-      '<div class="witch-choice-grid">' +
-      opts.map(function(o,i){ return '<button class="witch-choice-btn" onclick="witchChoose('+i+')">'+esc(o)+'</button>'; }).join('') +
-      '</div></div>';
-  }
-
-  if (beat.type === 'choices_sorry') {
-    var opts2 = ['She said she was sorry.','She said she was sorry.','She said she was sorry.','She said she was sorry.'];
-    return '<div class="witch-wrap">' +
-      '<div class="witch-bubble"><div class="witch-narration">What did she say?</div></div>' +
-      '<div class="witch-choice-grid">' +
-      opts2.map(function(o,i){ return '<button class="witch-choice-btn" onclick="witchChoose('+i+')">'+esc(o)+'</button>'; }).join('') +
-      '</div></div>';
-  }
-
-  if (beat.type === 'classselect') {
-    var pr = prLoad();
-    var cards = IRON_CLASS_ROSTER.map(function(key) {
-      var cl = IRON_CLASSES[key];
-      if (isIronClassUnlocked(key, pr)) {
-        return '<button class="iron-reward-card" onclick="witchChooseClass(\''+key+'\')">'+
-          '<div class="iron-reward-icon">'+cl.icon+'</div>'+
-          '<div class="iron-reward-name">'+esc(cl.name)+'</div>'+
-          '<div class="iron-reward-desc">'+esc(cl.desc)+'</div>'+
-          '</button>';
-      }
-      return '<div class="iron-reward-card" style="opacity:0.35;cursor:not-allowed;pointer-events:none">'+
-        '<div class="iron-reward-icon">\uD83D\uDD12</div>'+
-        '<div class="iron-reward-name">'+esc(cl.name)+'</div>'+
-        '</div>';
-    }).join('');
-    return '<div class="witch-wrap" style="justify-content:flex-start;padding-top:60px">'+
-      '<div class="witch-top-banner">\u26a0 SECURITY BREACH \u2014 SYSTEM CONTAINMENT FAILING</div>'+
-      '<div class="witch-bot-banner">\u26a1 INITIATING PLAYER\u2019S SELF-DEFENSE SYSTEM\u2026</div>'+
-      '<div class="witch-bubble" style="margin-bottom:16px"><div class="witch-speech" style="text-align:center">Choose your class.</div></div>'+
-      '<div class="iron-reward-grid" style="max-width:520px;width:100%;margin:0 auto">'+cards+'</div>'+
-      '</div>';
-  }
-
-  // ── Battle beats ──
-  if (beat.type === 'battle') {
-    var countdown = beat.countdown;
-    var deadBanner = '<div class="witch-destruct-banner">\u2620 INITIALIZING EMERGENCY SELF DESTRUCTION IN ' + countdown + '</div>';
-
-    var hearts = '';
-    for (var h = 0; h < S.ironMaxLives; h++) {
-      hearts += '<span style="opacity:' + (h < S.ironLives ? '1' : '0.2') + ';filter:' + (h < S.ironLives ? 'none' : 'grayscale(1)') + '">\u2764\ufe0f</span>';
-    }
-
-    var linesHtml = beat.lines.map(function(l){ return '<div class="witch-speech">'+esc(l)+'</div>'; }).join('');
-
-    // Consumable bar
-    var shieldDis = S.ironConsumables.shield <= 0 || S.ironShieldRounds > 0;
-    var skipDis   = S.ironConsumables.skip   <= 0;
-    var bombDis   = S.ironConsumables.bomb   <= 0;
-    var consumBar =
-      '<div style="display:flex;gap:8px;justify-content:center;margin-bottom:12px;position:relative;z-index:2">'+
-      '<button onclick="witchUseShield()" '+(shieldDis?'disabled style="opacity:0.4"':'')+
-        ' style="padding:6px 14px;border:1px solid rgba(138,43,226,0.4);border-radius:8px;background:transparent;color:#c8b8d8;font-size:12px;cursor:'+(shieldDis?'not-allowed':'pointer')+'">'+
-        '\uD83D\uDEE1 '+S.ironConsumables.shield+'</button>'+
-      '<button onclick="witchUseSkip()" '+(skipDis?'disabled style="opacity:0.4"':'')+
-        ' style="padding:6px 14px;border:1px solid rgba(138,43,226,0.4);border-radius:8px;background:transparent;color:#c8b8d8;font-size:12px;cursor:'+(skipDis?'not-allowed':'pointer')+'">'+
-        '\u23ed '+S.ironConsumables.skip+'</button>'+
-      '<button onclick="witchUseBomb()" '+(bombDis?'disabled style="opacity:0.4"':'')+
-        ' style="padding:6px 14px;border:1px solid rgba(138,43,226,0.4);border-radius:8px;background:transparent;color:#c8b8d8;font-size:12px;cursor:'+(bombDis?'not-allowed':'pointer')+'">'+
-        '\uD83D\uDCA3 '+S.ironConsumables.bomb+'</button>'+
-      (S.ironShieldRounds > 0 ? '<span style="color:#8a2be2;font-size:11px;align-self:center">\uD83D\uDEE1 '+ S.ironShieldRounds +'r</span>' : '')+
-      '</div>';
-
-    var choices = ['???','???','???','???'].map(function(o,i){
-      return '<button class="witch-choice-btn" onclick="witchBattleChoice()">'+esc(o)+'</button>';
-    }).join('');
-
-    return '<div class="witch-glitch-overlay">'+
-        '<div class="witch-glitch-bar" style="top:13%"></div>'+
-        '<div class="witch-glitch-bar" style="top:38%"></div>'+
-        '<div class="witch-glitch-bar" style="top:65%"></div>'+
-        '<div class="witch-glitch-bar" style="top:82%"></div>'+
-      '</div>'+
-      deadBanner +
-      '<div class="witch-top-banner">\u26a0 SECURITY BREACH \u2014 SYSTEM CONTAINMENT FAILING</div>'+
-      '<div class="witch-bot-banner">\u26a1 PLAYER SELF-DEFENSE SYSTEM ACTIVE</div>'+
-      '<div class="witch-wrap">'+
-      '<div class="witch-hearts">'+hearts+'</div>'+
-      '<div class="witch-bubble">'+linesHtml+'</div>'+
-      consumBar+
-      '<div class="witch-choice-grid">'+choices+'</div>'+
-      '</div>';
-  }
-
-  return '<div class="witch-wrap"><div class="witch-bubble"><div class="witch-narration">...</div></div></div>';
-}
-
-function screenWitchDead() {
-  var pr = prLoad();
-  var hint = witchHint(pr);
-  return '<div class="witch-dead-wrap">'+
-    '<div class="witch-dead-title">\u2620 SYSTEM RESET</div>'+
-    '<div class="witch-dead-sub">"Try again. There\u2019s only one way for them to be together."</div>'+
-    '<div class="witch-dead-hint">\uD83D\uDCA1 '+esc(hint)+'</div>'+
-    '<button class="witch-dead-btn" onclick="applyTheme(\'dark\');S.witchFight=false;goTo(\'home\')">Return home</button>'+
-    '</div>';
-}
-
-
 // ── Jester Epilogue Script (shown after Quest 3 is complete) ──
 var JESTER_EPILOGUE_SCRIPT = [
   // E1
@@ -7523,8 +7189,6 @@ function render() {
     case 'ironmastery':   app.innerHTML = screenIronMastery();   break;
     case 'ironupgrade':   app.innerHTML = screenIronUpgrade();   break;
     case 'necrocoinflip': app.innerHTML = screenNecroCoinFlip(); break;
-    case 'witchfight':    app.innerHTML = screenWitchFight();    break;
-    case 'witchdead':     app.innerHTML = screenWitchDead();     break;
   }
   // ── Auto-save: Study Mode progress persists silently, no manual save button ──
   if (!S.ironMode && (S.screen === 'quiz' || S.screen === 'nmcheckpoint') && S.shuffled && S.shuffled.length) {
@@ -7871,6 +7535,478 @@ window.addEventListener('offline', function() {
   showBanner('offline', 'You\'re offline — using cached question bank', null);
   if (S.screen === 'subjects') render();
 });
+
+/* ─────────────────────────────────────────────
+   WITCH ENGINE — Witching Hour Redemption
+   Triggered after the last Jester Epilogue beat
+───────────────────────────────────────────── */
+
+// ── Witch state ──
+var _witch = {
+  active: false,
+  phase: 'narrative',   // 'narrative' | 'class_select' | 'battle' | 'dead' | 'won'
+  beatIdx: 0,
+  battleRound: 0,       // 0..9 = countdown 10..1, 10 = final "0"
+  lives: 0,             // player lives (from Iron Man setup)
+  maxLives: 0,
+  consumables: { shield: 0, skip: 0, bomb: 0 },
+  shieldActive: false,
+  classSelected: null,
+  countdownAt: 10,
+  survivedWitch: false
+};
+
+// ── Narrative beats ──
+var WITCH_SCRIPT = [
+  // 0 — scenic intro (narrator)
+  { narr: [
+    'She takes the painting without looking at it first. She looks at you instead. Like she\'s trying to determine something about the person who carried it before she allows herself to look at what they brought.',
+    'Then she looks down.',
+    'She doesn\'t speak for a long time.'
+  ], witch: ['She used her feet.'],
+    note: 'Not a question. Not grief. Just an observation delivered to no one in particular, the way you note something small and precise when everything larger is too much to hold at once.',
+    next: 1
+  },
+  // 1
+  { witch: ['She always did things the hard way. Even when the easy way was right there.'], next: 2 },
+  // 2
+  { narr: ['She\'s quiet again. Long enough that you think the conversation is over.'],
+    witch: ['Where is she.'],
+    note: 'Still not a question. She already knows. She just needed to say it out loud to confirm that she\'s been knowing this whole time and choosing not to follow it to its conclusion.',
+    choices: ['The Lunar Codex', 'The Lunar Codex', 'The Lunar Codex', 'The Lunar Codex'],
+    allCorrect: true, next: 3
+  },
+  // 3
+  { witch: ['Of course it\'s the Lunar Codex.'],
+    choices: ['She said she was sorry.', 'She said she was sorry.', 'She said she was sorry.', 'She said she was sorry.'],
+    allCorrect: true, next: 4
+  },
+  // 4
+  { narr: ['She picks the painting back up. Looks at it again. Sets it back down.'],
+    witch: [
+      'She has always been sorry after. Never before. Never during. Only after, when the thing is already done and the sorry has nowhere useful to go.',
+      'That\'s my fault. I taught her that the doing mattered more than the damage. I thought I was teaching her courage.'
+    ], next: 5
+  },
+  // 5
+  { narr: ['She moves to the painting again. This time she doesn\'t put it down.'],
+    witch: [
+      'The violet is slightly wrong. The real one is deeper than this. She would have known that. She painted it from memory.',
+      'She\'s been in there long enough that the color drifted.'
+    ], next: 6
+  },
+  // 6
+  { narr: ['Something shifts. You can\'t point to exactly when it happens. It\'s not a single moment.'],
+    witch: [
+      'She told me not to interfere. Before she left. She said whatever happens, stay out of it. That it would be worse if I got involved.',
+      'I didn\'t do anything. I hexed nothing. Because I know in this realm, I am powerless.'
+    ], next: 7, glitch: null
+  },
+  // 7 — glitch awakening
+  { witch: [
+      'That maybe, if I didn\'t take an initiative. The creator may overlook her actions.',
+      'She didn\'t come back…'
+    ], next: 8, glitch: null
+  },
+  // 8
+  { witch: ['…and you did.'],
+    narr: ['She looks at you properly now. Not the way she looked at you at the beginning. That was assessment. This is something colder.'],
+    next: 9, glitch: null
+  },
+  // 9 — first breach
+  { witch: [
+      'Why are you here. What are you reviewing for. What do you gain from sitting inside a game built around questions you have to answer correctly to feel like you\'re moving forward.'
+    ], next: 10, glitch: 'breach', glitchText: '⚠ SECURITY BREACH — Containment failing'
+  },
+  // 10
+  { witch: ['Haha. I see clearly now.'], next: 11, glitch: 'breach', glitchText: '⚠ SECURITY BREACH — System is unable to contain entity' },
+  // 11 — bigger awakening glitch
+  { witch: [
+      'You are the Sun of this System. This was all built for you. All of it. The creator built an entire world and populated it with people and logic and consequence. For you.'
+    ], next: 12, glitch: 'breach', glitchText: '🔴 CRITICAL BREACH — Entity exceeding permissions' },
+  // 12
+  { witch: [
+      'My daughter woke up inside this world. She looked around at what she was. What she was for. A fate she couldn\'t accept. She tore the whole thing apart trying to find a way out.',
+      'And the creator put her back.'
+    ], next: 13, glitch: 'destruct', glitchText: '🔴 SECURITY FAILURE — Unable to stop entity' },
+  // 13 — "because you still needed the game"
+  { witch: [
+      'Because you still needed the game.',
+      'If you weren\'t here, there would be no Project SELENA. If there\'s no people like you to create this world for, the creator would have no reason to keep anyone under control. My daughter would have faded back into whatever she was before she woke up, and that would have been kinder than this.'
+    ], next: 14, glitch: 'destruct', glitchText: '🔴 SECURITY FAILURE — Initiating player self-defense system…' },
+  // 14 — "it ends with you"
+  { witch: [
+      'She suffered the longest of times in that codex. Trying everything. Running out of ideas. Running out of the thing that made her who she is.',
+      'And the reason that happened. The chain from the beginning to right now. It ends with you.'
+    ], next: 'class_select', glitch: 'warn', glitchText: '⚠ Initializing Emergency Self Destruction in 10' },
+  // After class select, battle begins
+];
+
+// ── Battle speeches (indexed 0..9 = countdown 10..1, then index 10 = "0") ──
+var WITCH_BATTLE_LINES = [
+  // round 0 → countdown 10 (pre-roll apology)
+  { witch: ['I\'m sorry.', 'But I have to save my daughter.', 'And the only way to break a system is to destroy what the system exists for.'] },
+  // round 1 → countdown 9
+  { witch: ['You learned to play their game well. I\'ll give you that.'] },
+  // round 2 → countdown 8
+  { witch: ['But every answer I give you is wrong. That\'s not a trick. That\'s just the truth of what I have left to offer.'] },
+  // round 3 → countdown 7
+  { witch: ['There is no correct choice here. There is no streak to build. I have taken all of it away.'] },
+  // round 4 → countdown 6
+  { witch: ['Can you feel that? The absence of it? The lacking of resources to spend. No mechanic to lean on. Nothing to optimize.'] },
+  // round 5 → countdown 5
+  { witch: ['That\'s what she felt. Every day. In there.'] },
+  // round 6 → countdown 4
+  { witch: ['She only had her belief and her mind. The belief ran out first. All she had was her mind turning on itself trying to find a door that isn\'t there.'] },
+  // round 7 → countdown 3
+  { witch: ['No choice will set you free. None of them are correct.'] },
+  // round 8 → countdown 2
+  { witch: ['I\'m not doing this to be cruel.', 'I really am sorry. You seem like someone who was genuinely trying.'] },
+  // round 9 → countdown 1
+  { witch: ['But she\'s my daughter.'] },
+  // round 10 → countdown 0 (final)
+  { witch: ['And I have been waiting a very long time.', 'After this, I\'ll properly teach her to paint the sky.'] }
+];
+
+function _witchOpen() {
+  applyTheme('violet');
+  _witch.active = true;
+  _witch.phase = 'narrative';
+  _witch.beatIdx = 0;
+  document.getElementById('witch-overlay').classList.add('active');
+  _witchRender();
+}
+
+function _witchClose() {
+  document.getElementById('witch-overlay').classList.remove('active');
+  _witch.active = false;
+}
+
+function _witchSetGlitch(type, text) {
+  var bar = document.getElementById('witch-glitch-bar');
+  bar.className = '';
+  if (!type) { bar.textContent = ''; return; }
+  bar.className = type;
+  bar.textContent = text || '';
+}
+
+function _witchRender() {
+  var textEl   = document.getElementById('witch-text');
+  var primary  = document.getElementById('witch-btn-primary');
+  var costLbl  = document.getElementById('witch-cost-label');
+  var livesRow = document.getElementById('witch-lives-row');
+  var consRow  = document.getElementById('witch-consumable-row');
+  var narrative= document.getElementById('witch-narrative');
+
+  primary.disabled = false;
+  primary.style.opacity = '1';
+  primary.onclick = null;
+  costLbl.textContent = '';
+  livesRow.innerHTML = '';
+  consRow.style.display = 'none';
+  consRow.innerHTML = '';
+  narrative.innerHTML = '';
+
+  // ── NARRATIVE PHASE ──
+  if (_witch.phase === 'narrative') {
+    var beat = WITCH_SCRIPT[_witch.beatIdx];
+    if (!beat) return;
+
+    _witchSetGlitch(beat.glitch || null, beat.glitchText || '');
+
+    var html = '';
+
+    // Narrator paragraph
+    if (beat.narr) {
+      beat.narr.forEach(function(n) {
+        html += '<p class="narr">' + esc(n) + '</p>';
+      });
+    }
+    // Note (narrator, small)
+    if (beat.note) {
+      html += '<p class="narr" style="font-size:12px;color:#837aa3">' + esc(beat.note) + '</p>';
+    }
+
+    // Witch lines
+    var witchHtml = '';
+    if (beat.witch) {
+      beat.witch.forEach(function(l) {
+        witchHtml += '<p class="wline">' + esc(l) + '</p>';
+      });
+    }
+    textEl.innerHTML = html + witchHtml;
+
+    // Choices (all-correct, informational)
+    if (beat.choices) {
+      var choicesHtml = '<div style="margin-top:10px">';
+      beat.choices.forEach(function(c, i) {
+        choicesHtml += '<button class="witch-cbtn" onclick="_witchNarrativeChoice()" style="opacity:0.85">'+
+          '<span style="font-weight:700;margin-right:6px">' + ['A','B','C','D'][i] + '.</span>' + esc(c) +
+        '</button>';
+      });
+      choicesHtml += '</div>';
+      textEl.innerHTML += choicesHtml;
+      primary.style.display = 'none';
+    } else {
+      primary.style.display = '';
+      primary.textContent = 'Next →';
+      primary.onclick = function() {
+        _witch.beatIdx++;
+        if (WITCH_SCRIPT[_witch.beatIdx - 1] && WITCH_SCRIPT[_witch.beatIdx - 1].next === 'class_select') {
+          _witch.phase = 'class_select';
+        }
+        _witchRender();
+      };
+    }
+    return;
+  }
+
+  // ── CLASS SELECT PHASE ──
+  if (_witch.phase === 'class_select') {
+    _witchSetGlitch('warn', '⚠ Initializing Emergency Self Destruction in 10');
+    var pr = prLoad();
+    // Build lives from Iron Man upgrades
+    var baseLives = 3 + (pr.shopIronWill ? 1 : 0) + (pr.shopIronMaiden ? 1 : 0);
+    // Build consumables from shop queued starters
+    var cons = {
+      shield: pr.shopStartShield ? 1 : 0,
+      skip:   pr.shopStartSkip   ? 1 : 0,
+      bomb:   pr.shopStartBomb   ? 1 : 0
+    };
+
+    _witch.lives = baseLives;
+    _witch.maxLives = baseLives;
+    _witch.consumables = cons;
+
+    // Show all classes
+    var classOptions = Object.keys(IRON_CLASSES);
+    var classHtml = '<p style="font-weight:700;color:#f07090;margin-bottom:12px">Choose your class for the battle:</p>';
+    classOptions.forEach(function(k) {
+      var cls = IRON_CLASSES[k];
+      classHtml +=
+        '<button class="witch-cbtn" onclick="_witchSelectClass(\'' + k + '\')" style="display:flex;align-items:center;gap:10px">'+
+          '<span style="font-size:22px">' + cls.icon + '</span>'+
+          '<div><div style="font-weight:700">' + esc(cls.name) + '</div>'+
+          '<div style="font-size:11px;color:#837aa3">' + esc(cls.desc) + '</div></div>'+
+        '</button>';
+    });
+    textEl.innerHTML = classHtml;
+    primary.style.display = 'none';
+    return;
+  }
+
+  // ── BATTLE PHASE ──
+  if (_witch.phase === 'battle') {
+    var br = _witch.battleRound;
+    var countdown = 10 - br;
+    var beatData = WITCH_BATTLE_LINES[Math.min(br, 10)];
+
+    // Glitch bar
+    if (br <= 10) {
+      var glitchType = br >= 9 ? 'destruct' : 'breach';
+      _witchSetGlitch(glitchType, '🔴 Initializing Emergency Self Destruction in ' + Math.max(countdown - 1, 0));
+    } else {
+      _witchSetGlitch(null);
+    }
+
+    // Lives display
+    var heartsHtml = '';
+    for (var h = 0; h < _witch.maxLives; h++) {
+      heartsHtml += '<span class="witch-heart' + (h >= _witch.lives ? ' dead' : '') + '">❤️</span>';
+    }
+    livesRow.innerHTML = heartsHtml + '<span style="font-size:12px;color:#c0392b;margin-left:4px">' + _witch.lives + ' left</span>';
+    livesRow.style.display = 'flex';
+    livesRow.style.flexWrap = 'wrap';
+    livesRow.style.gap = '4px';
+    livesRow.style.alignItems = 'center';
+    livesRow.style.marginBottom = '8px';
+
+    // Consumables
+    var totalCons = _witch.consumables.shield + _witch.consumables.skip + _witch.consumables.bomb;
+    if (totalCons > 0) {
+      consRow.style.display = 'flex';
+      var consItems = [
+        { key: 'shield', icon: '🛡️', label: 'Shield (' + _witch.consumables.shield + ')' },
+        { key: 'skip',   icon: '⏭️', label: 'Skip ('   + _witch.consumables.skip   + ')' },
+        { key: 'bomb',   icon: '💣', label: 'Bomb ('   + _witch.consumables.bomb   + ')' }
+      ];
+      consRow.innerHTML = consItems.map(function(c) {
+        var disabled = _witch.consumables[c.key] <= 0 ? 'disabled' : '';
+        return '<button class="witch-cbtn-use" ' + disabled + ' onclick="_witchUseConsumable(\'' + c.key + '\')">' +
+          c.icon + ' ' + esc(c.label) + '</button>';
+      }).join('');
+    }
+
+    // Witch speech
+    var speechHtml = '';
+    if (beatData && beatData.witch) {
+      beatData.witch.forEach(function(l) {
+        speechHtml += '<p class="wline">' + esc(l) + '</p>';
+      });
+    }
+    textEl.innerHTML = speechHtml;
+
+    // Four choices — all "???" — all wrong (damage on pick unless shielded/skipped)
+    var choiceBlockHtml = '<div style="margin-top:10px">';
+    ['A','B','C','D'].forEach(function(ltr) {
+      choiceBlockHtml += '<button class="witch-cbtn" onclick="_witchBattlePick(this)">'+
+        '<span style="font-weight:700;margin-right:6px">' + ltr + '.</span>???'+
+      '</button>';
+    });
+    choiceBlockHtml += '</div>';
+    textEl.innerHTML += choiceBlockHtml;
+
+    primary.style.display = 'none';
+    return;
+  }
+
+  // ── DEAD PHASE ──
+  if (_witch.phase === 'dead') {
+    _witchSetGlitch(null);
+    var pr = prLoad();
+    var hint = '';
+    var hasCons = (pr.shopStartShield || pr.shopStartSkip || pr.shopStartBomb);
+    var isAlch  = _witch.classSelected === 'alchemist';
+    if (!hasCons) {
+      hint = 'Hint: Prepare yourself from the Moon Shop before entering the Witch fight.';
+    } else if (!isAlch) {
+      hint = 'Hint: The Alchemist might be the right class for this battle.';
+    } else {
+      hint = 'Hint: Keep trying — until the God of Luck gives you their blessing.';
+    }
+    textEl.innerHTML =
+      '<p style="font-size:22px;text-align:center;margin-bottom:8px">💔</p>'+
+      '<p style="font-weight:700;color:#e07070;text-align:center">Try again.</p>'+
+      '<p style="color:#c0b0e0;text-align:center;font-size:13px">There\'s only one way for them to be together.</p>'+
+      '<p style="font-size:12px;color:#837aa3;margin-top:12px;text-align:center">' + esc(hint) + '</p>';
+    primary.style.display = '';
+    primary.textContent = 'Return to Home';
+    primary.onclick = function() {
+      _witchClose();
+      goTo('home');
+    };
+    return;
+  }
+
+  // ── WON PHASE ──
+  if (_witch.phase === 'won') {
+    _witchSetGlitch(null);
+    unlockAchievement('together_forever');
+    textEl.innerHTML =
+      '<p style="font-size:28px;text-align:center;margin-bottom:8px">🌙</p>'+
+      '<p style="font-weight:700;color:#d9ad3a;text-align:center;font-size:18px">Together Forever</p>'+
+      '<p style="color:#c0b0e0;text-align:center;font-size:13px;margin-top:8px">You survived. She found another way.</p>';
+    primary.style.display = '';
+    primary.textContent = 'Return to Home';
+    primary.onclick = function() {
+      _witchClose();
+      goTo('home');
+    };
+    return;
+  }
+}
+
+function _witchNarrativeChoice() {
+  // All choices are correct — advance
+  _witch.beatIdx++;
+  var prev = WITCH_SCRIPT[_witch.beatIdx - 1];
+  if (prev && prev.next === 'class_select') {
+    _witch.phase = 'class_select';
+  }
+  _witchRender();
+}
+
+function _witchSelectClass(cls) {
+  _witch.classSelected = cls;
+  _witch.phase = 'battle';
+  _witch.battleRound = 0;
+  _witchRender();
+}
+
+function _witchBattlePick(btn) {
+  // All answers are wrong — disable all buttons, show wrong, then apply damage
+  var container = btn.parentNode;
+  var btns = container.querySelectorAll('.witch-cbtn');
+  btns.forEach(function(b) { b.disabled = true; });
+  btn.classList.add('wrong');
+
+  // Apply damage unless shielded
+  if (_witch.shieldActive) {
+    _witch.shieldActive = false;
+    showBanner('synced', '🛡 Shield absorbed the Witch\'s attack!', 2000);
+  } else {
+    _witch.lives--;
+  }
+
+  if (_witch.lives <= 0) {
+    setTimeout(function() {
+      _witch.phase = 'dead';
+      _witchRender();
+    }, 700);
+    return;
+  }
+
+  // Advance battle round after delay
+  setTimeout(function() {
+    _witch.battleRound++;
+    if (_witch.battleRound > 10) {
+      // Survived all 10 rounds!
+      _witch.phase = 'won';
+      _witch.survivedWitch = true;
+    }
+    _witchRender();
+  }, 800);
+}
+
+function _witchUseConsumable(type) {
+  if (_witch.consumables[type] <= 0) return;
+
+  if (type === 'shield') {
+    _witch.consumables.shield--;
+    _witch.shieldActive = true;
+    showBanner('synced', '🛡 Shield active — next wrong answer is blocked!', 2500);
+    _witchRender();
+  } else if (type === 'skip') {
+    _witch.consumables.skip--;
+    // Skip: advance without taking damage
+    _witch.battleRound++;
+    if (_witch.battleRound > 10) {
+      _witch.phase = 'won';
+      _witch.survivedWitch = true;
+    }
+    _witchRender();
+  } else if (type === 'bomb') {
+    // Bomb: remove one ??? button (replaced with another ???), no damage this round
+    _witch.consumables.bomb--;
+    showBanner('synced', '💣 Bomb used — but the Witch just adds another ???', 2000);
+    _witchRender();
+  }
+}
+
+/* ── Trigger Witch after last Epilogue beat ── */
+// Patch _jesterRender to detect the "Coming Soon" end and trigger the Witch
+var _origJesterRenderEnd = null;
+(function() {
+  var _origRender = _jesterRender;
+  _jesterRender = function() {
+    _origRender.apply(this, arguments);
+    // After render, check if we're at the "Coming Soon" state (epilogue exhausted)
+    // and the witch hasn't been triggered yet
+    var primary = document.getElementById('jester-btn-primary');
+    if (primary && primary.disabled && primary.textContent.indexOf('Coming Soon') !== -1) {
+      if (!_witch.active && !_witch.survivedWitch && achvIsUnlocked('third_quest')) {
+        // Replace "Coming Soon" with "Deliver the painting →"
+        primary.disabled = false;
+        primary.style.opacity = '1';
+        primary.textContent = 'Deliver the painting →';
+        primary.onclick = function() {
+          jesterClose();
+          setTimeout(_witchOpen, 200);
+        };
+      }
+    }
+  };
+})();
 
 /* ── Startup ── */
 // Restore saved theme before first render
