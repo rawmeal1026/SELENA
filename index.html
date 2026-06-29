@@ -6242,8 +6242,12 @@ var WITCH_SCENE_BEATS = [
 
 function witchHint(pr) {
   var hasBought = (pr.starterConsumablesBought || 0) > 0;
+  var isAlchemist = S.ironClass === 'alchemist';
   if (!hasBought) {
     return '\u26a0\ufe0f Prepare yourself. Visit the Moon Shop and buy a Starter Consumable before entering this fight.';
+  }
+  if (hasBought && !isAlchemist) {
+    return '\u26a0\ufe0f Every answer here is wrong \u2014 but consumables can block or dodge the damage. Consider picking the Alchemist class for extra consumable synergy.';
   }
   return '\u2728 The God of Luck has not abandoned you. Keep going.';
 }
@@ -6333,31 +6337,11 @@ function witchUseBomb() {
   render();
 }
 
-function witchUseSkill() {
-  if (!S.ironClass) return;
-  // Temporarily set ironMode so useClassSkill() runs its body
-  var _prev = S.ironMode;
-  S.ironMode = true;
-  // Provide a dummy question context
-  var _prevShuffled = S.shuffled;
-  var _prevCur = S.cur;
-  var _prevDone = S.done;
-  S.shuffled = [{ question:'???', choices:['???','???','???','???'], answer:'???', topic:'???', subj:'???', _order:[0,1,2,3] }];
-  S.cur = 0;
-  S.done = false;
-  useClassSkill();
-  S.ironMode = _prev;
-  S.shuffled = _prevShuffled;
-  S.cur = _prevCur;
-  S.done = _prevDone;
-  render();
-}
-
 function witchUseShield() {
   if (S.ironConsumables.shield <= 0 || S.ironShieldRounds > 0) return;
   S.ironConsumables.shield--;
-  S.ironConsumablesUsedThisQ = (S.ironConsumablesUsedThisQ || 0) + 1;
-  S.ironShieldRounds = (S.ironClass === 'knight' && S.ironMasteryActive) ? 3 : 2;
+  S.ironConsumablesUsedThisQ++;
+  S.ironShieldRounds = 2;
   render();
 }
 
@@ -6475,35 +6459,34 @@ function screenWitchFight() {
   // ── Battle beats ──
   if (beat.type === 'battle') {
     var countdown = beat.countdown;
-    var deadBanner = '<div class="witch-destruct-banner">☠ INITIALIZING EMERGENCY SELF DESTRUCTION IN ' + countdown + '</div>';
+    var deadBanner = '<div class="witch-destruct-banner">\u2620 INITIALIZING EMERGENCY SELF DESTRUCTION IN ' + countdown + '</div>';
 
     var hearts = '';
     for (var h = 0; h < S.ironMaxLives; h++) {
-      hearts += '<span class="iron-heart'+(h < S.ironLives ? '' : ' dead')+'">❤️</span>';
+      hearts += '<span style="opacity:' + (h < S.ironLives ? '1' : '0.2') + ';filter:' + (h < S.ironLives ? 'none' : 'grayscale(1)') + '">\u2764\ufe0f</span>';
     }
 
     var linesHtml = beat.lines.map(function(l){ return '<div class="witch-speech">'+esc(l)+'</div>'; }).join('');
 
-    // Inject a dummy question so ironConsumableRow and ironSkillRow can render safely
-    var _prevShuffled = S.shuffled;
-    var _prevCur = S.cur;
-    var _prevDone = S.done;
-    S.shuffled = [{ question:'???', choices:['???','???','???','???'], answer:'???', topic:'???', subj:'???', _order:[0,1,2,3] }];
-    S.cur = 0;
-    S.done = false;
-    // ironConsumableRow expects a question arg for bomb candidate count — pass dummy
-    var consumBar = ironConsumableRow(S.shuffled[0])
-      .replace('onclick="useIronShield()"', 'onclick="witchUseShield()"')
-      .replace('onclick="useIronSkip()"',   'onclick="witchUseSkip()"')
-      .replace('onclick="useIronBomb()"',   'onclick="witchUseBomb()"');
-    // ironSkillRow: wrap useClassSkill to advance witch beat after firing
-    var skillBar = S.ironClass ? ironSkillRow()
-      .replace('onclick="useClassSkill()"', 'onclick="witchUseSkill()"') : '';
-    S.shuffled = _prevShuffled;
-    S.cur = _prevCur;
-    S.done = _prevDone;
+    // Consumable bar
+    var shieldDis = S.ironConsumables.shield <= 0 || S.ironShieldRounds > 0;
+    var skipDis   = S.ironConsumables.skip   <= 0;
+    var bombDis   = S.ironConsumables.bomb   <= 0;
+    var consumBar =
+      '<div style="display:flex;gap:8px;justify-content:center;margin-bottom:12px;position:relative;z-index:2">'+
+      '<button onclick="witchUseShield()" '+(shieldDis?'disabled style="opacity:0.4"':'')+
+        ' style="padding:6px 14px;border:1px solid rgba(138,43,226,0.4);border-radius:8px;background:transparent;color:#c8b8d8;font-size:12px;cursor:'+(shieldDis?'not-allowed':'pointer')+'">'+
+        '\uD83D\uDEE1 '+S.ironConsumables.shield+'</button>'+
+      '<button onclick="witchUseSkip()" '+(skipDis?'disabled style="opacity:0.4"':'')+
+        ' style="padding:6px 14px;border:1px solid rgba(138,43,226,0.4);border-radius:8px;background:transparent;color:#c8b8d8;font-size:12px;cursor:'+(skipDis?'not-allowed':'pointer')+'">'+
+        '\u23ed '+S.ironConsumables.skip+'</button>'+
+      '<button onclick="witchUseBomb()" '+(bombDis?'disabled style="opacity:0.4"':'')+
+        ' style="padding:6px 14px;border:1px solid rgba(138,43,226,0.4);border-radius:8px;background:transparent;color:#c8b8d8;font-size:12px;cursor:'+(bombDis?'not-allowed':'pointer')+'">'+
+        '\uD83D\uDCA3 '+S.ironConsumables.bomb+'</button>'+
+      (S.ironShieldRounds > 0 ? '<span style="color:#8a2be2;font-size:11px;align-self:center">\uD83D\uDEE1 '+ S.ironShieldRounds +'r</span>' : '')+
+      '</div>';
 
-    var choices = ['???','???','???','???'].map(function(o){
+    var choices = ['???','???','???','???'].map(function(o,i){
       return '<button class="witch-choice-btn" onclick="witchBattleChoice()">'+esc(o)+'</button>';
     }).join('');
 
@@ -6514,13 +6497,12 @@ function screenWitchFight() {
         '<div class="witch-glitch-bar" style="top:82%"></div>'+
       '</div>'+
       deadBanner +
-      '<div class="witch-top-banner">⚠ SECURITY BREACH — SYSTEM CONTAINMENT FAILING</div>'+
-      '<div class="witch-bot-banner">⚡ PLAYER SELF-DEFENSE SYSTEM ACTIVE</div>'+
+      '<div class="witch-top-banner">\u26a0 SECURITY BREACH \u2014 SYSTEM CONTAINMENT FAILING</div>'+
+      '<div class="witch-bot-banner">\u26a1 PLAYER SELF-DEFENSE SYSTEM ACTIVE</div>'+
       '<div class="witch-wrap">'+
       '<div class="witch-hearts">'+hearts+'</div>'+
       '<div class="witch-bubble">'+linesHtml+'</div>'+
       consumBar+
-      skillBar+
       '<div class="witch-choice-grid">'+choices+'</div>'+
       '</div>';
   }
