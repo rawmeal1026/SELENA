@@ -1055,7 +1055,7 @@ html.violet .nm-witch-banner   { background:#241a08; border-color:#c79a3a; color
 .wg-text {
   position:absolute; font-family:monospace; font-size:10px; font-weight:700;
   letter-spacing:.1em; text-transform:uppercase; opacity:0; line-height:1.3;
-  white-space:nowrap;
+  white-space:normal; word-break:break-word;
   animation:wgt-blink var(--tdur,3s) var(--tdelay,0s) steps(1) infinite;
 }
 @keyframes wgt-blink {
@@ -6410,6 +6410,8 @@ function _jesterRender() {
   primary.style.opacity = '1';
   primary.onclick = null;
 
+  var _fp = prLoad().jesterFreePlay; // post-Canvas: quests play out but never gate
+
   // Helper: build paragraph HTML from lines array
   function buildLines(lines) {
     return lines.map(function(l) {
@@ -6418,14 +6420,19 @@ function _jesterRender() {
   }
 
   // ── Quest 3 complete: Epilogue script ──
-  if (achvIsUnlocked('third_quest') && _jester.inQuest3) {
+  if (_fp ? _jester.inQuest3 && _jester.quest3BeatIdx >= JESTER_QUEST3_SCRIPT.length
+          : (achvIsUnlocked('third_quest') && _jester.inQuest3)) {
     var ep = JESTER_EPILOGUE_SCRIPT[_jester.epilogueBeatIdx || 0];
     if (!ep) {
-      // All epilogue beats exhausted — Coming Soon
+      // All epilogue beats exhausted
       textEl.innerHTML = '<p style="margin:0 0 10px">\u201cThat’s all.\u201d</p>';
-      primary.textContent = 'Coming Soon\u2026';
+      if (_fp) {
+        prRecord(function(p) { p.witchReadyAgain = true; });
+      }
+      primary.textContent = _fp ? 'That\u2019s all.' : 'Coming Soon\u2026';
       primary.disabled = true;
       primary.style.opacity = '0.5';
+      if (_fp) secondary.style.display = 'none';
       return;
     }
     textEl.innerHTML = buildLines(ep.lines);
@@ -6438,7 +6445,8 @@ function _jesterRender() {
   }
 
   // ── Quest 2 complete: transition into Quest 3 ──
-  if (achvIsUnlocked('second_quest') && _jester.inQuest2 && !_jester.inQuest3) {
+  if (_fp ? _jester.inQuest2 && _jester.quest2BeatIdx >= JESTER_QUEST2_SCRIPT.length && !_jester.inQuest3
+          : (achvIsUnlocked('second_quest') && _jester.inQuest2 && !_jester.inQuest3)) {
     _jester.inQuest3 = true;
     _jester.quest3BeatIdx = 0;
     _jesterRender();
@@ -6451,7 +6459,7 @@ function _jesterRender() {
     if (!q3beat) return;
     textEl.innerHTML = buildLines(q3beat.lines);
 
-    if (q3beat.quest3Prompt) {
+    if (q3beat.quest3Prompt && !_fp) {
       var pr3 = prLoad();
       var dupesDone = pr3.jesterQuest3DupeCount || 0;
       var done3 = achvIsUnlocked('third_quest');
@@ -6466,6 +6474,7 @@ function _jesterRender() {
         primary.onclick = function() { _jesterRender(); };
       }
     } else {
+      if (q3beat.quest3Prompt) costLbl.textContent = '\u2705 Quest complete!';
       primary.textContent = 'Continue \u2192';
       primary.onclick = function() {
         _jester.quest3BeatIdx++;
@@ -6481,7 +6490,7 @@ function _jesterRender() {
     if (!q2beat) return;
     textEl.innerHTML = buildLines(q2beat.lines);
 
-    if (q2beat.quest2Prompt) {
+    if (q2beat.quest2Prompt && !_fp) {
       var done2 = achvIsUnlocked('second_quest');
       costLbl.textContent = done2 ? '\u2705 Quest complete!' : '\u23f3 Use 5 consumables on one question';
       if (!done2) {
@@ -6493,6 +6502,7 @@ function _jesterRender() {
         primary.onclick = function() { _jesterRender(); };
       }
     } else {
+      if (q2beat.quest2Prompt) costLbl.textContent = '\u2705 Quest complete!';
       primary.textContent = 'Continue \u2192';
       primary.onclick = function() {
         _jester.quest2BeatIdx++;
@@ -6503,7 +6513,8 @@ function _jesterRender() {
   }
 
   // ── Quest 1 complete: transition into Quest 2 ──
-  if (achvIsUnlocked('first_quest') && _jester.inQuest && !_jester.inQuest2) {
+  if (_fp ? _jester.inQuest && _jester.questBeatIdx >= JESTER_QUEST_SCRIPT.length && !_jester.inQuest2
+          : (achvIsUnlocked('first_quest') && _jester.inQuest && !_jester.inQuest2)) {
     _jester.inQuest2 = true;
     _jester.quest2BeatIdx = 0;
     _jesterRender();
@@ -6516,7 +6527,7 @@ function _jesterRender() {
     if (!q1beat) return;
     textEl.innerHTML = buildLines(q1beat.lines);
 
-    if (q1beat.questPrompt) {
+    if (q1beat.questPrompt && !_fp) {
       var pr = prLoad();
       var found = pr.jesterQuest1Stars || [];
       var remaining = 3 - found.length;
@@ -6534,6 +6545,7 @@ function _jesterRender() {
         };
       }
     } else {
+      if (q1beat.questPrompt) costLbl.textContent = '\u2705 Quest complete!';
       primary.textContent = 'Continue \u2192';
       primary.onclick = function() {
         _jester.questBeatIdx++;
@@ -6554,23 +6566,12 @@ function _jesterRender() {
   textEl.innerHTML = paragraphs;
 
   if (beat.askQuest) {
-    var _fpPr = prLoad();
-    if (_fpPr.jesterFreePlay) {
-      // Free play mode (post-Canvas reset): no quests, just end the monologue
-      // Mark that the Witch Encounter can be triggered again
-      prRecord(function(p) { p.witchReadyAgain = true; });
-      primary.textContent = 'That\u2019s all.';
-      primary.disabled = true;
-      primary.style.opacity = '0.5';
-      secondary.style.display = 'none';
-    } else {
-      primary.textContent = 'Continue \u2192';
-      primary.onclick = function() {
-        _jester.inQuest = true;
-        _jester.questBeatIdx = 0;
-        _jesterRender();
-      };
-    }
+    primary.textContent = 'Continue \u2192';
+    primary.onclick = function() {
+      _jester.inQuest = true;
+      _jester.questBeatIdx = 0;
+      _jesterRender();
+    };
   } else {
     primary.textContent = 'Continue \u2192';
     primary.onclick = function() {
@@ -7546,21 +7547,35 @@ function _witchBgHTML(level) {
     ];
     var fragCount = level >= 4 ? 6 : (level >= 3 ? 4 : 2);
     var colors = { error:'#e04848', warn:'#d4a052', sys:'#9b7ac8' };
+    // Each slot owns a distinct vertical band and side, so text never overlaps —
+    // even on narrow mobile widths where left/right anchored text can otherwise collide.
     var positions = [
-      {l:'8px',t:'12px'},{r:'8px',t:'12px'},
-      {l:'8px',b:'60px'},{r:'8px',b:'60px'},
-      {l:'8px',t:'40%'},{r:'8px',t:'40%'},
-      {l:'8px',t:'65%'},{r:'8px',t:'65%'},
+      {l:'8px',t:'12px'},
+      {r:'8px',t:'18%'},
+      {l:'8px',t:'34%'},
+      {r:'8px',t:'50%'},
+      {l:'8px',t:'66%'},
+      {r:'8px',b:'70px'},
     ];
+    // Shuffle which slots get used so the same band isn't always picked first
+    var slotOrder = positions.map(function(_, i){ return i; });
+    for (var i = slotOrder.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = slotOrder[i]; slotOrder[i] = slotOrder[j]; slotOrder[j] = tmp;
+    }
+    var usedFrags = [];
     for (var f = 0; f < fragCount; f++) {
-      var frag = fragments[Math.floor(Math.random() * fragments.length)];
-      var pos  = positions[f % positions.length];
+      var frag;
+      do { frag = fragments[Math.floor(Math.random() * fragments.length)]; }
+      while (usedFrags.indexOf(frag[0]) !== -1 && usedFrags.length < fragments.length);
+      usedFrags.push(frag[0]);
+      var pos  = positions[slotOrder[f % slotOrder.length]];
       var col  = colors[frag[1]];
       var top  = (0.12 + Math.random() * 0.22).toFixed(2);
       var tdur = (2 + Math.random() * 3).toFixed(1);
       var tdel = (Math.random() * 4).toFixed(1);
       var posStr = Object.keys(pos).map(function(k){ return k+':'+pos[k]; }).join(';');
-      html += '<div class="wg-text" style="'+posStr+';color:'+col+';--top:'+top+';--tdur:'+tdur+'s;--tdelay:'+tdel+'s">'+frag[0]+'</div>';
+      html += '<div class="wg-text" style="'+posStr+';max-width:46vw;color:'+col+';--top:'+top+';--tdur:'+tdur+'s;--tdelay:'+tdel+'s">'+frag[0]+'</div>';
     }
   }
 
@@ -7692,10 +7707,8 @@ function _witchClassSelectScreen() {
     '<div style="text-align:center;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#5b5280;margin-bottom:16px;padding-top:16px">— THE WITCH —</div>' +
     '<div style="border-radius:8px;border:1px solid #5a2a6a;background:rgba(80,20,100,0.15);padding:12px 14px;margin-bottom:16px;text-align:center;">' +
       '<div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#c080ff;margin-bottom:4px">EMERGENCY DEFENSE SYSTEM INITIALIZING</div>' +
-      '<div style="font-size:12px;color:#837aa3;line-height:1.55">Survive 10 rounds. Every answer is wrong. Use your class skills.</div>' +
     '</div>' +
     '<div style="font-size:15px;font-weight:700;color:#e0c0ff;margin-bottom:6px">Choose your class</div>' +
-    '<div style="font-size:12px;color:#837aa3;margin-bottom:14px;line-height:1.6">Your starter consumables and heart upgrades from the shop will apply. Class skills are fully active.</div>' +
     '<div class="witch-class-grid">';
   keys.forEach(function(key) {
     var cls = IRON_CLASSES[key];
@@ -8105,7 +8118,7 @@ function _witchVictoryScreen() {
   return '<div class="witch-victory-wrap">' +
     '<div class="witch-victory-icon">🌌</div>' +
     '<div class="witch-victory-title">Together Forever</div>' +
-    '<div class="witch-victory-msg">You survived. Ten rounds against a grief that had nothing left to lose.<br><br>She lowers the painting. Not to set it down — to keep it. Something in her posture changes. Not relief. Something older than relief.<br><br>She doesn\'t look at you again. She doesn\'t need to. Whatever she was going to do, she isn\'t going to do it.<br><br>She walks back into wherever she came from, and the sky does what it always does at this hour — turns that impossible violet that no one has the right words for.<br><br>You did that. By staying.</div>' +
+    '<div class="witch-victory-msg">At the end of them, you understood you were never the point.<br><br>She stopped being reachable. You felt it go, like a held breath finally let out. Whatever part of her had still been arguing with itself wasn\'t arguing anymore. There was only the desire to be with her, and nothing left to stop it from getting answered.<br><br>She got what she came for. Wherever she went, her daughter was there waiting, and that\'s the only mercy this story has in it.<br><br>The sky turned violet anyway. It does that regardless of who\'s left alive to see it.</div>' +
     '<button class="witch-victory-btn" onclick="witchHide();goTo(\'home\')">← Return Home</button>' +
   '</div>';
 }
