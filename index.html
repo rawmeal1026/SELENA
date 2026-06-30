@@ -1486,7 +1486,7 @@ var PR_DEFAULTS = {
   shopStartBomb: false,
   shopIronCodex: false,   // Iron Codex unlocked (access the fallen questions log)
   shopMoonCodex: false,   // Lunar Codex upgrade (expands codex from 5 → 10 entries, renames to Lunar Codex)
-  witchBeaten: false,     // true after surviving the Witch Encounter; hides Witching Hour & Jester card until Empty Canvas reset
+
 
   // Wish on the Sky — classes unlocked via gacha
   wishUnlockedClasses: {}, // all wish classes locked by default; unlock via Wish on the Sky
@@ -4348,7 +4348,7 @@ function screenNmSettings() {
     { key:'witch',   icon:'🧙‍♀️', name:"Witching Hour", desc:'Graveyard Questions return exactly 10 times, guided by a witch who mistakes you for her lost child.' },
   ].filter(function(r) {
     // Hide Witching Hour after the Witch has been defeated, until an Empty Canvas is used
-    if (r.key === 'witch' && _prNms.witchBeaten) return false;
+    if (r.key === 'witch' && achvIsUnlocked('together_forever')) return false;
     return true;
   }).map(function(r) {
     var sel = S.nmRedemption === r.key ? ' selected' : '';
@@ -4672,7 +4672,7 @@ function screenIronCodex() {
   }
 
   var lbl = codexLabel();
-  var jesterCard = hasLunar && !pr2.witchBeaten
+  var jesterCard = hasLunar && !achvIsUnlocked('together_forever')
     ? '<div class="jester-card" onclick="jesterOpenOrReturn()">'+
         '<div class="jester-card-avatar">🃏</div>'+
         '<div style="flex:1;min-width:0">'+
@@ -7030,7 +7030,7 @@ function screenShop() {
   // ── Empty Canvas (story reset — visible only after witch is beaten)
   (function() {
     var pr3 = prLoad();
-    if (!pr3.witchBeaten) return '';
+    if (!achvIsUnlocked('together_forever')) return '';
     var canvasState = pr3._shopCanvasOwned ? 'owned' : 'buy';
     return '<div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px">🎨 Remnants</div>' +
       shopItem('emptyCanvas', '🖼️', 'Empty Canvas', 100,
@@ -7192,7 +7192,6 @@ function shopBuy(item) {
   if (item === 'mooncodex')   { if (!pr.shopIronCodex) { pr.moons += cost; prSave(pr); return; } pr.shopMoonCodex = true; }
   if (item === 'emptyCanvas') {
     // Reset Jester + Witch storyline
-    pr.witchBeaten = false;
     pr.jesterQuest1Stars = [];
     pr.jesterQuest3DupeCount = 0;
     pr.jesterFreePlay = true;   // suppresses quest gates until epilogue is burned again
@@ -8106,7 +8105,6 @@ function _witchDeathScreen() {
 
 function _witchVictoryScreen() {
   unlockAchievement('together_forever');
-  prRecord(function(pr) { pr.witchBeaten = true; });
   var f = document.getElementById('witch-footer');
   if (f) f.style.display = 'none';
   return '<div class="witch-victory-wrap">' +
