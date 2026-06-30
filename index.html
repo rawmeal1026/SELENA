@@ -1323,6 +1323,13 @@ var S = {
   ironRemoved: {},
   ironRewardOptions: [],
   ironRewardCadence: 10,
+  // ── Jester (Iron Man slot 16) ──
+  ironIsJester: false,        // true for the whole run if 'jester' was chosen at class-select
+  ironJesterSecretClass: null,// the currently-assigned hidden class id (rerolls on streak reset / Hex Swap)
+  ironJesterTier1: false,     // live: streak >= 10 — passive + skill button revealed
+  ironJesterThiefClaimed: {}, // {streakValue: true} — prevents re-claiming a 7-multiple thief proc without a full streak reset
+  ironJesterHexRushUses: 0,   // capped at 3 per run
+  ironJesterRevealShown: false, // whether the tier-1 reveal screen has been shown for the CURRENT secret class
   ironClass: null,
   ironClassOptions: [],
   ironPaladinUsed: false,
@@ -1420,7 +1427,8 @@ var IRON_CLASSES = {
   scout:       { name: 'Scout',       icon: '\ud83c\udff9',     desc: 'See the topic of the next question.', skillName: 'Ready Up', skillCooldown: 7 },
   fairy:       { name: 'Fairy',       icon: '\ud83e\uddda',     desc: 'Get 2 Moons for every unique topic answered per run.', skillName: 'Rebirth',           skillCooldown: 0 },
   elf:         { name: 'Elf',         icon: '\ud83e\udddd',     desc: 'Each round gives you a stack of Spirit Love. Summon the spirits to answer for you — burn stacks for a better chance at the truth.', skillName: 'Spirit Judgement', skillCooldown: 0 },
-  mage:        { name: 'Mage',        icon: '✨',     desc: 'Wrong answers not chosen turn into Mana. Active skill changes depending on the current SELENA theme.', skillName: 'Cast Spell', skillCooldown: 0 }
+  mage:        { name: 'Mage',        icon: '✨',     desc: 'Wrong answers not chosen turn into Mana. Active skill changes depending on the current SELENA theme.', skillName: 'Cast Spell', skillCooldown: 0 },
+  jester:      { name: 'Jester',      icon: '🃏',     desc: 'Streaks unlock a hidden class. 10-streak: their passive + skill. 20-streak: their Mastery. 30-streak: their Upgrade. Use Hex skills to manipulate your streak.', skillName: '???', skillCooldown: 0 }
 };
 var L = ['A','B','C','D'];
 
@@ -1517,8 +1525,8 @@ var PR_DEFAULTS = {
   ironConsumableRounds: 0,
 
   // Iron Man — Per Class
-  ironClassRuns:    { knight:0, bomber:0, thief:0, rogue:0, paladin:0, monk:0, alchemist:0, necromancer:0, beastman:0, medium:0, assassin:0, scout:0, fairy:0, elf:0, mage:0 },
-  ironClassBest:    { knight:0, bomber:0, thief:0, rogue:0, paladin:0, monk:0, alchemist:0, necromancer:0, beastman:0, medium:0, assassin:0, scout:0, fairy:0, elf:0, mage:0 },
+  ironClassRuns:    { knight:0, bomber:0, thief:0, rogue:0, paladin:0, monk:0, alchemist:0, necromancer:0, beastman:0, medium:0, assassin:0, scout:0, fairy:0, elf:0, mage:0, jester:0 },
+  ironClassBest:    { knight:0, bomber:0, thief:0, rogue:0, paladin:0, monk:0, alchemist:0, necromancer:0, beastman:0, medium:0, assassin:0, scout:0, fairy:0, elf:0, mage:0, jester:0 },
   ironClassMastery: { knight:false, bomber:false, thief:false, rogue:false, paladin:false, monk:false, alchemist:false, necromancer:false, beastman:false, medium:false, assassin:false, scout:false, fairy:false, elf:false, mage:false },
   ironClassUpgrade: { thief:false, alchemist:false, paladin:false, rogue:false, knight:false, bomber:false, monk:false, medium:false, assassin:false, scout:false, fairy:false, elf:false, beastman:false, necromancer:false, mage:false },
 
@@ -2277,6 +2285,18 @@ function startQuiz() {
     S.ironShieldRounds = 0; S.ironBombsUsedThisQ = 0; S.ironConsumablesUsedThisQ = 0; S.ironRemoved = {};
     S.ironConsumables = { shield: 0, skip: 0, bomb: 0 };
     S.ironUsedConsumableThisRound = false;
+    // ── Jester: secret-class engine init ──
+    S.ironIsJester = (S.ironClass === 'jester');
+    if (S.ironIsJester) {
+      S.ironJesterSecretClass = shuf(JESTER_SECRET_POOL.slice())[0];
+      S.ironJesterTier1 = false;
+      S.ironJesterThiefClaimed = {};
+      S.ironJesterHexRushUses = 0;
+      S.ironJesterRevealShown = false;
+      S.ironMasteryActive = false;
+      S.ironUpgradeActive = false;
+      // S.ironClass stays 'jester' (locked) until streak hits 10 — see jesterUpdateTiers()
+    }
     // Shop-purchased starter consumables: apply once, then clear so they must be re-bought for the next run.
     (function(){
       var _pr = prLoad();
@@ -2377,7 +2397,7 @@ function startQuiz() {
   prRecord(function(pr) {
     if (S.ironMode) {
       pr.ironSessionsPlayed++;
-      if (S.ironClass) pr.ironClassRuns[S.ironClass]++;
+      if (S.ironClass) pr.ironClassRuns[ironStatKey()]++;
     } else {
       pr.normalSessionsStarted++;
     }
@@ -2736,7 +2756,7 @@ function nmStartMindful() {
 // Fairy: track total Moons gained this Iron Man run, unlock Winker Bell at 16
 // Check and trigger Iron Man mastery milestone (15 points). Safe to call after any score increment.
 function checkIronMastery() {
-  if (!S.ironMode || S.ironMasteryTriggered || S.score < 15) return;
+  if (!S.ironMode || S.ironIsJester || S.ironMasteryTriggered || S.score < 15) return;
   S.ironMasteryTriggered = true;
   S.ironMasteryActive = true;
   prRecord(function(pr){
@@ -2906,6 +2926,7 @@ function pick(displayIdx) {
       S.ironStreak++;
       if (S.ironStreak > S.ironHighStreak) S.ironHighStreak = S.ironStreak;
       if (S.ironStreak >= 10) unlockAchievement('ten_hit_combo');
+      jesterUpdateTiers();
       S.ironTotalCorrect++;
       // Rogue passive: 15% bonus point
       if (S.ironClass === 'rogue' && Math.random() < 0.15) {
@@ -2944,7 +2965,7 @@ function pick(displayIdx) {
         S.ironMonkHealsThisRun = (S.ironMonkHealsThisRun || 0) + 1;
         if (S.ironMonkHealsThisRun >= 4) unlockAchievement('inner_peace');
       }
-      if (S.ironClass === 'thief' && S.ironStreak % 7 === 0) {
+      if (S.ironClass === 'thief' && S.ironStreak % 7 === 0 && (!S.ironIsJester || !S.ironJesterThiefClaimed[S.ironStreak])) {
         // Passive steal: always exactly 1 of a random consumable
         var _stealType = shuf(['shield','skip','bomb'])[0];
         S.ironConsumables[_stealType] += 1;
@@ -2952,6 +2973,7 @@ function pick(displayIdx) {
         prRecord(function(pr){ pr.thiefConsumablesStolen++; });
         S.ironThiefStolenThisRun = (S.ironThiefStolenThisRun || 0) + 1;
         if (S.ironThiefStolenThisRun >= 4) unlockAchievement('sleight_of_hand');
+        if (S.ironIsJester) S.ironJesterThiefClaimed[S.ironStreak] = true;
       }
       // Assassin passive: correct answer → +1 Exposure on current topic
       if (S.ironClass === 'assassin' && q.topic) {
@@ -3050,7 +3072,7 @@ function pick(displayIdx) {
         showBanner('synced', '🗝️ Silent Shoes — Shield blocked the damage and protected your streak!', 2500);
         // streak does NOT reset — fall through to shield damage block below
       } else {
-        S.ironStreak = 0;
+        S.ironStreak = 0; jesterOnStreakReset();
       }
       // Mage passive: +2 Mana on wrong answer
       if (S.ironClass === 'mage') {
@@ -3202,7 +3224,7 @@ function advanceQuestion() {
           pr.ironRoundsSurvivedAllTime += (S.ironTotalRounds || 0);
           if (S.ironHighStreak > pr.ironLongestStreakEver) pr.ironLongestStreakEver = S.ironHighStreak;
           if (S.score > pr.ironHighestScore) pr.ironHighestScore = S.score;
-          if (S.ironClass && S.score > pr.ironClassBest[S.ironClass]) pr.ironClassBest[S.ironClass] = S.score;
+          if (S.ironClass && S.score > pr.ironClassBest[ironStatKey()]) pr.ironClassBest[ironStatKey()] = S.score;
         });
       }
     } else {
@@ -3331,7 +3353,7 @@ function useIronSkip() {
   checkJesterQuest2();
   if (S.ironClass === 'medium') { S.ironMediumPossession = (S.ironMediumPossession || 0) + 1; showBanner('synced', '✨ Possession +1 stack (' + S.ironMediumPossession + ' total)', 1800); }
   if (!(S.ironClass === 'thief' && S.ironMasteryActive)) {
-    S.ironStreak = 0;
+    S.ironStreak = 0; jesterOnStreakReset();
   }
   S.done = true;
   S.skipped = true;
@@ -3438,6 +3460,119 @@ function applyIronDamage(amount) {
   }
   S.ironWrong = wouldBeWrong;
   S.ironLives = Math.max(S.ironMaxLives - S.ironWrong, 0);
+}
+
+/* ─────────────────────────────────────────────
+   JESTER — secret-class engine (Iron Man slot 16)
+   Masquerade trick: once tier 1 is reached, S.ironClass is set to the secret
+   class id. Every existing passive/skill/mastery/upgrade check in the file
+   reads S.ironClass directly, so they all work for the Jester automatically —
+   no per-class refactor needed. Re-locking (tier drops below 10) flips
+   S.ironClass back to 'jester'. ironStatKey() keeps lifetime stat credit on
+   "jester" regardless of which class is currently being worn.
+───────────────────────────────────────────── */
+function jesterRollSecretClass(excludeCurrent) {
+  var pool = JESTER_SECRET_POOL.slice();
+  if (excludeCurrent && S.ironJesterSecretClass) {
+    pool = pool.filter(function(c){ return c !== S.ironJesterSecretClass; });
+    if (!pool.length) pool = JESTER_SECRET_POOL.slice();
+  }
+  return shuf(pool)[0];
+}
+function jesterShowReveal(kind) {
+  var cls = IRON_CLASSES[S.ironJesterSecretClass];
+  if (!cls) return;
+  if (kind === 'passive') {
+    showBanner('synced', '🃏 The mask slips \u2014 you are ' + cls.icon + ' ' + cls.name + '! Passive + skill unlocked.', 3200);
+  } else if (kind === 'mastery') {
+    showBanner('synced', '🃏 20-Streak \u2014 ' + cls.icon + ' ' + cls.name + ' Mastery awakens!', 3000);
+  } else if (kind === 'upgrade') {
+    showBanner('synced', '🃏 30-Streak \u2014 ' + cls.icon + ' ' + cls.name + ' Upgrade awakens!', 3000);
+  }
+}
+// Call after EVERY streak change while S.ironIsJester is true.
+function jesterUpdateTiers() {
+  if (!S.ironIsJester) return;
+  var streak = S.ironStreak || 0;
+  var tier1 = streak >= 10, tier2 = streak >= 20, tier3 = streak >= 30;
+  if (tier1 && !S.ironJesterTier1) {
+    S.ironJesterTier1 = true;
+    S.ironClass = S.ironJesterSecretClass;
+    S.ironMasteryActive = tier2;
+    S.ironUpgradeActive = tier3;
+    jesterShowReveal('passive');
+  } else if (!tier1 && S.ironJesterTier1) {
+    S.ironJesterTier1 = false;
+    S.ironClass = 'jester';
+    S.ironMasteryActive = false;
+    S.ironUpgradeActive = false;
+  } else if (tier1) {
+    if (tier2 && !S.ironMasteryActive) { S.ironMasteryActive = true; jesterShowReveal('mastery'); }
+    if (!tier2 && S.ironMasteryActive) { S.ironMasteryActive = false; }
+    if (tier3 && !S.ironUpgradeActive) { S.ironUpgradeActive = true; jesterShowReveal('upgrade'); }
+    if (!tier3 && S.ironUpgradeActive) { S.ironUpgradeActive = false; }
+  }
+}
+// Full reset to 0 streak: re-locks the mask AND rerolls who's hiding behind it.
+function jesterOnStreakReset() {
+  if (!S.ironIsJester) return;
+  S.ironJesterSecretClass = jesterRollSecretClass(true);
+  S.ironJesterThiefClaimed = {};
+  S.ironJesterTier1 = false;
+  S.ironClass = 'jester';
+  S.ironMasteryActive = false;
+  S.ironUpgradeActive = false;
+}
+function jesterSpendStreak(amount) {
+  S.ironStreak = (S.ironStreak || 0) - amount;
+  if (S.ironStreak <= 0) { S.ironStreak = 0; jesterOnStreakReset(); }
+  else { jesterUpdateTiers(); }
+}
+function jesterGainStreak(amount) {
+  S.ironStreak = (S.ironStreak || 0) + amount;
+  if (S.ironStreak > S.ironHighStreak) S.ironHighStreak = S.ironStreak;
+  jesterUpdateTiers();
+}
+
+/* ── Jester: Hex skills (always available, independent of tier/lock state) ── */
+function useJesterHexShot() {
+  if (!S.ironMode || !S.ironIsJester || S.done) return;
+  if ((S.ironStreak || 0) < 5) return;
+  var q = S.shuffled[S.cur];
+  var candidates = [];
+  for (var pos = 0; pos < q._order.length; pos++) {
+    if (q._order[pos] !== q.answer && !S.ironRemoved[pos]) candidates.push(pos);
+  }
+  if (!candidates.length) return;
+  var toRemove = shuf(candidates).slice(0, 3); // 4 choices total, so this clears all 3 wrong ones
+  for (var i = 0; i < toRemove.length; i++) S.ironRemoved[toRemove[i]] = true;
+  jesterSpendStreak(5);
+  showBanner('synced', '🃏 Hex Shot \u2014 3 wrong choices banished! (\u22125 streak)', 2000);
+  render();
+}
+function useJesterHexSwap() {
+  if (!S.ironMode || !S.ironIsJester || S.done) return;
+  if ((S.ironStreak || 0) < 3) return;
+  jesterSpendStreak(3);
+  if (S.ironStreak > 0) { // only reroll-in-place if that spend didn't already trigger a full reset+reroll
+    S.ironJesterSecretClass = jesterRollSecretClass(true);
+    S.ironJesterThiefClaimed = {};
+    if (S.ironJesterTier1) S.ironClass = S.ironJesterSecretClass;
+  }
+  var cls = IRON_CLASSES[S.ironJesterSecretClass];
+  showBanner('synced', '🃏 Hex Swap \u2014 the mask shifts' + (S.ironJesterTier1 ? (' to ' + cls.icon + ' ' + cls.name) : '') + '! (\u22123 streak)', 2200);
+  render();
+}
+function useJesterHexRush() {
+  if (!S.ironMode || !S.ironIsJester || S.done) return;
+  if ((S.ironJesterHexRushUses || 0) >= 3) return;
+  if ((S.ironLives || 0) <= 1) return; // the Witch would not kill her daughter
+  S.ironJesterHexRushUses = (S.ironJesterHexRushUses || 0) + 1;
+  applyIronDamage(1); // bypasses the shield-block check entirely (shield is checked by callers, not inside applyIronDamage)
+  jesterGainStreak(10);
+  showBanner('synced', '🃏 Hex Rush \u2014 a life for momentum! +10 streak, \u22121 life (' + S.ironJesterHexRushUses + '/3 used)', 2400);
+  render();
+  if (S.ironWrong >= S.ironMaxLives) setTimeout(function() { S.screen = 'ironover'; render(); }, 900);
 }
 
 /* ─────────────────────────────────────────────
@@ -3798,7 +3933,7 @@ function useClassSkill() {
     S.done = true;
     S.skipped = true;
     S.chosen = null;
-    S.ironStreak = 0;
+    S.ironStreak = 0; jesterOnStreakReset();
     S.ironTotalSkipped++;
     stopIronTimer();
     var lucky = S.ironUpgradeActive || Math.random() < 0.5;
@@ -4053,7 +4188,7 @@ function useClassSkill() {
               pr.ironRoundsSurvivedAllTime += (S.ironTotalRounds || 0);
               if (S.ironHighStreak > pr.ironLongestStreakEver) pr.ironLongestStreakEver = S.ironHighStreak;
               if (S.score > pr.ironHighestScore) pr.ironHighestScore = S.score;
-              if (S.ironClass && S.score > pr.ironClassBest[S.ironClass]) pr.ironClassBest[S.ironClass] = S.score;
+              if (S.ironClass && S.score > pr.ironClassBest[ironStatKey()]) pr.ironClassBest[ironStatKey()] = S.score;
             });
           }
           S.screen = 'ironover'; render();
@@ -4203,18 +4338,29 @@ function _fireUmbraReward() {
    IRON MAN CLASS SELECTION
 ───────────────────────────────────────────── */
 var IRON_BASE_CLASSES = ['knight','bomber','thief','rogue','paladin','monk','alchemist']; // always-unlocked, slots 1-7
-var IRON_CLASS_ROSTER  = IRON_BASE_CLASSES.concat(['necromancer','beastman','medium','assassin','scout','fairy','elf','mage']); // fixed slot order: 8 Necromancer,9 Beastman,10 Medium,11 Assassin,12 Scout,13 Fairy,14 Elf,15 Mage (always-unlocked, slot 15)
-var TOTAL_CLASS_SLOTS  = 16; // slot 16 reserved for future class
+var IRON_CLASS_ROSTER  = IRON_BASE_CLASSES.concat(['necromancer','beastman','medium','assassin','scout','fairy','elf','mage','jester']); // fixed slot order: 8 Necromancer,9 Beastman,10 Medium,11 Assassin,12 Scout,13 Fairy,14 Elf,15 Mage,16 Jester
+var TOTAL_CLASS_SLOTS  = 16;
 
 var IRON_WISH_CLASSES = ['necromancer','beastman','medium','assassin','scout','fairy','elf'];
+// Classes the Jester is allowed to be secretly assigned. Excludes 'jester' itself and 'mage'
+// (mage's theme-branching skill dispatch is handled separately and is safe to include once verified —
+// left out for now to avoid the extra branch complexity on day one).
+var JESTER_SECRET_POOL = ['knight','bomber','thief','rogue','paladin','monk','alchemist','necromancer','beastman','medium','assassin','scout','fairy','elf'];
 function isIronClassUnlocked(key, pr) {
   if (key === 'mage') {
     var achv = achvLoad();
     return !!(achv && achv['right_person_right_time']);
   }
+  if (key === 'jester') {
+    var achvJ = achvLoad();
+    return !!(achvJ && achvJ['together_forever']);
+  }
   if (IRON_BASE_CLASSES.indexOf(key) !== -1) return true;
   return !!(pr.wishUnlockedClasses && pr.wishUnlockedClasses[key]);
 }
+// Stat-crediting key: while masquerading as a secret class, lifetime per-class stats
+// (runs played, best score) still belong to "jester", never leak to the impersonated class.
+function ironStatKey() { return S.ironIsJester ? 'jester' : S.ironClass; }
 
 function pickIronClassOptions() {
   var pr = prLoad();
@@ -4255,7 +4401,7 @@ function startIronTimer() {
       } else if (S.ironClass === 'thief' && S.ironUpgradeActive && S.ironShieldRounds > 0) {
         showBanner('synced', '🗝️ Silent Shoes — Shield blocked the damage and protected your streak!', 2500);
       } else {
-        S.ironStreak = 0;
+        S.ironStreak = 0; jesterOnStreakReset();
       }
       var q = S.shuffled[S.cur];
       S.chosen = -1; // no choice = timeout
@@ -4740,7 +4886,7 @@ function screenIronOver() {
       pr.ironRoundsSurvivedAllTime += (S.ironTotalRounds || 0);
       if (S.ironHighStreak > pr.ironLongestStreakEver) pr.ironLongestStreakEver = S.ironHighStreak;
       if (S.score > pr.ironHighestScore) pr.ironHighestScore = S.score;
-      if (S.ironClass && S.score > pr.ironClassBest[S.ironClass]) pr.ironClassBest[S.ironClass] = S.score;
+      if (S.ironClass && S.score > pr.ironClassBest[ironStatKey()]) pr.ironClassBest[ironStatKey()] = S.score;
     });
   }
   var msgs = [
@@ -5086,7 +5232,7 @@ var IRON_UPGRADE_DATA = {
 
 // Check and trigger Class Upgrade milestone (50 points). Safe to call after any score increment.
 function checkIronUpgrade() {
-  if (!S.ironMode || S.ironUpgradeTriggered || S.score < 50) return;
+  if (!S.ironMode || S.ironIsJester || S.ironUpgradeTriggered || S.score < 50) return;
   if (!S.ironClass || !IRON_UPGRADE_DATA[S.ironClass]) return;
   S.ironUpgradeTriggered = true;
   S.ironUpgradeActive = true;
@@ -5695,6 +5841,7 @@ function ironConsumableRow(q) {
 
 function ironSkillRow() {
   if (!S.ironClass) return '';
+  if (S.ironIsJester && !S.ironJesterTier1) return jesterLockedSkillRow();
   var cls = IRON_CLASSES[S.ironClass];
   var cd = S.ironSkillCooldown;
   var isMonkFull = (S.ironClass === 'monk' && S.ironWrong === 0 && !S.ironUpgradeActive);
@@ -6035,8 +6182,53 @@ function ironSkillRow() {
       '</div>'+
       cdHtml+
     '</button>'+
+  '</div>' + (S.ironIsJester ? jesterHexRow() : '');
+}
+
+/* ── Jester: skill-row UI — locked placeholder (pre tier-1) and the 3 Hex buttons ── */
+function jesterLockedSkillRow() {
+  return '<div class="iron-skill-row">'+
+    '<button class="iron-skill-btn" disabled title="Reach a 10-streak to unlock your secret class">'+
+      '<div class="iron-skill-btn-emoji">\ud83c\udccf</div>'+
+      '<div class="iron-skill-btn-body">'+
+        '<div class="iron-skill-name">???</div>'+
+        '<div class="iron-skill-desc">A secret class is hiding behind the mask. Reach a 10-streak to reveal it.</div>'+
+      '</div>'+
+      '<span class="iron-skill-cd inactive">Locked</span>'+
+    '</button>'+
+  '</div>' + jesterHexRow();
+}
+function jesterHexRow() {
+  var streak = S.ironStreak || 0;
+  var canShot = streak >= 5 && !S.done;
+  var canSwap = streak >= 3 && !S.done;
+  var rushUsesLeft = 3 - (S.ironJesterHexRushUses || 0);
+  var canRush = rushUsesLeft > 0 && (S.ironLives || 0) > 1 && !S.done;
+  return '<div class="iron-skill-row" style="gap:6px;margin-top:6px">'+
+    '<button class="iron-skill-btn" style="flex:1" '+(canShot?'':'disabled')+' onclick="useJesterHexShot()" title="Hex Shot \u2014 5 streak">'+
+      '<div class="iron-skill-btn-emoji">\ud83c\udfaf</div>'+
+      '<div class="iron-skill-btn-body">'+
+        '<div class="iron-skill-name">Hex Shot</div>'+
+        '<div class="iron-skill-desc">Remove 3 wrong choices \u00b7 \u22125 streak</div>'+
+      '</div>'+
+    '</button>'+
+    '<button class="iron-skill-btn" style="flex:1" '+(canSwap?'':'disabled')+' onclick="useJesterHexSwap()" title="Hex Swap \u2014 3 streak">'+
+      '<div class="iron-skill-btn-emoji">\ud83d\udd00</div>'+
+      '<div class="iron-skill-btn-body">'+
+        '<div class="iron-skill-name">Hex Swap</div>'+
+        '<div class="iron-skill-desc">Reroll your secret class \u00b7 \u22123 streak</div>'+
+      '</div>'+
+    '</button>'+
+    '<button class="iron-skill-btn" style="flex:1" '+(canRush?'':'disabled')+' onclick="useJesterHexRush()" title="Hex Rush \u2014 1 life">'+
+      '<div class="iron-skill-btn-emoji">\ud83d\udd25</div>'+
+      '<div class="iron-skill-btn-body">'+
+        '<div class="iron-skill-name">Hex Rush ('+rushUsesLeft+'/3)</div>'+
+        '<div class="iron-skill-desc">+10 streak \u00b7 \u22121 life, ignores shield</div>'+
+      '</div>'+
+    '</button>'+
   '</div>';
 }
+
 
 /* ── Jester NPC Engine ── */
 // Each beat is one speech bubble. lines[] are paragraphs within that bubble.
