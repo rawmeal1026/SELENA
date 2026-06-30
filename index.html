@@ -7550,12 +7550,12 @@ function _witchBgHTML(level) {
     // Each slot owns a distinct vertical band and side, so text never overlaps —
     // even on narrow mobile widths where left/right anchored text can otherwise collide.
     var positions = [
-      {l:'8px',t:'12px'},
-      {r:'8px',t:'18%'},
-      {l:'8px',t:'34%'},
-      {r:'8px',t:'50%'},
-      {l:'8px',t:'66%'},
-      {r:'8px',b:'70px'},
+      {left:'8px',top:'12px'},
+      {right:'8px',top:'18%'},
+      {left:'8px',top:'34%'},
+      {right:'8px',top:'50%'},
+      {left:'8px',top:'66%'},
+      {right:'8px',bottom:'70px'},
     ];
     // Shuffle which slots get used so the same band isn't always picked first
     var slotOrder = positions.map(function(_, i){ return i; });
