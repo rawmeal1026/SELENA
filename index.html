@@ -1423,12 +1423,12 @@ var IRON_CLASSES = {
   necromancer: { name: 'Necromancer', icon: '\ud83d\udc80',     desc: 'Wrong answers are stored in your graveyard.', skillName: 'Redemption',         skillCooldown: 40 },
   beastman:    { name: 'Beastman',    icon: '\ud83d\udc3a',     desc: 'Odd rounds: Human Form — correct answers give no points. Even rounds: Beast Form — your skill is available.', skillName: 'Wild Roar', skillCooldown: 0 },
   medium:      { name: 'Medium',      icon: '\ud83d\udd2e',     desc: 'Using consumables gives you a Possession stack. Use your skill to peek at any choice to learn if it\'s correct before you answer.', skillName: 'Communicate with the Dead', skillCooldown: 0 },
-  assassin:    { name: 'Assassin',    icon: '\ud83d\udde1\ufe0f', desc: 'Correct answers stack Exposure on their topic. Stab a topic to permanently remove one wrong choice from all its questions.', skillName: 'Stab', skillCooldown: 0 },
+  assassin:    { name: 'Assassin',    icon: '\ud83d\udde1\ufe0f', desc: 'Stab a topic to permanently remove one wrong choice from all its questions.', skillName: 'Stab', skillCooldown: 0 },
   scout:       { name: 'Scout',       icon: '\ud83c\udff9',     desc: 'See the topic of the next question.', skillName: 'Ready Up', skillCooldown: 7 },
   fairy:       { name: 'Fairy',       icon: '\ud83e\uddda',     desc: 'Get 2 Moons for every unique topic answered per run.', skillName: 'Rebirth',           skillCooldown: 0 },
-  elf:         { name: 'Elf',         icon: '\ud83e\udddd',     desc: 'Each round gives you a stack of Spirit Love. Summon the spirits to answer for you — burn stacks for a better chance at the truth.', skillName: 'Spirit Judgement', skillCooldown: 0 },
+  elf:         { name: 'Elf',         icon: '\ud83e\udddd',     desc: 'Summon the spirits to answer for you — burn stacks for a better chance of the correct answer.', skillName: 'Spirit Judgement', skillCooldown: 0 },
   mage:        { name: 'Mage',        icon: '✨',     desc: 'Wrong answers not chosen turn into Mana. Active skill changes depending on the current SELENA theme.', skillName: 'Cast Spell', skillCooldown: 0 },
-  jester:      { name: 'Jester',      icon: '🃏',     desc: 'Streaks unlock a hidden class. 10-streak: their passive + skill. 20-streak: their Mastery. 30-streak: their Upgrade. Use Hex skills to manipulate your streak.', skillName: '???', skillCooldown: 0 }
+  jester:      { name: 'Jester',      icon: '🃏',     desc: 'Streaks unlock a hidden class. 10-streak: their passive + skill. 20-streak: their Mastery. 30-streak: their Upgrade. The Witch\'s skills will help you manage your streak.', skillName: '???', skillCooldown: 0 }
 };
 var L = ['A','B','C','D'];
 
@@ -1547,6 +1547,7 @@ var PR_DEFAULTS = {
   assassinSuccessfulStabs: 0,
   scoutReadyUpPoints: 0,
   mageSpellsCast: 0,
+  jesterHexStreakLost: 0,
   moonsSpent: 0,
   totalWishes: 0,
   wishesGranted: 0,
@@ -3524,6 +3525,7 @@ function jesterOnStreakReset() {
   S.ironUpgradeActive = false;
 }
 function jesterSpendStreak(amount) {
+  prRecord(function(pr){ pr.jesterHexStreakLost = (pr.jesterHexStreakLost || 0) + amount; });
   S.ironStreak = (S.ironStreak || 0) - amount;
   if (S.ironStreak <= 0) { S.ironStreak = 0; jesterOnStreakReset(); }
   else { jesterUpdateTiers(); }
@@ -4682,7 +4684,7 @@ function screenIronClass() {
     return '<div class="iron-reward-card" style="opacity:0.38;cursor:not-allowed;pointer-events:none">' +
       '<div class="iron-reward-icon">🔒</div>' +
       '<div class="iron-reward-name">'+esc(c.name)+'</div>' +
-      '<div class="iron-reward-desc">'+(key === 'mage' ? 'Complete the &quot;Learn Magic from the Right Person, at the Right Place and at the Right Time&quot; Achievement' : 'A Granted Wish on the Sky Unlocks this Class')+'</div>' +
+      '<div class="iron-reward-desc">'+(key === 'mage' ? 'Complete the &quot;Learn Magic from the Right Person, at the Right Place and at the Right Time&quot; Achievement' : key === 'jester' ? 'Complete the &quot;Together Forever&quot; Achievement' : 'A Granted Wish on the Sky Unlocks this Class')+'</div>' +
     '</div>';
   }).join('');
 
@@ -6935,7 +6937,7 @@ function screenRecords() {
     '</div>';
 
   // Iron Man — Per Class
-  var classOrder = ['knight','bomber','thief','rogue','paladin','monk','alchemist','necromancer','beastman','medium','assassin','scout','fairy','elf','mage'];
+  var classOrder = ['knight','bomber','thief','rogue','paladin','monk','alchemist','necromancer','beastman','medium','assassin','scout','fairy','elf','mage','jester'];
   var classRowsHtml = classOrder.map(function(key) {
     var cls = IRON_CLASSES[key];
     var runs = pr.ironClassRuns[key];
@@ -6948,6 +6950,21 @@ function screenRecords() {
           '<div><div class="pr-class-name">'+esc(cls.name)+'</div><div class="pr-class-runs">Never played</div></div>'+
         '</div>'+
         '<div class="pr-class-right"><div class="pr-class-untried">Try me!</div></div>'+
+      '</div>';
+    }
+    if (key === 'jester') {
+      return '<div class="pr-class-row">'+
+        '<div class="pr-class-left">'+
+          '<div class="pr-class-icon">'+cls.icon+'</div>'+
+          '<div>'+
+            '<div class="pr-class-name">'+esc(cls.name)+'</div>'+
+            '<div class="pr-class-runs">'+runs+' run'+(runs!==1?'s':'')+' played</div>'+
+          '</div>'+
+        '</div>'+
+        '<div class="pr-class-right">'+
+          '<div class="pr-class-best">Best: '+best+' pts</div>'+
+          '<div class="pr-class-mastery" style="color:var(--text-muted)">— No Mastery / Upgrade</div>'+
+        '</div>'+
       '</div>';
     }
     return '<div class="pr-class-row">'+
@@ -6993,6 +7010,7 @@ function screenRecords() {
       flavourRow('🧚‍♀️', 'Fairy — Moons gained per answering new topics', pr.fairyDustProcs || 0)+
       flavourRow('🧝', 'Elf — Times Spirits Told You the Correct Answer', pr.elfSpiritCorrectTells || 0)+
       flavourRow('✨', 'Mage — Lumina/Umbra Incantations Cast & Vespera Uses', pr.mageSpellsCast || 0)+
+      flavourRow('🃏', 'Jester — Streak Lost from Hex Skills', pr.jesterHexStreakLost || 0)+
     '</div>';
 
   // Moon Shop Records
