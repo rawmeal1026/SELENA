@@ -2059,7 +2059,7 @@ function goTo(sc) {
   if (sc === 'subjects') S.ironMode = false;
   // Clear transient "owned" display flag when leaving the shop
   if (S.screen === 'shop' && sc !== 'shop') {
-    prRecord(function(pr) { delete pr._shopCanvasOwned; });
+    _canvasJustBought = false;
   }
   S.screen = sc; render();
 }
@@ -2365,6 +2365,12 @@ function startQuiz() {
   }
   S.skipped = false;
 
+  // Witch Encounter: Witching Hour (witch) + trigger condition met — launch directly, no study session
+  if (!S.ironMode && S.nmRedemption === 'witch' && shouldTriggerWitch()) {
+    setTimeout(function() { witchShow(); }, 80);
+    return;
+  }
+
   // ── Personal Records: session started ──
   prRecord(function(pr) {
     if (S.ironMode) {
@@ -2377,10 +2383,6 @@ function startQuiz() {
 
   S.screen = 'quiz'; render();
   if (S.ironMode) setTimeout(startIronTimer, 50);
-  // Witch Encounter: Witching Hour (witch) + Jester epilogue burned
-  if (!S.ironMode && S.nmRedemption === 'witch' && shouldTriggerWitch()) {
-    setTimeout(function() { witchShow(); }, 80);
-  }
 }
 
 /* ─────────────────────────────────────────────
@@ -6371,6 +6373,8 @@ var JESTER_EPILOGUE_SCRIPT = [
   ]}
 ];
 
+var _canvasJustBought = false; // true immediately after Empty Canvas purchase; cleared when leaving the shop
+
 var _jester = {
   beatIdx: 0,
   inQuest: false,      // true once player accepted quest 1
@@ -7030,9 +7034,8 @@ function screenShop() {
 
   // ── Empty Canvas (story reset — visible only after Together Forever is earned)
   (function() {
-    var pr3 = prLoad();
     if (!achvIsUnlocked('together_forever')) return '';
-    var canvasState = pr3._shopCanvasOwned ? 'owned' : 'buy';
+    var canvasState = _canvasJustBought ? 'owned' : 'buy';
     return '<div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px">🎨 Remnants</div>' +
       shopItem('emptyCanvas', '🖼️', 'Empty Canvas', 100,
         'Start the story over. The Jester returns to the Lunar Codex and speaks from the beginning — no quests, no gates. Witching Hour becomes available again in Redemption Mode. The Witch Encounter can be triggered anew.',
@@ -7198,7 +7201,7 @@ function shopBuy(item) {
     pr.jesterQuest3DupeCount = 0;
     pr.jesterFreePlay = true;   // suppresses quest gates until epilogue is burned again
     // Mark owned for display until player leaves and re-enters shop
-    pr._shopCanvasOwned = true;
+    _canvasJustBought = true;
     // Clear Jester in-memory state so next open starts from beat 0, no quests
     _jester.beatIdx = 0;
     _jester.inQuest = false;
@@ -8085,22 +8088,11 @@ function _witchDeathScreen() {
   // Hide countdown footer on death
   var f = document.getElementById('witch-footer');
   if (f) f.style.display = 'none';
-  var pr = prLoad();
-  var boughtConsumables = pr.starterConsumablesBought || 0;
-  var hasAlchemist = (_witch.ironClass === 'alchemist');
-  var hint = '';
-  if (boughtConsumables === 0) {
-    hint = 'You have no starter consumables. Visit the Moon Shop and buy a Shield, Skip, or Bomb before entering Witching Hour. They will carry into the Witch fight.';
-  } else if (!hasAlchemist) {
-    hint = 'You have consumables, but consider the Alchemist class — Transmutation lets you generate more consumables mid-fight, greatly extending your survivability.';
-  } else {
-    hint = 'Keep trying. The God of Luck will eventually smile on you. Transmutation at the right moment can turn the tide.';
-  }
   return '<div class="witch-death-wrap">' +
     '<div class="witch-death-icon">💀</div>' +
     '<div class="witch-death-title">You have fallen.</div>' +
     '<div class="witch-death-msg">Try again. There\'s only one way for them to be together.</div>' +
-    '<div class="witch-death-hint">💡 ' + esc(hint) + '</div>' +
+    '<div class="witch-death-hint">💡 Prepare your consumables before facing the Witch. Every round you survive is a round closer to them being together again.</div>' +
     '<button class="witch-death-btn" onclick="witchHide();goTo(\'home\')">← Return Home</button>' +
   '</div>';
 }
