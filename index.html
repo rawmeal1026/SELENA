@@ -3381,8 +3381,8 @@ function ironBombCandidatesLeft(q) {
 function useIronBomb() {
   if (!S.ironMode || S.done) return;
   if (S.ironConsumables.bomb <= 0) return;
-  // Bomber Mastery — Calculated Detonation: only 1 use per question (no multi-bomb)
-  var maxUses = (S.ironClass === 'bomber' && S.ironMasteryActive) ? 1 : 3;
+  // Bomber Mastery — Calculated Detonation: 1 use per question (2 with Strategic Explosives upgrade)
+  var maxUses = (S.ironClass === 'bomber' && S.ironMasteryActive) ? (S.ironUpgradeActive ? 2 : 1) : 3;
   if (S.ironBombsUsedThisQ >= maxUses) return;
   var q = S.shuffled[S.cur];
   var candidates = [];
@@ -3401,16 +3401,15 @@ function useIronBomb() {
   S.ironUsedConsumableThisRound = true;
   S.ironConsumablesUsedThisQ = (S.ironConsumablesUsedThisQ || 0) + 1;
   checkJesterQuest2();
-  S.ironUsedConsumableThisRound = true;
   if (S.ironClass === 'medium') { S.ironMediumPossession = (S.ironMediumPossession || 0) + 1; showBanner('synced', '✨ Possession +1 stack (' + S.ironMediumPossession + ' total)', 1800); }
   beastmanConsumableScore();
-  // Strategic Explosives: 25% refund a Bomb, 4% heal 1 life
+  // Strategic Explosives: independent 25% refund and 4% heal (both can trigger on same bomb)
   if (S.ironClass === 'bomber' && S.ironUpgradeActive) {
-    var _bombRoll = Math.random();
-    if (_bombRoll < 0.04 && S.ironWrong > 0) {
+    if (Math.random() < 0.04 && S.ironWrong > 0) {
       S.ironWrong--; S.ironLives = S.ironMaxLives - S.ironWrong;
       showBanner('synced', '💣 Strategic Explosives — surgical precision! +1 HP!', 2500);
-    } else if (_bombRoll < 0.25) {
+    }
+    if (Math.random() < 0.25) {
       S.ironConsumables.bomb++;
       showBanner('synced', '💣 Strategic Explosives — recovered a Bomb! +1 Bomb!', 2500);
     }
@@ -3499,9 +3498,11 @@ function jesterUpdateTiers() {
   if (tier1 && !S.ironJesterTier1) {
     S.ironJesterTier1 = true;
     S.ironClass = S.ironJesterSecretClass;
-    S.ironMasteryActive = tier2;
-    S.ironUpgradeActive = tier3;
+    S.ironMasteryActive = false;
+    S.ironUpgradeActive = false;
     jesterShowReveal('passive');
+    if (tier2) { S.ironMasteryActive = true; jesterShowReveal('mastery'); }
+    if (tier3) { S.ironUpgradeActive = true; jesterShowReveal('upgrade'); }
   } else if (!tier1 && S.ironJesterTier1) {
     S.ironJesterTier1 = false;
     S.ironClass = 'jester';
@@ -3523,6 +3524,18 @@ function jesterOnStreakReset() {
   S.ironClass = 'jester';
   S.ironMasteryActive = false;
   S.ironUpgradeActive = false;
+  // Reset all class-specific passive/skill state so the next secret class starts clean.
+  S.ironPaladinUsed = false; S.ironPaladinSaved = false;
+  S.ironRogueBonus = false; S.ironMonkHeal = false;
+  S.ironThiefSneakActive = false; S.ironThiefGrantType = null;
+  S.ironMonkFocusActive = false; S.ironMonkFocusFullHP = false;
+  S.ironBeastWildRoarActive = false;
+  S.ironElfSpiritLove = 0;
+  S.ironMageMana = 0; S.ironMageLuminaImmune = false;
+  S.ironMediumPossession = 0; S.ironMediumPossessing = false; S.ironMediumPeekedPos = null;
+  S.ironScoutReadyUpActive = false; S.ironScoutReadyUpBonus = false;
+  S.ironSkillCooldown = 0; S.ironSkillUsedThisQ = false;
+  S.necroGraveyard = []; S.necroRedemptionActive = false; S.necroCoinFlipPending = false;
 }
 function jesterSpendStreak(amount) {
   prRecord(function(pr){ pr.jesterHexStreakLost = (pr.jesterHexStreakLost || 0) + amount; });
@@ -3546,15 +3559,16 @@ function useJesterHexShot() {
     if (q._order[pos] !== q.answer && !S.ironRemoved[pos]) candidates.push(pos);
   }
   if (!candidates.length) return;
-  var toRemove = shuf(candidates).slice(0, 3); // 4 choices total, so this clears all 3 wrong ones
+  jesterSpendStreak(5); // spend first — if this hits 0 it triggers a class reroll
+  var toRemove = shuf(candidates).slice(0, 3);
   for (var i = 0; i < toRemove.length; i++) S.ironRemoved[toRemove[i]] = true;
-  jesterSpendStreak(5);
   showBanner('synced', '🃏 Hex Shot \u2014 3 wrong choices banished! (\u22125 streak)', 2000);
   render();
 }
 function useJesterHexSwap() {
   if (!S.ironMode || !S.ironIsJester || S.done) return;
   if ((S.ironStreak || 0) < 3) return;
+  var wasTier1 = S.ironJesterTier1; // snapshot before spend mutates it
   jesterSpendStreak(3);
   if (S.ironStreak > 0) { // only reroll-in-place if that spend didn't already trigger a full reset+reroll
     S.ironJesterSecretClass = jesterRollSecretClass(true);
@@ -3562,7 +3576,7 @@ function useJesterHexSwap() {
     if (S.ironJesterTier1) S.ironClass = S.ironJesterSecretClass;
   }
   var cls = IRON_CLASSES[S.ironJesterSecretClass];
-  showBanner('synced', '🃏 Hex Swap \u2014 the mask shifts' + (S.ironJesterTier1 ? (' to ' + cls.icon + ' ' + cls.name) : '') + '! (\u22123 streak)', 2200);
+  showBanner('synced', '🃏 Hex Swap \u2014 the mask shifts' + (wasTier1 && S.ironStreak > 0 ? (' to ' + cls.icon + ' ' + cls.name) : '') + '! (\u22123 streak)', 2200);
   render();
 }
 function useJesterHexRush() {
@@ -3570,7 +3584,10 @@ function useJesterHexRush() {
   if ((S.ironJesterHexRushUses || 0) >= 3) return;
   if ((S.ironLives || 0) <= 1) return; // the Witch would not kill her daughter
   S.ironJesterHexRushUses = (S.ironJesterHexRushUses || 0) + 1;
-  applyIronDamage(1); // bypasses the shield-block check entirely (shield is checked by callers, not inside applyIronDamage)
+  // Raw damage: bypasses shield, Lumina immunity, Paladin save, and Necromancer coin-flip.
+  // Hex Rush is self-inflicted — no class passive should intercept it.
+  S.ironWrong = (S.ironWrong || 0) + 1;
+  S.ironLives = Math.max(S.ironMaxLives - S.ironWrong, 0);
   jesterGainStreak(10);
   showBanner('synced', '🃏 Hex Rush \u2014 a life for momentum! +10 streak, \u22121 life (' + S.ironJesterHexRushUses + '/3 used)', 2400);
   render();
@@ -3899,13 +3916,17 @@ function useClassSkill() {
   var cd = IRON_CLASSES[cls].skillCooldown;
 
   if (cls === 'knight') {
-    // Raise Shield: Nullify damage for 1 round (2 with mastery)
+    // Raise Shield: Nullify damage for 2 rounds (3 with mastery — Brace for Impact)
     if (S.done) return;
-    var knightShieldDuration = (S.ironMasteryActive) ? 2 : 1;
-    S.ironShieldRounds = Math.max(S.ironShieldRounds, knightShieldDuration);
-    S.ironSkillEvent = S.ironMasteryActive
-      ? '🛡 Brace for Impact — shield raised for 2 rounds!'
-      : '🛡 Shield raised — damage nullified this round!';
+    if (S.ironShieldRounds > 0) {
+      S.ironSkillEvent = '🛡 Already Shielded — the shield is still up!';
+    } else {
+      var knightShieldDuration = S.ironMasteryActive ? 3 : 2;
+      S.ironShieldRounds = knightShieldDuration;
+      S.ironSkillEvent = S.ironMasteryActive
+        ? '🛡 Brace for Impact — shield raised for 3 rounds!'
+        : '🛡 Shield raised — damage nullified for 2 rounds!';
+    }
   } else if (cls === 'bomber') {
     // Absolute Destruction: Remove ALL wrong answers
     if (S.done) return;
@@ -4043,7 +4064,7 @@ function useClassSkill() {
     S.ironConsumables = newPool;
     var atFullLife = (S.ironWrong <= 0);
     if (total >= 3 && !atFullLife) {
-      // Gain a life, lose 3 consumables
+      // Gain 1 life (2 with upgrade), lose 3 consumables
       var lost = 3;
       var order2 = shuf(typeKeys);
       for (var oi = 0; oi < order2.length && lost > 0; oi++) {
@@ -4051,9 +4072,11 @@ function useClassSkill() {
         S.ironConsumables[order2[oi]] -= take;
         lost -= take;
       }
-      if (S.ironWrong > 0) { S.ironWrong--; S.ironLives = S.ironMaxLives - S.ironWrong; }
+      var livesHealed = 0;
+      if (S.ironWrong > 0) { S.ironWrong--; S.ironLives = S.ironMaxLives - S.ironWrong; livesHealed++; }
+      if (S.ironUpgradeActive && S.ironWrong > 0) { S.ironWrong--; S.ironLives = S.ironMaxLives - S.ironWrong; livesHealed++; }
       S.ironAlchemistSacrificeForLife = true;
-      S.ironSkillEvent = '⚗️ Transmutation — Sacrificed 3 consumables, gained 1 life!';
+      S.ironSkillEvent = '⚗️ Transmutation — Sacrificed 3 consumables, gained ' + livesHealed + ' life' + (livesHealed !== 1 ? 's' : '') + '!';
     } else {
       // Lose a life, get consumables (6 with upgrade, 3 base)
       applyIronDamage();
@@ -4347,7 +4370,7 @@ var IRON_WISH_CLASSES = ['necromancer','beastman','medium','assassin','scout','f
 // Classes the Jester is allowed to be secretly assigned. Excludes 'jester' itself and 'mage'
 // (mage's theme-branching skill dispatch is handled separately and is safe to include once verified —
 // left out for now to avoid the extra branch complexity on day one).
-var JESTER_SECRET_POOL = ['knight','bomber','thief','rogue','paladin','monk','alchemist','necromancer','beastman','medium','assassin','scout','fairy','elf'];
+var JESTER_SECRET_POOL = ['knight','bomber','thief','rogue','paladin','monk','alchemist','necromancer','beastman','medium','assassin','scout','fairy','elf','mage'];
 function isIronClassUnlocked(key, pr) {
   if (key === 'mage') {
     var achv = achvLoad();
@@ -5137,7 +5160,7 @@ var IRON_SKILL_BASE_DESC = {
 
 var IRON_MASTERY_DATA = {
   knight:    { mastery: 'Brace for Impact',       desc: 'Shields last one more round.' },
-  bomber:    { mastery: 'Calculated Detonation',   desc: 'Bombs now remove 2 wrong answers instead of one. Bombs can no longer be used multiple times for one question.' },
+  bomber:    { mastery: 'Calculated Detonation',   desc: 'Bombs now remove 2 wrong answers instead of one. Bombs can no longer be used multiple times for one question (restored to 2 uses with Strategic Explosives).' },
   thief:     { mastery: 'Gold Rush',               desc: 'Skip no longer breaks streaks.' },
   rogue:     { mastery: 'Speedy Slingshot',        desc: 'Earn an extra point for scoring within 3 seconds.' },
   paladin:   { mastery: 'Call for Karma',          desc: 'Every round, gain a stack of blessing. Once your passive is spent, every round instead burns your current stack for a chance to recover it — 2% per stack.' },
@@ -5163,7 +5186,7 @@ var IRON_UPGRADE_DATA = {
   alchemist: {
     upgradedName: 'Matter Weaver',
     upgrade: 'Successful Experiment',
-    desc: 'Transmutation yields twice the consumables. Losing a life now grants 6 consumables instead of 3. Gaining a life still costs 3 consumables.'
+    desc: 'Transmutation yields twice the consumables. Losing a life now grants 6 consumables instead of 3. Gaining a life now heals 2 lives instead of 1, still costing 3 consumables.'
   },
   paladin: {
     upgradedName: "God's Order",
@@ -5183,7 +5206,7 @@ var IRON_UPGRADE_DATA = {
   bomber: {
     upgradedName: 'War Criminal',
     upgrade: 'Strategic Explosives',
-    desc: 'Using a Bomb now has a 25% chance to grant 1 Bomb back and a 4% chance to heal 1 life.'
+    desc: 'Using a Bomb now has a 25% chance to grant 1 Bomb back and a 4% chance to heal 1 life. With Calculated Detonation, bombs can now be used twice per question again — 2 bombs clears all 3 wrong choices.'
   },
   monk: {
     upgradedName: 'Transcended One',
@@ -5827,13 +5850,15 @@ function screenQuiz() {
 
 function ironConsumableRow(q) {
   var bombLeft = ironBombCandidatesLeft(q);
-  var maxBombUses = (S.ironClass === 'bomber' && S.ironMasteryActive) ? 1 : 3;
+  var maxBombUses = (S.ironClass === 'bomber' && S.ironMasteryActive) ? (S.ironUpgradeActive ? 2 : 1) : 3;
   var shieldDisabled = S.done || S.ironConsumables.shield <= 0 || S.ironShieldRounds > 0;
   var skipDisabled   = S.done || S.ironConsumables.skip  <= 0;
   var bombDisabled   = S.done || S.ironConsumables.bomb  <= 0 || S.ironBombsUsedThisQ >= maxBombUses || bombLeft <= 0;
   var shieldTitle = (S.ironClass === 'knight' && S.ironMasteryActive) ? 'Nullifies damage for 3 rounds (Brace for Impact)' : 'Nullifies damage for 2 rounds';
   var skipTitle   = (S.ironClass === 'thief'  && S.ironMasteryActive) ? 'Skip · Gold Rush: streak preserved!' : 'Skip this question · breaks streak';
-  var bombTitle   = (S.ironClass === 'bomber' && S.ironMasteryActive) ? 'Remove 2 wrong answers · 1 use per question (Calculated Detonation)' : 'Remove a wrong answer · up to 3 per question';
+  var bombTitle   = (S.ironClass === 'bomber' && S.ironMasteryActive)
+    ? (S.ironUpgradeActive ? 'Remove 2 wrong answers · 2 uses per question (Strategic Explosives)' : 'Remove 2 wrong answers · 1 use per question (Calculated Detonation)')
+    : 'Remove a wrong answer · up to 3 per question';
   return '<div class="iron-consumable-row">'+
     '<button class="iron-cbtn" '+(shieldDisabled?'disabled':'')+' onclick="useIronShield()" title="'+shieldTitle+'">🛡 Shield<span class="iron-cbtn-count">'+S.ironConsumables.shield+'</span></button>'+
     '<button class="iron-cbtn" '+(skipDisabled  ?'disabled':'')+' onclick="useIronSkip()"   title="'+skipTitle  +'">⏭ Skip<span class="iron-cbtn-count">'+S.ironConsumables.skip+'</span></button>'+
@@ -5962,7 +5987,7 @@ function ironSkillRow() {
   };
   var masteryDescriptions = {
     knight:      S.ironUpgradeActive ? 'Nullify damage for 2 rounds (Brace for Impact) · 8% to heal on block' : 'Nullify damage for 2 rounds (Brace for Impact)',
-    bomber:      S.ironUpgradeActive ? 'Remove ALL wrong answers (1 use/q with Calculated Detonation) · 25% refund Bomb · 4% heal' : 'Remove ALL wrong answers (1 use/q with Calculated Detonation)',
+    bomber:      S.ironUpgradeActive ? 'Remove ALL wrong answers (2 uses/q with Calculated Detonation) · 25% refund Bomb · 4% heal' : 'Remove ALL wrong answers (1 use/q with Calculated Detonation)',
     thief:       'Sneak — protect streak this round (skip preserves streak)',
     rogue:       S.ironUpgradeActive ? 'Guaranteed point · no life risk · +1 pt if ≤3s' : 'Skip + 50/50 · +1 pt if answered in ≤3s',
     paladin:     S.ironUpgradeActive ? '10% heal · 20% consumable · blessings recover passive' : '5% heal · 15% consumable · blessings recover passive',
@@ -6015,7 +6040,7 @@ function ironSkillRow() {
     if (isLethal) {
       desc = '\u26a0\ufe0f LETHAL \u2014 only 1 life left and fewer than 3 consumables. Life loss bypasses shield. Using this will kill you!';
     } else if (totalCons >= 3 && !atFullLifePreview) {
-      desc = 'Gain a life \u00b7 lose 3 consumables' + (S.ironMasteryActive ? ' \u00b7 adrenaline stacks earn bonus pts' : '');
+      desc = 'Gain ' + (S.ironUpgradeActive ? '2 lives' : 'a life') + ' \u00b7 lose 3 consumables' + (S.ironMasteryActive ? ' \u00b7 adrenaline stacks earn bonus pts' : '');
     } else {
       desc = 'Lose a life \u00b7 gain ' + gainAmt + ' consumables (bypasses shield)' + (atFullLifePreview ? ' \u00b7 life is full' : '') + (S.ironMasteryActive ? ' \u00b7 adrenaline stacks earn bonus pts' : '');
     }
