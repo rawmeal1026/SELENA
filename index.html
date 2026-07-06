@@ -371,6 +371,34 @@ h1 { font-size: 18px; font-weight: 500; margin-bottom: 4px; }
 .subj-card.disabled-card { opacity: .45; cursor: not-allowed; pointer-events: none; }
 .home-card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 12px; }
 .home-card-grid .subj-card { padding: 1.1rem 1.25rem; }
+
+/* Lunar Calendar */
+.lunar-cal-card { background: var(--surface); border: 0.5px solid var(--bd); border-radius: var(--r); padding: 1.1rem 1rem; margin-bottom: 16px; }
+.lunar-cal-head { text-align: center; font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 12px; }
+.lunar-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.lunar-weekday { text-align: center; font-size: 10px; font-weight: 600; letter-spacing: .04em; color: var(--hint); padding-bottom: 4px; text-transform: uppercase; }
+.lunar-day { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-radius: var(--rs); font-size: 12px; color: var(--text); border: 0.5px solid transparent; position: relative; }
+.lunar-day.empty { visibility: hidden; }
+.lunar-day.today { border-color: var(--gold-glow); background: var(--gold-bg); cursor: pointer; font-weight: 700; }
+.lunar-day.today:hover { opacity: .85; }
+.lunar-day .lunar-mark { font-size: 11px; line-height: 1; }
+.lunar-day.marked-wrong .lunar-mark { opacity: .55; }
+.lunar-day.future { color: var(--hint); }
+
+/* Tales of the Awakened */
+.tales-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.tales-class-card { background: var(--surface); border: 0.5px solid var(--bd); border-radius: var(--rs); padding: 14px 6px; text-align: center; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.tales-class-card:hover { border-color: var(--bdh); }
+.tales-class-icon { font-size: 26px; }
+.tales-class-name { font-size: 12px; font-weight: 700; color: var(--text); line-height: 1.2; }
+.tales-class-progress { font-size: 10px; color: var(--muted); letter-spacing: .05em; }
+.tales-stage-card { border: 0.5px solid var(--bd); border-radius: var(--r); padding: 14px 16px; margin-bottom: 12px; background: var(--surface); }
+.tales-stage-card.unlocked { }
+.tales-stage-card.next { border-color: var(--gold-glow); background: var(--gold-bg); }
+.tales-stage-card.future { opacity: 0.5; }
+.tales-stage-label { font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.tales-stage-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.tales-stage-text { font-size: 13.5px; line-height: 1.55; color: var(--text); }
 .subj-num { font-size: 11px; font-weight: 500; color: var(--blue-text); background: var(--blue-bg); display: inline-block; padding: 2px 8px; border-radius: 20px; width: fit-content; }
 .subj-name { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.4; }
 .subj-count { font-size: 12px; color: var(--muted); }
@@ -1351,8 +1379,10 @@ var S = {
   ironSkillEvent: null,       // last skill outcome message to display
   ironMasteryTriggered: false,// tracks if mastery screen has been shown this run
   ironMasteryActive: false,   // true once mastery is unlocked for this run
+  ironMasteryPending: false,  // threshold crossed but reveal deferred to the next clean round boundary
   ironUpgradeTriggered: false,// tracks if upgrade screen has been shown this run
   ironUpgradeActive: false,   // true once class upgrade is unlocked for this run
+  ironUpgradePending: false,  // threshold crossed but reveal deferred to the next clean round boundary
   necroGraveyard: [],          // Necromancer: wrong questions stored here
   necroRedemptionActive: false,// true when next question is a Redemption pull
   necroCoinFlipPending: false, // true when death coin flip is awaiting display
@@ -1439,6 +1469,151 @@ var IRON_CLASSES = {
 };
 var L = ['A','B','C','D'];
 
+/* ─────────────────────────────────────────────
+   TALES OF THE AWAKENED — per-class lore, 4 stages each,
+   unlocked progressively with Moons. Excludes Jester.
+───────────────────────────────────────────── */
+var TALES_CLASS_ORDER = ['knight','bomber','thief','rogue','paladin','monk','alchemist','necromancer','beastman','medium','assassin','scout','fairy','elf','mage'];
+var TALES_STAGE_COST = [25, 50, 75, 100];
+
+var TALES_DATA = {
+  knight: {
+    subtitle: "The Unmovable Shield",
+    stages: [
+      { title: "The Selection", text: "The Knight Selection was a stage for glory — and he was its punchline. Every duel he entered, he lost. His grip on the blade was clumsy, his footwork worse. The other candidates laughed loud enough for the noble stands to hear. He was one loss away from being struck from the roster entirely, forsaken before he'd even begun." },
+      { title: "The Shield That Wouldn't Fall", text: "He picked up a shield only because no one wanted him near a blade after that. But something changed. Strike after strike, he didn't fall. He didn't yield ground. Where his sword faltered, his shield held — again, and again, and again, long after the crowd expected him to collapse. A noble in the stands stopped laughing and started watching." },
+      { title: "The Noble's Choice", text: "The noble approached him after the Selection ended, not to mock him like the others, but to make an offer: a place at his side, in preparation for something far larger than tournaments — the rising shadow of the Monster Lord. The Knight didn't hesitate. He remembered a kindness once shown to him when he had nothing, and he knew exactly how he intended to repay it." },
+      { title: "The Unmovable Shield of House Bloodmighty", text: "He would never be the fastest blade, and he stopped pretending to be. Instead he became something rarer — a wall that legends would one day be told about. In the years to come, soldiers and monsters alike would learn the same lesson the tournament crowd once refused to: he does not fall. He does not move. He is the Unmovable Shield of House Bloodmighty, and he chose that name himself, the day he decided a debt of kindness was worth a lifetime of standing firm." }
+    ]
+  },
+  thief: {
+    subtitle: "The Younger Silent Sibling",
+    stages: [
+      { title: "Scraps", text: "He learned to move quiet before he learned to speak clearly. In the slums, food didn't come to those who waited politely for it. He stole for himself, but more than that, he stole for his sister — the two of them surviving on scraps he lifted from stalls, pockets, and careless hands." },
+      { title: "The Mark He Shouldn't Have Picked", text: "One day he set his sights on a mark who looked easy — a broad-shouldered man carrying supplies who didn't seem to be paying attention. He wasn't easy. The Thief's hand never even reached the pouch before a grip like iron closed around his wrist. He'd just tried to steal from a Knight." },
+      { title: "Caught, Not Punished", text: "He braced for the usual outcome — a beating, a scream for the guards, maybe worse. Instead, the Knight looked at him for a long moment, then loosened his grip. Bad technique, wrong mark, but real skill underneath it — quick hands, quiet feet, sharp instincts. The Knight didn't see a criminal. He saw someone worth training." },
+      { title: "A Roof for the Silent Siblings", text: "The Knight didn't just let him go — he vouched for him, and for the sister waiting for him back in the slums. For the first time, the Thief didn't have to steal to eat. He had a roof, a noble's shelter, and a reason to sharpen his skills for something other than survival. He never forgot who gave him that first chance." }
+    ]
+  },
+  rogue: {
+    subtitle: "The Elder Silent Sibling",
+    stages: [
+      { title: "Watching From the Shadows", text: "Before anyone in the noble's household knew her name, she already knew theirs. While her younger brother lifted scraps in the open, she worked differently — watching, listening, learning the shape of people long before she ever had to speak to them. It was how she kept them both alive." },
+      { title: "Two Slum Rats at the Gate", text: "When the Knight brought them both before the noble's family, the welcome was cold. Two children from the slums, one of them caught red-handed stealing — the household's trust was never going to be freely given. Whispers followed them through every hallway." },
+      { title: "What She Already Knew", text: "But the Rogue hadn't walked in blind. She'd spent time studying this family long before the Knight ever made his introduction — their habits, their history, the things they valued and the things they feared. When suspicion turned to questions, she answered with a precision that unsettled the very people doubting her." },
+      { title: "Earning the House", text: "One by one, the doubts gave way. It wasn't charm that won the noble family over — it was proof, delivered calmly and exactly when it mattered. The Rogue secured not just her own place in the household, but her brother's too, through the same quiet skill that had kept them both fed on the streets. She didn't need a sword or a title. She only ever needed to be one step ahead." }
+    ]
+  },
+  paladin: {
+    subtitle: "The Boy Who Was Saved",
+    stages: [
+      { title: "The Village", text: "Before the plague, before any of it, he was just a happy boy in a small village. Then the Monster Lord's rise brought a sickness that didn't kill — it turned. Neighbors, friends, family, one after another rising again as undead. His world ended in a single night." },
+      { title: "Silence and the Bed", text: "His father, desperate to keep him alive and quiet, struck him across the throat, destroying his vocal folds so no sound could escape and draw the dead to their door. Then he strapped his son to the bed and went out into the ruined village to search for the boy's mother. Neither of his parents ever came back." },
+      { title: "Two Days", text: "He lay there for two days, unable to call for help, unable to move, listening to the village fall further into silence outside. It was the Elf and the Monk who finally found him — the same boy the Elf had argued wasn't worth saving. The Monk healed him anyway, and for the first time since that night, the boy made a sound again: his own voice, returning." },
+      { title: "The Follower of the Evertree", text: "He stayed with them after that, and the Monk's quiet devotion left its mark on him just as much as the healing had. In time, he took up the Evertree's faith as his own, no longer a broken boy strapped to a bed but someone determined to become strong enough that no one else would ever have to live through what he did. The trauma never left him entirely — but it became the reason he fought, instead of the reason he hid." }
+    ]
+  },
+  monk: {
+    subtitle: "The Last of the Rootbound Communion",
+    stages: [
+      { title: "The Communion", text: "His sect, the Rootbound Communion, held one belief above all others: that the Evertree was the source feeding every living thing in the land of Origo, and that tending to it was the truest form of devotion. For generations, that belief held the sect together. It was a quiet, simple life of faith." },
+      { title: "The Emptying Halls", text: "When the Monster Lord began to rise, the source of that evil crept closer to the Evertree than anyone was willing to stand near. One by one, his sectmates packed their belongings and left, their faith outweighed by fear. He watched the halls empty until he was the only believer left, still tending to roots no one else dared approach." },
+      { title: "The Elf's Offer", text: "An Elf appeared before him one day, having watched his devotion from a distance. She offered him a reward for his loyalty — the ability to stop aging entirely. He declined without much hesitation. Immortality meant stepping away from what made him human in the first place, and that was a price his faith never asked him to pay." },
+      { title: "A Different Gift", text: "Impressed rather than deterred, the Elf offered something else instead: the power to heal any wound, any illness, freely given rather than earned through sacrifice. In return, she asked him to leave the Evertree and join her in the fight against the rising Monster Lord. He said yes — not because his faith had wavered, but because protecting Origo was simply the same devotion, aimed outward." }
+    ]
+  },
+  alchemist: {
+    subtitle: "The Weight of Undeserved Happiness",
+    stages: [
+      { title: "A Life Too Good", text: "She grew up in a loving family, healthy and wanting for nothing, in a childhood most people would call fortunate. But she never felt fortunate. Somewhere inside her, a quiet certainty took root: she hadn't earned any of this happiness, and she didn't deserve it." },
+      { title: "Paying an Invisible Debt", text: "That false sense of owing something to the world became the engine behind everything she did. If she hadn't earned her happy life, she reasoned, she would spend the rest of it trying to be worth the gift she'd been given — one breakthrough at a time." },
+      { title: "Never Failing, Never Proud", text: "Her discipline bordered on unnatural. Anything she could imagine, she found a way to make real, without a single failed attempt standing in her way. And yet, no achievement ever brought her the sense of pride most people would expect it to. She simply moved on to the next thing she owed the world." },
+      { title: "Head of the Origo Creation Guild", text: "Her unmatched ability to conjure the impossible into something real eventually earned her leadership of the Origo Creation Guild. She still didn't believe she deserved the life she'd been given — but with the Monster Lord's rise threatening to take that life from everyone else too, she finally found a debt she felt worth working toward repaying." }
+    ]
+  },
+  necromancer: {
+    subtitle: "The Shadow's Bidding",
+    stages: [
+      { title: "What Comes After the Verdict", text: "A verdict from the Assassin was never the end of the story — it was a beginning for someone else in the Brigade. When she judged a victim too far gone, consumed completely by the evil spreading across Origo, it fell to the Necromancer to decide what came next for the body left behind. She understood that line between life and death better than most, being half undead, half human herself — enough humanity left to feel the weight of what she did, enough of death already in her to do it without flinching." },
+      { title: "A Second Purpose", text: "Rather than let the judged simply die and rot, the Necromancer bound what remained of them, raising a body with no will of its own left to raise objections. What the person could no longer choose in life, the Brigade now chose for them in death." },
+      { title: "Working Beneath the World", text: "These risen servants never marched openly for the Brigade's name. They moved beneath notice, in shadows and silence, completing tasks the living members couldn't risk being seen attempting. It was quiet, unglamorous work — and it was exactly why the Ophelia Brigade functioned as more than three individuals acting alone." },
+      { title: "The Reason for \"Brigade\"", text: "One judgment, one Assassin, and one victim would have simply been an execution. But behind every verdict stood a small, silent army built from the very people condemned by it. That was what turned Ophelia's name from a single blade into a Brigade — a force built quite literally from its own casualties." }
+    ]
+  },
+  beastman: {
+    subtitle: "The Curse of the Full Dark",
+    stages: [
+      { title: "An Ordinary Life", text: "Before the Monster Lord rose, he was nothing remarkable — just another worker in Origo, living an unremarkable life among people who knew him well. It was a quiet, forgettable kind of peace, and he never once thought to be grateful for it until it was gone." },
+      { title: "What the Night Made Him", text: "When the Monster Lord's rise swept over the land, it left him with a curse: every night, without fail, he transformed into a werewolf, losing himself to something feral until dawn returned him to his own body. He couldn't control it, and he couldn't hide it for long." },
+      { title: "Ostracized", text: "His neighbors didn't need long to notice. Fear spread faster than sympathy ever could, and the same people who once knew him well turned him away, unwilling to live beside what he'd become at night. He left before they could force him to." },
+      { title: "A Shared Hunt", text: "With nothing left to lose, he set his sights on the source of his curse and began hunting for the Monster Lord itself, hoping to undo what had been done to him. Along the way, he found the Scout, a man hunted by a curse of his own kind — different in shape, but just as unwanted. Neither of them walked that road alone after that." }
+    ]
+  },
+  medium: {
+    subtitle: "The Peace Before Sleep",
+    stages: [
+      { title: "Not Every Verdict Was the Same", text: "Not every person the Assassin marked had chosen their own cruelty. Some had been forced into it — coerced, threatened, or broken until evil was no longer a decision but a cage. For these victims, the Brigade's judgment took a different shape entirely, and that shape began with the Medium, who was half specter, half human — one foot already among the dead long before she ever took up the role." },
+      { title: "Listening to the Dying", text: "Being neither fully living nor fully spirit let her sit with a dying soul in a way no one else in the Brigade could. Before the Brigade completed its work, the Medium would commune with the victim's soul, giving them a final chance to be heard. Some had regrets they'd carried in silence for years. Some had one last message meant for someone they loved and would never see again. Some feared for a person still left in harm's way, unable to protect them any longer." },
+      { title: "Ophelia", text: "The name wasn't taken from any single soul she comforted — it came from what the word itself meant: help. Of everything the Brigade did, judgment and shadowed labor included, it was the Medium's part that carried that meaning closest. Giving a broken, coerced soul a chance to be heard, to send one last word to someone they loved, to find peace before the end — that was the truest help the Brigade had to offer, and it was why the whole Brigade carried her purpose as its name." },
+      { title: "A Peaceful Death", text: "Once the Assassin's judgment was carried out and the Necromancer's work was done, it was the Medium who closed the circle — lulling the victim's soul into a rest most people in Origo could only hope for. Not everyone judged by the Brigade deserved punishment. Some simply deserved, at last, to be heard before they were gone." }
+    ]
+  },
+  assassin: {
+    subtitle: "The Judgment of the Ophelia Brigade",
+    stages: [
+      { title: "Neither Side", text: "As the Monster Lord's war spread, most of Origo was forced to pick a side. The Ophelia Brigade picked neither. They didn't fight for humanity, and they didn't fight for the Monster Lord's rise — they answered to a judgment of their own making, one nobody had asked them to deliver." },
+      { title: "Half of Two Worlds", text: "Their leader belonged fully to neither side of her own bloodline. Half vampire, half human, she carried the hunger of one half and the conscience of the other, and had long since stopped trying to reconcile them. Instead, she turned that tension into purpose." },
+      { title: "A Verdict, Not a Kill", text: "She never called herself a murderer, even though the title fit. To her, killing wasn't destruction — it was release. Those consumed entirely by the world's cruelty, beyond saving, beyond turning back, deserved one thing above punishment: freedom from what they'd become. She delivered that freedom personally, and never once looked away while doing it." },
+      { title: "Unstoppable by Design", text: "Whoever the Assassin marked, the Brigade moved on together, and nothing in Origo had yet found a way to stand in their path once a judgment was made. She led not through cruelty alone, but through a conviction so absolute that even her own allies rarely questioned her verdicts — only carried them out." }
+    ]
+  },
+  scout: {
+    subtitle: "The Watched Hunter",
+    stages: [
+      { title: "A Hunter's Gift", text: "He'd made his living as a professional hunter across Origo long before the Monster Lord ever rose. When that rise came, something in him sharpened without warning — his eyes, his ears, his instincts, all suddenly keener than any human's had a right to be. To most people, it would have felt like a gift." },
+      { title: "Never Quite Alone", text: "For him, it felt like a curse wearing a gift's face. Everywhere he went, he carried the same crawling sense that he wasn't alone — that something, somewhere, was watching him, even while he slept. No amount of hunting instinct could tell him who, or why." },
+      { title: "A Life Not His Own", text: "The feeling gnawed at him until it became fear. If someone was truly watching that closely, that constantly, then how much of his life was actually his to control? He became certain there was only one being with the reach to do something like this to him: the Monster Lord." },
+      { title: "Meeting a Fellow Cursed", text: "He set out toward the Monster Lord himself, hoping to confront whatever had changed him and finally take his life back. On that road, he crossed paths with the Beastman — another man carrying an unwanted curse of his own. Neither had answers yet, but for the first time, the Scout no longer felt like the only one hunted by something unseen." }
+    ]
+  },
+  fairy: {
+    subtitle: "The Watcher From Afar",
+    stages: [
+      { title: "A Love Across the Divide", text: "She'd fallen for a human once, fully and quietly, but the gap between their kinds meant she could only ever love him from a distance — near enough to watch, never close enough to be seen. It was a love with no path forward, and she'd made an uneasy peace with that, until the Monster Lord rose." },
+      { title: "A Silent Protector", text: "The rising threat turned her quiet devotion into worry. She began watching over him in earnest, warding off dangers he never even noticed, and — without ever revealing herself — gifting him senses sharper than any human should have, just to help him survive whatever was coming." },
+      { title: "Following His Path", text: "As she trailed him from the shadows across his travels, she realized where his journey was leading: straight toward the Monster Lord. Terrified of losing him to something she couldn't shield him from at a distance, she made a decision she'd avoided for years." },
+      { title: "Close Enough to Confess", text: "She resolved to follow him all the way there, still from afar, but no longer content to simply protect him in silence. Somewhere along that road, she hoped, she would finally find the courage to let him see her — and to tell him a feeling she'd carried unseen for far too long." }
+    ]
+  },
+  elf: {
+    subtitle: "The Reluctant Envoy",
+    stages: [
+      { title: "The Prophecy", text: "An ancient prophecy foretold the end of the world with the Monster Lord's rise. The Elder Elves chose her to leave their realm and seek alliance with the other races — a mission she wanted no part of. She had lived longer than nearly anyone alive, and in all those years, her opinion of humans had never once softened." },
+      { title: "An Understanding, Reluctantly Reached", text: "She resisted the assignment, certain that humanity wasn't worth the effort of saving. But the prophecy left no room for pride. Without every race standing together, fate could not be changed — not by elves alone, not by anyone alone. She accepted the mission, though not the sentiment behind it." },
+      { title: "On the Road", text: "Her expedition into the human realm brought her face to face with people she'd spent centuries dismissing from a distance. One by one, they proved harder to write off than she expected — not because they were powerful, but because of small, stubborn choices they kept making for each other, choices that made no sense by an elf's long, careful logic." },
+      { title: "What Changed", text: "She never fully lost her sharp edges, and she never admitted it out loud. But somewhere along the journey, the humans she met chipped away at centuries of certainty. The disdain she arrived with quietly gave way to something she never expected to feel toward mankind again: respect, and eventually, something close to fondness." }
+    ]
+  },
+  mage: {
+    subtitle: "The Cog Behind the Violet Sky",
+    stages: [
+      { title: "A Sky That Shouldn't Be", text: "Night should have been black, plain and simple, yet the sky over Origo carried a violet tint no one else seemed to question. She couldn't let it go. To her, that color wasn't decoration — it was a clue to something the rest of the world had stopped bothering to ask about." },
+      { title: "Questions Nobody Else Asked", text: "The violet sky was only the beginning of her list. What caused monsters to erupt from the land itself? How did the dead keep moving as zombies? How could ghosts share a realm meant only for the living? Why did the Vampire Sieges begin exactly when they did? Everyone else treated these as separate horrors. She refused to believe they weren't connected." },
+      { title: "The Invisible Cog", text: "Her conclusion was as unsettling as it was simple: something like a cog was turning beneath Origo, driving all of it — the sky, the monsters, the dead, the sieges — as a single system, and that same cog was behind the Monster Lord's rise. Chasing that theory led her to tap into an invisible force she'd only ever theorized about before: Mana." },
+      { title: "Head of the Mana Research Guild", text: "Her success in touching what no one else could even prove existed earned her a new purpose — leading the Mana Research Guild, dedicating herself fully to proving what her instincts had told her from the start. Her hunch about the cog remained unconfirmed by the wider world, but she was certain it was only a matter of time before humanity caught up to what she already suspected." }
+    ]
+  },
+  bomber: {
+    subtitle: "The Guild That Learned to Destroy",
+    stages: [
+      { title: "Fireworks and Coin", text: "His obsessions were simple growing up: fireworks, and the money they could bring in. He built a life around dazzling crowds with color and noise, chasing the thrill of both the spectacle and the profit that followed it." },
+      { title: "The Slow Decline", text: "But spectacle doesn't sell forever, and as sales dried up, so did his fortune. He watched the business he'd built go quiet, the crowds thinning along with his coin purse, with no clear way to reverse it." },
+      { title: "A New Buyer", text: "The rise of evil across Origo turned out to be very good for business, if he looked at it the right way. Panicked villages and desperate lords didn't want fireworks anymore — they wanted firepower, and they were willing to pay far more for it than any festival crowd ever had. He didn't need convincing twice." },
+      { title: "From Entertainment to Destruction", text: "What was once the Origo Entertainment Guild became the Monster Destruction Guild under his leadership, its fireworks repurposed into weapons against the Monster Lord's forces — sold, contracted, and billed accordingly. He joined forces with two other guild heads, the Alchemist and the Mage, less out of noble conviction and more because bigger contracts came bundled with bigger names. Whatever slayed the Monster Lord first, he intended to be the one holding the invoice." }
+    ]
+  }
+};
+
 // ── Wish on the Sky (gacha) ──
 // Wish target rotates daily. Only classes flagged true in WISH_ENABLED are currently wishable;
 // other days show their scheduled class but the feature stays disabled until turned on.
@@ -1501,6 +1676,8 @@ var PR_DEFAULTS = {
   shopStartBomb: false,
   shopIronCodex: false,   // Iron Codex unlocked (access the fallen questions log)
   shopMoonCodex: false,   // Lunar Codex upgrade (expands codex from 5 → 10 entries, renames to Lunar Codex)
+  shopLunarCalendar: false, // Lunar Calendar unlocked (access the daily question feature)
+  shopTales: false,       // Tales of the Awakened unlocked (access class lore)
   witchBeaten: false,     // true once Together Forever is earned; reset by Empty Canvas to re-enable Jester card and Witching Hour
   jesterFreePlay: false,  // true after Empty Canvas purchase; quests play out narratively but never gate
   witchReadyAgain: false, // true once the post-Canvas monologue is fully read; allows the Witch Encounter to retrigger
@@ -1562,6 +1739,13 @@ var PR_DEFAULTS = {
 
   // Jester Quest 1 — Star 3 specific deaths
   jesterQuest1Stars: [], // tracks which of the 3 required causes have been starred
+
+  // Lunar Calendar — keyed by 'YYYY-MM-DD', stores that day's fixed question + result
+  lunarCalendar: {},
+  // Star Coins — earned monthly by converting the previous month's Moon Marks
+  starCoins: 0,
+  // Tales of the Awakened — keyed by class, stores highest lore stage unlocked (0-4)
+  talesUnlocked: {},
 };
 
 function prLoad() {
@@ -1696,6 +1880,16 @@ function tryOpenCodex() {
   var pr = prLoad();
   if (pr.shopIronCodex) { goTo('ironcodex'); return; }
   selenaAlert('🔒 ' + codexLabel() + ' Locked', 'Unlock the Iron Codex in the Moon Shop to access your fallen questions log.');
+}
+function tryOpenLunar() {
+  var pr = prLoad();
+  if (pr.shopLunarCalendar) { goTo('lunar'); return; }
+  selenaAlert('🔒 Lunar Calendar Locked', 'Unlock the Lunar Calendar in the Moon Shop to access daily questions.');
+}
+function tryOpenTales() {
+  var pr = prLoad();
+  if (pr.shopTales) { goTo('tales'); return; }
+  selenaAlert('🔒 Tales of the Awakened Locked', 'Unlock Tales of the Awakened in the Moon Shop to access class lore.');
 }
 
 // Helper: add to a unique-array field
@@ -2346,8 +2540,10 @@ function startQuiz() {
     S.ironElfSpiritWasCorrect = false;
     S.ironMasteryActive = false;
     S.ironMasteryTriggered = false;
+    S.ironMasteryPending = false;
     S.ironUpgradeActive = false;
     S.ironUpgradeTriggered = false;
+    S.ironUpgradePending = false;
     S.necroGraveyard = [];
     S.necroRedemptionActive = false;
     S.necroCoinFlipPending = false;
@@ -2777,6 +2973,8 @@ function nmStartMindful() {
 
 // Fairy: track total Moons gained this Iron Man run, unlock Winker Bell at 16
 // Check and trigger Iron Man mastery milestone (15 points). Safe to call after any score increment.
+// The actual reveal is NOT shown here — it's deferred to the next clean round boundary (see next())
+// so it can never cut into a question that's still in progress.
 function checkIronMastery() {
   if (!S.ironMode || S.ironIsJester || S.ironMasteryTriggered || S.score < 15) return;
   S.ironMasteryTriggered = true;
@@ -2792,8 +2990,8 @@ function checkIronMastery() {
     for (var ck in pr.ironClassMastery) { if (!pr.ironClassMastery[ck]) { _allMastered = false; break; } }
     if (_allMastered) unlockAchievement('violet_sky_all');
   });
+  S.ironMasteryPending = true;
   render();
-  setTimeout(function() { S.screen = 'ironmastery'; render(); }, 700);
 }
 
 function fairyTrackMoons(amount) {
@@ -3149,6 +3347,26 @@ function pick(displayIdx) {
   }
 }
 function next() {
+  // ── Deferred Iron Man milestone reveals ──
+  // checkIronMastery()/checkIronUpgrade() only set a *pending* flag when a threshold is
+  // crossed — the actual full-screen reveal always happens here, at the moment a round
+  // is about to begin, when the previous question is fully resolved and nothing is
+  // currently on screen for the player to be pulled out of. This guarantees the reveal
+  // never cuts into an ongoing question.
+  if (S.ironMode && (S.ironMasteryPending || S.ironUpgradePending)) {
+    // Safety net: if a per-question timer is somehow still running at this boundary,
+    // freeze it (don't let it keep ticking, or expire, behind the reveal screen).
+    if (S.ironTimerInterval) stopIronTimer();
+    if (S.ironMasteryPending) {
+      S.ironMasteryPending = false;
+      S.screen = 'ironmastery';
+    } else {
+      S.ironUpgradePending = false;
+      S.screen = 'ironupgrade';
+    }
+    render();
+    return;
+  }
   if (S.ironMode) {
     if (S.ironUsedConsumableThisRound) {
       prRecord(function(pr){ pr.ironConsumableRounds = (pr.ironConsumableRounds || 0) + 1; });
@@ -4581,7 +4799,16 @@ function startIronTimer() {
   stopIronTimer();
   S.ironTimeLeft = curseTimerMax();
   updateTimerDisplay();
-  S.ironTimerInterval = setInterval(function() {
+  S.ironTimerInterval = setInterval(ironTimerTick, 1000);
+}
+// Resumes ticking from the current S.ironTimeLeft (does NOT reset it) — used to
+// un-freeze the timer after a safety-net pause, as opposed to startIronTimer()
+// which begins a fresh countdown for a new question.
+function resumeIronTimer() {
+  if (S.ironTimerInterval || S.ironTimeLeft <= 0) return;
+  S.ironTimerInterval = setInterval(ironTimerTick, 1000);
+}
+function ironTimerTick() {
     S.ironTimeLeft--;
     updateTimerDisplay();
     if (S.ironTimeLeft <= 0) {
@@ -4628,7 +4855,6 @@ function startIronTimer() {
       render();
       if (S.ironWrong >= S.ironMaxLives) setTimeout(function() { S.screen = 'ironover'; render(); }, 900);
     }
-  }, 1000);
 }
 function stopIronTimer() {
   if (S.ironTimerInterval) { clearInterval(S.ironTimerInterval); S.ironTimerInterval = null; }
@@ -5425,6 +5651,8 @@ var IRON_UPGRADE_DATA = {
 };
 
 // Check and trigger Class Upgrade milestone (50 points). Safe to call after any score increment.
+// The actual reveal is NOT shown here — it's deferred to the next clean round boundary (see next())
+// so it can never cut into a question that's still in progress.
 function checkIronUpgrade() {
   if (!S.ironMode || S.ironIsJester || S.ironUpgradeTriggered || S.score < 50) return;
   if (!S.ironClass || !IRON_UPGRADE_DATA[S.ironClass]) return;
@@ -5440,14 +5668,25 @@ function checkIronUpgrade() {
     for (var ck in pr.ironClassUpgrade) { if (!pr.ironClassUpgrade[ck]) { _allUpgraded = false; break; } }
     if (_allUpgraded) unlockAchievement('violet_sky_upgrade_all');
   });
+  S.ironUpgradePending = true;
   render();
-  setTimeout(function() { S.screen = 'ironupgrade'; render(); }, 700);
 }
 
 function continueAfterUpgrade() {
-  S.screen = 'quiz';
-  render();
+  // Normal case: the question that triggered this was already fully resolved before we
+  // got here, so just resume the round-advance flow — it'll show the mastery reveal too
+  // if that's also pending, then move on to the next question.
+  // Safety-net case: if a question is somehow still ongoing (see the freeze in next()),
+  // return to it and resume its timer from where it was frozen instead of skipping ahead.
+  if (S.ironMode && !S.done && S.shuffled && S.shuffled[S.cur]) {
+    S.screen = 'quiz';
+    render();
+    resumeIronTimer();
+    return;
+  }
+  next();
 }
+
 function screenIronCurseChoice() {
   var newCurse = S.ironCurseChoiceNewId ? IRON_CURSES[S.ironCurseChoiceNewId] : null;
   var currentCursesHtml = S.ironCurses.map(function(id) {
@@ -5612,11 +5851,18 @@ function screenIronMastery() {
 }
 
 function continueAfterMastery() {
-  // The current question was already answered (S.done=true), so just re-render quiz
-  // so the player can see the result feedback and press Next normally.
-  // Do NOT restart the timer — the question is already done.
-  S.screen = 'quiz';
-  render();
+  // Normal case: the question that triggered this was already fully resolved before we
+  // got here, so just resume the round-advance flow — it'll show the upgrade reveal too
+  // if that's also pending, then move on to the next question.
+  // Safety-net case: if a question is somehow still ongoing (see the freeze in next()),
+  // return to it and resume its timer from where it was frozen instead of skipping ahead.
+  if (S.ironMode && !S.done && S.shuffled && S.shuffled[S.cur]) {
+    S.screen = 'quiz';
+    render();
+    resumeIronTimer();
+    return;
+  }
+  next();
 }
 
 function screenIronReward() {
@@ -5686,10 +5932,28 @@ function screenHome() {
         var _pr = prLoad();
         var _lbl = codexLabel();
         var _locked = !_pr.shopIronCodex;
-        return '<div class="subj-card'+(_locked?' disabled-card':'')+'"'+(_locked?'':' onclick="tryOpenCodex()"')+' style="opacity:'+(_locked?'0.6':'1')+'">'+
-          '<div class="subj-num">'+(_locked ? '🔒' : '📜')+' Codex</div>'+
+        return '<div class="subj-card" onclick="tryOpenCodex()" style="opacity:'+(_locked?'0.6':'1')+'">'+
+          '<div class="subj-num">'+(_locked ? '🔒 Purchase in Moon Shop' : '📜 Codex')+'</div>'+
           '<div class="subj-name">'+esc(_lbl)+' \u2014 Fallen Questions</div>'+
           '<div class="subj-count">Review questions you\'ve gotten wrong</div>'+
+        '</div>';
+      })()+
+      (function(){
+        var _lcPr = prLoad();
+        var _lcLocked = !_lcPr.shopLunarCalendar;
+        return '<div class="subj-card" onclick="tryOpenLunar()" style="opacity:'+(_lcLocked?'0.6':'1')+'">'+
+          '<div class="subj-num">'+(_lcLocked ? '🔒 Purchase in Moon Shop' : '🌙 Daily')+'</div>'+
+          '<div class="subj-name">Lunar Calendar</div>'+
+          '<div class="subj-count">Answer daily questions to earn Moons and Star Coins</div>'+
+        '</div>';
+      })()+
+      (function(){
+        var _talesPr = prLoad();
+        var _talesLocked = !_talesPr.shopTales;
+        return '<div class="subj-card" onclick="tryOpenTales()" style="opacity:'+(_talesLocked?'0.6':'1')+'">'+
+          '<div class="subj-num">'+(_talesLocked ? '🔒 Purchase in Moon Shop' : '📖 Lore')+'</div>'+
+          '<div class="subj-name">Tales of the Awakened</div>'+
+          '<div class="subj-count">Unlock every class\'s story</div>'+
         '</div>';
       })()+
     '</div>';
@@ -7339,6 +7603,323 @@ function openFeedback() {
   overlay.addEventListener('click', handleOverlay);
 }
 
+/* ─────────────────────────────────────────────
+   LUNAR CALENDAR — one fixed question per day
+───────────────────────────────────────────── */
+function lunarPad(n) { return n < 10 ? '0'+n : ''+n; }
+
+function lunarDateKey(d) {
+  return d.getFullYear()+'-'+lunarPad(d.getMonth()+1)+'-'+lunarPad(d.getDate());
+}
+
+function lunarMonthKey(d) {
+  return d.getFullYear()+'-'+lunarPad(d.getMonth()+1);
+}
+
+// Converts any past month's Moon Marks into Star Coins, then discards that month's data.
+// Safe to call on every Lunar Calendar open — after the first call in a new month there's
+// nothing left from prior months to convert, so it's a no-op until the month rolls over again.
+function lunarConvertPastMonths() {
+  var pr = prLoad();
+  if (!pr.lunarCalendar) pr.lunarCalendar = {};
+  var currentMonthKey = lunarMonthKey(new Date());
+  var marksCount = 0;
+  var toDelete = [];
+  Object.keys(pr.lunarCalendar).forEach(function(dateKey) {
+    if (dateKey.slice(0, 7) < currentMonthKey) {
+      if (pr.lunarCalendar[dateKey] && pr.lunarCalendar[dateKey].answered) marksCount++;
+      toDelete.push(dateKey);
+    }
+  });
+  if (toDelete.length) {
+    toDelete.forEach(function(k) { delete pr.lunarCalendar[k]; });
+    if (marksCount > 0) pr.starCoins = (pr.starCoins || 0) + marksCount;
+    prSave(pr);
+  }
+  return pr;
+}
+
+// Simple deterministic string hash — same date always maps to the same index
+function lunarHash(str) {
+  var h = 0;
+  for (var i = 0; i < str.length; i++) { h = (h*31 + str.charCodeAt(i)) | 0; }
+  return Math.abs(h);
+}
+
+// Names of regular subjects (excludes Iron Man) that currently have questions loaded
+function lunarLoadedSubjectNames() {
+  var names = [];
+  DEFAULT_SUBJECTS.forEach(function(s) {
+    if (s.name === IRON_MAN.name) return;
+    var qs = S.loadedQ[s.name];
+    if (qs && qs.length) names.push(s.name);
+  });
+  return names;
+}
+
+// Picks a random subject, then a random question within it — deterministic per date
+function lunarPickQuestion(dateKey) {
+  var names = lunarLoadedSubjectNames();
+  if (!names.length) return null;
+  var subjName = names[lunarHash(dateKey+'|subj') % names.length];
+  var qs = S.loadedQ[subjName];
+  return qs[lunarHash(dateKey+'|q') % qs.length];
+}
+
+// Fetches every subject not yet loaded, then re-renders if still on the Lunar Calendar screen —
+// so the question appears on its own instead of leaving the person stuck on an empty state
+function lunarKickoffLoad() {
+  if (S._lunarLoading) return;
+  var names = DEFAULT_SUBJECTS.filter(function(s) { return s.name !== IRON_MAN.name; }).map(function(s) { return s.name; });
+  var remaining = names.length;
+  if (!remaining) return;
+  S._lunarLoading = true;
+  function finish() {
+    S._lunarLoading = false;
+    if (S.screen === 'lunar') render();
+  }
+  names.forEach(function(name) {
+    if (S.loadedQ[name] && S.loadedQ[name].length) {
+      remaining--; if (remaining === 0) finish();
+      return;
+    }
+    fetchSubject(name, function(err, qs) {
+      if (!err && qs && qs.length) S.loadedQ[name] = qs;
+      remaining--; if (remaining === 0) finish();
+    });
+  });
+}
+
+// Returns today's fixed question, generating and persisting it on first view of the day
+function lunarEnsureToday() {
+  var pr = prLoad();
+  if (!pr.lunarCalendar) pr.lunarCalendar = {};
+  var todayKey = lunarDateKey(new Date());
+  var entry = pr.lunarCalendar[todayKey];
+  if (entry && entry.question) return entry;
+  var q = lunarPickQuestion(todayKey);
+  if (!q) return null; // no questions loaded yet
+  entry = {
+    subj: q.subj, topic: q.topic, question: q.question, choices: q.choices, answer: q.answer,
+    answered: false, correct: null, chosen: null
+  };
+  pr.lunarCalendar[todayKey] = entry;
+  prSave(pr);
+  return entry;
+}
+
+function lunarAnswer(idx) {
+  var pr = prLoad();
+  var todayKey = lunarDateKey(new Date());
+  var entry = pr.lunarCalendar && pr.lunarCalendar[todayKey];
+  if (!entry || entry.answered) return;
+  var isCorrect = (idx === entry.answer);
+  entry.answered = true;
+  entry.correct = isCorrect;
+  entry.chosen = idx;
+  pr.moons = (pr.moons || 0) + (isCorrect ? 50 : 25);
+  prSave(pr);
+  var mc = document.getElementById('moonCount');
+  if (mc) mc.textContent = (pr.moons || 0).toLocaleString();
+  render();
+}
+
+function screenLunarCalendar() {
+  var today    = new Date();
+  var todayKey = lunarDateKey(today);
+  var year     = today.getFullYear();
+  var month    = today.getMonth();
+  var monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var firstDow   = new Date(year, month, 1).getDay();
+  var daysInMonth = new Date(year, month+1, 0).getDate();
+
+  var pr  = lunarConvertPastMonths();
+  var cal = pr.lunarCalendar || {};
+
+  var weekdayHtml = ['Su','Mo','Tu','We','Th','Fr','Sa'].map(function(w) {
+    return '<div class="lunar-weekday">'+w+'</div>';
+  }).join('');
+
+  var cellsHtml = '';
+  for (var i = 0; i < firstDow; i++) cellsHtml += '<div class="lunar-day empty"></div>';
+  for (var day = 1; day <= daysInMonth; day++) {
+    var dObj = new Date(year, month, day);
+    var key  = lunarDateKey(dObj);
+    var isToday  = (key === todayKey);
+    var isFuture = (!isToday && dObj > today);
+    var entry = cal[key];
+    var cls = 'lunar-day';
+    if (isToday) cls += ' today';
+    else if (isFuture) cls += ' future';
+    var dayContent = day;
+    if (entry && entry.answered) {
+      cls += entry.correct ? ' marked-correct' : ' marked-wrong';
+      dayContent = '<span class="lunar-mark">🌙</span>';
+    }
+    cellsHtml += '<div class="'+cls+'"><div>'+dayContent+'</div></div>';
+  }
+
+  var calHtml = '<div class="lunar-cal-card">'+
+      '<div class="lunar-cal-head">'+monthNames[month]+' '+year+'</div>'+
+      '<div class="lunar-cal-grid">'+weekdayHtml+cellsHtml+'</div>'+
+    '</div>';
+
+  var todayEntry = cal[todayKey] || lunarEnsureToday();
+
+  var qSectionHtml;
+  if (!todayEntry) {
+    lunarKickoffLoad();
+    qSectionHtml = '<div class="card" style="text-align:center;padding:1.5rem 1.25rem">'+
+      '<div style="margin-bottom:10px"><span class="spin"></span></div>'+
+      '<div style="font-size:13px;color:var(--muted)">Fetching today\'s question\u2026</div>'+
+    '</div>';
+  } else if (!todayEntry.answered) {
+    qSectionHtml = '<div class="card">'+
+      '<div class="qsubj">'+esc(todayEntry.subj)+'</div>'+
+      (todayEntry.topic ? '<div class="qtopic">'+esc(todayEntry.topic)+'</div>' : '')+
+      '<div class="qtxt">'+esc(todayEntry.question)+'</div>'+
+      todayEntry.choices.map(function(c, i) {
+        return '<button class="cbtn" onclick="lunarAnswer('+i+')"><span class="cltr">'+String.fromCharCode(65+i)+'.</span> '+esc(c)+'</button>';
+      }).join('')+
+    '</div>';
+  } else {
+    var isOk = todayEntry.correct;
+    var choicesHtml = todayEntry.choices.map(function(c, i) {
+      var cls = 'cbtn';
+      if (i === todayEntry.answer) cls += ' correct';
+      else if (i === todayEntry.chosen) cls += ' wrong';
+      return '<button class="'+cls+'" disabled><span class="cltr">'+String.fromCharCode(65+i)+'.</span> '+esc(c)+'</button>';
+    }).join('');
+    qSectionHtml = '<div class="card">'+
+      '<div class="fb '+(isOk?'ok':'no')+'">'+(isOk ? '✓ Correct! +50 🌙' : '✗ Incorrect — +25 🌙')+'</div>'+
+      '<div class="qsubj">'+esc(todayEntry.subj)+'</div>'+
+      (todayEntry.topic ? '<div class="qtopic">'+esc(todayEntry.topic)+'</div>' : '')+
+      '<div class="qtxt">'+esc(todayEntry.question)+'</div>'+
+      choicesHtml+
+      '<div style="font-size:12px;color:var(--muted);margin-top:6px">Come back tomorrow for a new question.</div>'+
+    '</div>';
+  }
+
+  return '<div class="breadcrumb">'+
+      '<span onclick="goTo(\'home\')">Home</span>'+
+      '<span class="sep">/</span>'+
+      '<span class="cur">Lunar Calendar</span>'+
+    '</div>'+
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">'+
+      '<h1>🌙 Lunar Calendar</h1>'+
+      '<div style="display:flex;align-items:center;gap:6px;background:var(--blue-bg);border:1px solid var(--blue);border-radius:20px;padding:4px 12px;font-size:13px;font-weight:700;color:var(--blue-text);white-space:nowrap">'+
+        '⭐ '+(pr.starCoins || 0).toLocaleString()+
+      '</div>'+
+    '</div>'+
+    '<p class="sub" style="margin-top:10px">Answer the daily question to get a Moon Mark. By the end of every month, all moon marks are converted to Star Coins.</p>'+
+    calHtml+
+    qSectionHtml+
+    '<div class="brow" style="margin-top:16px"><button class="btn" onclick="goTo(\'home\')">← Back to Home</button></div>';
+}
+
+/* ─────────────────────────────────────────────
+   TALES OF THE AWAKENED
+───────────────────────────────────────────── */
+function talesStagesUnlocked(key) {
+  var pr = prLoad();
+  return (pr.talesUnlocked && pr.talesUnlocked[key]) || 0;
+}
+
+function goToTalesDetail(key) {
+  S.talesSelectedClass = key;
+  goTo('talesdetail');
+}
+
+function talesUnlockStage(key) {
+  var pr = prLoad();
+  if (!pr.talesUnlocked) pr.talesUnlocked = {};
+  var cur = pr.talesUnlocked[key] || 0;
+  var nextStage = cur + 1;
+  if (nextStage > 4) return;
+  var cost = TALES_STAGE_COST[nextStage - 1];
+  if ((pr.moons || 0) < cost) return;
+  pr.moons -= cost;
+  pr.talesUnlocked[key] = nextStage;
+  prSave(pr);
+  var mc = document.getElementById('moonCount');
+  if (mc) mc.textContent = (pr.moons || 0).toLocaleString();
+  render();
+}
+
+function screenTales() {
+  var pr = prLoad();
+  var cardsHtml = TALES_CLASS_ORDER.map(function(key) {
+    var cls = IRON_CLASSES[key];
+    var unlocked = talesStagesUnlocked(key);
+    return '<div class="tales-class-card" onclick="goToTalesDetail(\''+key+'\')">'+
+      '<div class="tales-class-icon">'+cls.icon+'</div>'+
+      '<div class="tales-class-name">'+esc(cls.name)+'</div>'+
+      '<div class="tales-class-progress">'+unlocked+'/4 stages</div>'+
+    '</div>';
+  }).join('');
+
+  return '<div class="breadcrumb">'+
+      '<span onclick="goTo(\'home\')">Home</span>'+
+      '<span class="sep">/</span>'+
+      '<span class="cur">Tales of the Awakened</span>'+
+    '</div>'+
+    '<h1>📖 Tales of the Awakened</h1>'+
+    '<p class="sub">Every class carries a story. Unlock it one stage at a time.</p>'+
+    '<div class="tales-grid">'+cardsHtml+'</div>'+
+    '<div class="brow" style="margin-top:16px"><button class="btn" onclick="goTo(\'home\')">← Back to Home</button></div>';
+}
+
+function screenTalesDetail() {
+  var key = S.talesSelectedClass;
+  var cls = IRON_CLASSES[key];
+  var tale = TALES_DATA[key];
+  if (!cls || !tale) return '<div class="card">Story not found.</div>';
+
+  var unlocked = talesStagesUnlocked(key);
+  var pr = prLoad();
+  var moons = pr.moons || 0;
+
+  var stagesHtml = tale.stages.map(function(stage, i) {
+    var stageNum = i + 1;
+    if (stageNum <= unlocked) {
+      return '<div class="tales-stage-card unlocked">'+
+        '<div class="tales-stage-label">Stage '+stageNum+'</div>'+
+        '<div class="tales-stage-title">'+esc(stage.title)+'</div>'+
+        '<div class="tales-stage-text">'+esc(stage.text)+'</div>'+
+      '</div>';
+    }
+    if (stageNum === unlocked + 1) {
+      var cost = TALES_STAGE_COST[stageNum - 1];
+      var canAfford = moons >= cost;
+      return '<div class="tales-stage-card next">'+
+        '<div class="tales-stage-label">Stage '+stageNum+' · Locked</div>'+
+        '<div class="tales-stage-title">???</div>'+
+        '<div style="font-size:13px;color:var(--muted);margin-bottom:10px">Unlock this stage to continue '+esc(cls.name)+'\'s story.</div>'+
+        '<button class="btn pri" style="font-size:13px;padding:6px 16px;opacity:'+(canAfford?'1':'0.45')+'"'+
+          (canAfford ? ' onclick="talesUnlockStage(\''+key+'\')"' : ' disabled')+
+          '>Unlock — 🌙 '+cost+'</button>'+
+      '</div>';
+    }
+    return '<div class="tales-stage-card future">'+
+      '<div class="tales-stage-label">Stage '+stageNum+' · Locked</div>'+
+      '<div class="tales-stage-title">🔒 ???</div>'+
+      '<div style="font-size:13px;color:var(--muted)">Unlock Stage '+(stageNum-1)+' first.</div>'+
+    '</div>';
+  }).join('');
+
+  return '<div class="breadcrumb">'+
+      '<span onclick="goTo(\'home\')">Home</span>'+
+      '<span class="sep">/</span>'+
+      '<span onclick="goTo(\'tales\')">Tales of the Awakened</span>'+
+      '<span class="sep">/</span>'+
+      '<span class="cur">'+esc(cls.name)+'</span>'+
+    '</div>'+
+    '<h1>'+cls.icon+' '+esc(cls.name)+'</h1>'+
+    '<p class="sub">'+esc(tale.subtitle)+'</p>'+
+    stagesHtml+
+    '<div class="brow" style="margin-top:16px"><button class="btn" onclick="goTo(\'tales\')">← Back to Tales</button></div>';
+}
+
 function screenShop() {
   var pr = prLoad();
   var moons = pr.moons || 0;
@@ -7382,6 +7963,20 @@ function screenShop() {
     'Correct answers now grant 2 Moons instead of 1.',
     forgeState,
     "shopBuy('forge')");
+
+  // Lunar Calendar
+  var lunarCalState = pr.shopLunarCalendar ? 'owned' : 'buy';
+  var lunarCalItem = shopItem('lunarcal', '🌙', 'Lunar Calendar', 200,
+    'Unlocks the Lunar Calendar — answer one fixed question each day to earn Moons and Star Coins.',
+    lunarCalState,
+    "shopBuy('lunarcal')");
+
+  // Tales of the Awakened
+  var talesState = pr.shopTales ? 'owned' : 'buy';
+  var talesItem = shopItem('tales', '📖', 'Tales of the Awakened', 50,
+    'Unlocks Tales of the Awakened — every class\'s 4-stage lore, unlockable one stage at a time.',
+    talesState,
+    "shopBuy('tales')");
 
   // Iron Will / Iron Maiden
   var willItem, maidenItem;
@@ -7470,7 +8065,7 @@ function screenShop() {
 
   // ── Section 1: Standard Shop
   '<div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">🛒 Moon Shop</div>' +
-  violetItem + forgeItem + willItem + maidenItem +
+  violetItem + forgeItem + lunarCalItem + talesItem + willItem + maidenItem +
   (function() {
     var codexOwned   = pr.shopIronCodex;
     var lunarOwned   = pr.shopMoonCodex;
@@ -7632,7 +8227,7 @@ function wishShowClassDetails() {
 
 function shopBuy(item) {
   var pr = prLoad();
-  var costs = { violet: 50, forge: 200, will: 50, maiden: 100, startShield: 20, startSkip: 10, startBomb: 10, ironcodex: 500, mooncodex: 500, emptyCanvas: 100 };
+  var costs = { violet: 50, forge: 200, will: 50, maiden: 100, startShield: 20, startSkip: 10, startBomb: 10, ironcodex: 500, mooncodex: 500, emptyCanvas: 100, lunarcal: 200, tales: 50 };
   var cost = costs[item];
   if ((pr.moons || 0) < cost) return;
   pr.moons -= cost;
@@ -7646,6 +8241,8 @@ function shopBuy(item) {
   if (item === 'startSkip')   { pr.shopStartSkip   = true; pr.starterConsumablesBought = (pr.starterConsumablesBought || 0) + 1; }
   if (item === 'startBomb')   { pr.shopStartBomb   = true; pr.starterConsumablesBought = (pr.starterConsumablesBought || 0) + 1; }
   if (item === 'ironcodex')   { pr.shopIronCodex   = true; }
+  if (item === 'lunarcal')    { pr.shopLunarCalendar = true; }
+  if (item === 'tales')       { pr.shopTales = true; }
   if (item === 'mooncodex')   { if (!pr.shopIronCodex) { pr.moons += cost; prSave(pr); return; } pr.shopMoonCodex = true; }
   if (item === 'emptyCanvas') {
     // Reset Jester + Witch storyline
@@ -8599,6 +9196,9 @@ function render() {
     case 'records':     app.innerHTML = screenRecords();     break;
     case 'achievements':app.innerHTML = screenAchievements(); break;
     case 'shop':        app.innerHTML = screenShop();        break;
+    case 'lunar':       app.innerHTML = screenLunarCalendar(); break;
+    case 'tales':        app.innerHTML = screenTales();        break;
+    case 'talesdetail':  app.innerHTML = screenTalesDetail();  break;
     case 'nmsettings':  app.innerHTML = screenNmSettings();  break;
     case 'nmcheckpoint':app.innerHTML = screenNmCheckpoint(); break;
     case 'ironloading': app.innerHTML = screenIronLoading(); break;
