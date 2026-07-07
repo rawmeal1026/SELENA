@@ -1363,6 +1363,8 @@ var S = {
   ironCurses: [],             // array of active curse ids, max 6
   ironCurseThreshold: 0,      // last score threshold processed (100, 200, 300...)
   ironCursePending: false,    // true when a curse-choice screen is waiting to be shown
+  ironCurseRevealPending: false, // true when a newly obtained curse's full-screen reveal is queued
+  ironCurseRevealId: null,    // id of the curse to display on the reveal screen
   ironCurseVampire2Active: false, // true this round if vampire_2 triggered (8s timer)
   ironCurseGhost2MaxLost: 0,  // total max-life reductions from ghost_2 this run
   ironClass: null,
@@ -1791,6 +1793,7 @@ function prMigrateAchievements(pr) {
   var allUpgraded = Object.keys(upgradeMap).length > 0 &&
     Object.keys(upgradeMap).every(function(k){ return upgradeMap[k]; });
   if (allUpgraded) unlockAchievement('violet_sky_upgrade_all');
+  checkTalesAchievements(pr);
 }
 
 function prSave(pr) {
@@ -1971,6 +1974,18 @@ var ACHIEVEMENTS = [
     desc:'As Elf, use Spirit Judgement but the spirit points to the wrong answer — then ignore it and answer correctly yourself.' },
   { id:'spellcaster',     icon:'✨', cat:'Class', title:'Spellcaster',
     desc:'As Mage, heal 1 life with Lumina and remove 7 wrong choices with Umbra in one Iron Man run.' },
+
+  // ── Tales of the Awakened ──
+  { id:'house_bloodmighty',          icon:'⚔️', cat:'Tales of the Awakened', title:'The House Bloodmighty',
+    desc:'Read all the Tales of Knight, Rogue, and Thief.' },
+  { id:'followers_of_the_evertree',  icon:'🌳', cat:'Tales of the Awakened', title:'The Followers of the Evertree',
+    desc:'Read all the Tales of Monk, Elf, and Paladin.' },
+  { id:'the_ophelia_brigade',        icon:'🗡️', cat:'Tales of the Awakened', title:'The Ophelia Brigade',
+    desc:'Read all the Tales of Assassin, Necromancer, and Medium.' },
+  { id:'the_cursed_ones',            icon:'🐾', cat:'Tales of the Awakened', title:'The Cursed Ones',
+    desc:'Read all the Tales of Beastman, Scout, and Fairy.' },
+  { id:'guilds_of_land_origo',       icon:'🏰', cat:'Tales of the Awakened', title:'Guilds of Land Origo',
+    desc:'Read all the Tales of Mage, Bomber, and Alchemist.' },
 
   // ── Misc ──
   { id:'no_touch_move_rule', icon:'✏️', cat:'Misc', title:'No Touch Move Rule',
@@ -2544,6 +2559,8 @@ function startQuiz() {
     S.ironUpgradeActive = false;
     S.ironUpgradeTriggered = false;
     S.ironUpgradePending = false;
+    S.ironCurseRevealPending = false;
+    S.ironCurseRevealId = null;
     S.necroGraveyard = [];
     S.necroRedemptionActive = false;
     S.necroCoinFlipPending = false;
@@ -3353,16 +3370,19 @@ function next() {
   // is about to begin, when the previous question is fully resolved and nothing is
   // currently on screen for the player to be pulled out of. This guarantees the reveal
   // never cuts into an ongoing question.
-  if (S.ironMode && (S.ironMasteryPending || S.ironUpgradePending)) {
+  if (S.ironMode && (S.ironMasteryPending || S.ironUpgradePending || S.ironCurseRevealPending)) {
     // Safety net: if a per-question timer is somehow still running at this boundary,
     // freeze it (don't let it keep ticking, or expire, behind the reveal screen).
     if (S.ironTimerInterval) stopIronTimer();
     if (S.ironMasteryPending) {
       S.ironMasteryPending = false;
       S.screen = 'ironmastery';
-    } else {
+    } else if (S.ironUpgradePending) {
       S.ironUpgradePending = false;
       S.screen = 'ironupgrade';
+    } else {
+      S.ironCurseRevealPending = false;
+      S.screen = 'ironcursereveal';
     }
     render();
     return;
@@ -3866,8 +3886,11 @@ function checkIronCurseThreshold() {
     var firstCurse = curseRollNew();
     if (firstCurse) {
       S.ironCurses.push(firstCurse);
-      var c = IRON_CURSES[firstCurse];
-      showBanner('synced', c.icon + ' CURSED! ' + c.name + ' (' + c.theme + ') awakens… Lose stacks by choosing wisely.', 4500);
+      // Defer the full reveal screen to the next round boundary (see next()),
+      // same pattern as ironMasteryPending/ironUpgradePending, so it never
+      // cuts into an ongoing question.
+      S.ironCurseRevealId = firstCurse;
+      S.ironCurseRevealPending = true;
     }
     return;
   }
@@ -3875,16 +3898,11 @@ function checkIronCurseThreshold() {
   var nextThreshold = S.ironCurseThreshold + 100;
   if (score >= nextThreshold && S.ironCurseThreshold >= 100) {
     S.ironCurseThreshold = nextThreshold;
-    // All 6 curses already owned → auto Karma Cleanse
-    if (S.ironCurses.length >= 6) {
-      S.ironCurseStacks = 0;
-      showBanner('synced', '✨ Karma Cleanse — all curses owned, stacks reset to zero!', 3500);
-    } else {
-      // Show choice screen
-      S.ironCursePending = true;
-      S.ironCurseChoiceNewId = curseRollNew();
-      setTimeout(function() { S.screen = 'ironcursechoice'; render(); }, 700);
-    }
+    S.ironCursePending = true;
+    // No curse left to offer once all 6 are owned — options 1-3 still grant
+    // their reward, just without a new curse attached.
+    S.ironCurseChoiceNewId = (S.ironCurses.length < 6) ? curseRollNew() : null;
+    setTimeout(function() { S.screen = 'ironcursechoice'; render(); }, 700);
   }
 }
 
@@ -3959,26 +3977,73 @@ function curseConsumableCheck() {
   return true;
 }
 
-// Curse choice screen handlers
-function ironCurseAcceptNew() {
-  // Option 1: reset stacks, gain the new curse
-  S.ironCurseStacks = 0;
-  if (S.ironCurseChoiceNewId && S.ironCurses.indexOf(S.ironCurseChoiceNewId) === -1) {
-    S.ironCurses.push(S.ironCurseChoiceNewId);
-    var c = IRON_CURSES[S.ironCurseChoiceNewId];
-    showBanner('synced', c.icon + ' ' + c.name + ' added — stacks cleansed!', 3000);
+// Curse choice screen handlers — 4 options at each 200/300/400... threshold.
+// Options 1-3 all grant a new curse when one is available (S.ironCurseChoiceNewId);
+// once all 6 curses are owned there's nothing left to gain, so those options
+// just deliver their reward with no downside. Option 4 never adds a curse.
+function _ironCurseTakeNewId() {
+  var acceptedId = S.ironCurseChoiceNewId;
+  if (acceptedId && S.ironCurses.indexOf(acceptedId) === -1) {
+    S.ironCurses.push(acceptedId);
+  } else {
+    acceptedId = null;
   }
   S.ironCursePending = false;
   S.ironCurseChoiceNewId = null;
-  S.screen = 'quiz';
+  if (S.ironTimerInterval) stopIronTimer();
+  return acceptedId;
+}
+function _ironCurseFinish(acceptedId) {
+  if (acceptedId) {
+    S.ironCurseRevealId = acceptedId;
+    S.screen = 'ironcursereveal';
+  } else {
+    S.screen = 'quiz';
+  }
   render();
 }
-function ironCurseKeepAll() {
-  // Option 2: keep all curses and stacks unchanged
+// Option 1: reset curse stacks to zero, gain a new curse if one is available.
+function ironCurseChoiceReset() {
+  var acceptedId = _ironCurseTakeNewId();
+  S.ironCurseStacks = 0;
+  _ironCurseFinish(acceptedId);
+}
+// Option 2: heal 2 lives, gain a new curse if one is available.
+function ironCurseChoiceHeal() {
+  var acceptedId = _ironCurseTakeNewId();
+  var healed = 0;
+  for (var i = 0; i < 2; i++) {
+    if (S.ironWrong > 0) { S.ironWrong--; healed++; }
+  }
+  S.ironLives = S.ironMaxLives - S.ironWrong;
+  if (healed > 0) showBanner('synced', '❤️ Healed ' + healed + ' life' + (healed !== 1 ? 's' : '') + '!', 2500);
+  _ironCurseFinish(acceptedId);
+}
+// Option 3: get 6 random consumables, gain a new curse if one is available.
+function ironCurseChoiceConsumables() {
+  var acceptedId = _ironCurseTakeNewId();
+  var types = ['shield', 'skip', 'bomb'];
+  var granted = { shield: 0, skip: 0, bomb: 0 };
+  for (var i = 0; i < 6; i++) {
+    var t = shuf(types)[0];
+    S.ironConsumables[t] += IRON_CONSUMABLE_INFO[t].qty;
+    granted[t] += IRON_CONSUMABLE_INFO[t].qty;
+  }
+  var summary = types.filter(function(t){ return granted[t] > 0; })
+    .map(function(t){ return IRON_CONSUMABLE_INFO[t].icon + ' +' + granted[t]; }).join('  ');
+  showBanner('synced', '🎁 Supply Drop — ' + summary, 3000);
+  _ironCurseFinish(acceptedId);
+}
+// Option 4: continue the run untouched, gain 50 Moons. No curse, no reward, no downside.
+function ironCurseChoiceMoons() {
   S.ironCursePending = false;
   S.ironCurseChoiceNewId = null;
-  S.screen = 'quiz';
-  render();
+  if (S.ironTimerInterval) stopIronTimer();
+  prRecord(function(pr){ pr.moons = (pr.moons || 0) + 50; });
+  var _mc = document.getElementById('moonCount');
+  if (_mc) _mc.textContent = (prLoad().moons || 0).toLocaleString();
+  showBanner('synced', '🌙 +50 Moons — the curse passes you by, for now.', 2800);
+  _ironCurseFinish(null);
 }
 
 /* ─────────────────────────────────────────────
@@ -5687,12 +5752,75 @@ function continueAfterUpgrade() {
   next();
 }
 
+function continueAfterCurseReveal() {
+  // Same resume logic as continueAfterUpgrade(): if a question is still live
+  // (the common case when this reveal was triggered right after accepting a
+  // new curse from the choice screen), just return to it and resume its timer.
+  // Otherwise (the deferred first-curse reveal at score 100, shown at a round
+  // boundary from next()), fall through and advance normally.
+  if (S.ironMode && !S.done && S.shuffled && S.shuffled[S.cur]) {
+    S.screen = 'quiz';
+    render();
+    resumeIronTimer();
+    return;
+  }
+  next();
+}
+
+function screenIronCurseReveal() {
+  var id = S.ironCurseRevealId;
+  var c = id ? IRON_CURSES[id] : null;
+  if (!c) return '<div class="iron-gameover-wrap"><div class="iron-gameover-title">CURSED</div></div>';
+
+  var otherCursesHtml = S.ironCurses.filter(function(cid){ return cid !== id; }).map(function(cid) {
+    var oc = IRON_CURSES[cid];
+    return '<div style="margin:4px 0;font-size:13px">' + oc.icon + ' <b>' + oc.name + '</b> — ' + oc.desc + '</div>';
+  }).join('');
+
+  return '<div class="mastery-wrap">' +
+    '<div class="mastery-banner" style="background:rgba(192,57,43,0.15);color:#c0392b">☠️ Iron Man Mode · Curse ' + S.ironCurseThreshold + '</div>' +
+    '<div class="mastery-badge-wrap">' +
+      '<div class="mastery-badge" style="border-color:#c0392b">' + c.icon + '</div>' +
+    '</div>' +
+    '<div class="mastery-title" style="color:#c0392b">CURSED!</div>' +
+    '<div class="mastery-sub">A new affliction has taken hold of you.</div>' +
+    '<div class="mastery-score-row">' +
+      '<span class="mastery-score-pill">🏆 Current Score: ' + S.score + '</span>' +
+      '<span class="mastery-score-pill">☠️ Curses: ' + S.ironCurses.length + '/6</span>' +
+    '</div>' +
+    '<div class="mastery-class-card" style="border-color:#c0392b">' +
+      '<div class="mastery-class-header">' +
+        '<div class="mastery-class-icon">' + c.icon + '</div>' +
+        '<div>' +
+          '<div class="mastery-class-name">' + esc(c.name) + '</div>' +
+          '<div class="mastery-class-tag">' + esc(c.theme) + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="mastery-divider"></div>' +
+      '<div class="mastery-ability-desc">' + esc(c.desc) + '</div>' +
+    '</div>' +
+    (otherCursesHtml ? (
+      '<div class="iron-gameover-box" style="text-align:left;max-width:420px;width:100%">' +
+        '<div style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--text-muted)">OTHER ACTIVE CURSES</div>' +
+        otherCursesHtml +
+      '</div>'
+    ) : '') +
+    '<button class="mastery-continue-btn" onclick="continueAfterCurseReveal()">Continue the Run →</button>' +
+    '<button class="mastery-back-btn" onclick="goTo(\'home\')">← Quit to home</button>' +
+  '</div>';
+}
+
 function screenIronCurseChoice() {
   var newCurse = S.ironCurseChoiceNewId ? IRON_CURSES[S.ironCurseChoiceNewId] : null;
+  var allOwned = S.ironCurses.length >= 6;
   var currentCursesHtml = S.ironCurses.map(function(id) {
     var c = IRON_CURSES[id];
     return '<div style="margin:4px 0;font-size:13px">' + c.icon + ' <b>' + c.name + '</b> — ' + c.desc + '</div>';
   }).join('');
+  // Suffix appended to options 1-3, describing what (if anything) is gained.
+  var gainSuffix = newCurse
+    ? (' + gain ' + newCurse.icon + ' ' + newCurse.name)
+    : '';
   return '<div class="iron-gameover-wrap" style="gap:18px">'+
     '<div class="iron-gameover-title" style="color:#c0392b;font-size:22px">⚠️ CURSE THRESHOLD</div>'+
     '<div style="font-size:14px;color:var(--text-muted);text-align:center">You have reached score <b>' + S.ironCurseThreshold + '</b>.<br>Choose your fate.</div>'+
@@ -5702,20 +5830,32 @@ function screenIronCurseChoice() {
     '</div>'+
     (newCurse ? (
       '<div class="iron-gameover-box" style="border-color:#c0392b;max-width:420px;width:100%;text-align:left">'+
-        '<div style="font-size:12px;color:#c0392b;font-weight:700;margin-bottom:4px">NEW CURSE OFFERED</div>'+
+        '<div style="font-size:12px;color:#c0392b;font-weight:700;margin-bottom:4px">NEW CURSE OFFERED (options 1-3)</div>'+
         '<div style="font-size:14px">' + newCurse.icon + ' <b>' + newCurse.name + '</b> (' + newCurse.theme + ')</div>'+
         '<div style="font-size:12px;color:var(--text-muted);margin-top:4px">' + newCurse.desc + '</div>'+
-      '</div>'+
-      '<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">'+
-        '<button class="btn btn-danger" onclick="ironCurseAcceptNew()" style="min-width:180px">'+
-          '☠️ Accept — Reset stacks, gain curse'+
-        '</button>'+
-        '<button class="btn" onclick="ironCurseKeepAll()" style="min-width:180px">'+
-          '🛡️ Endure — Keep all curses & stacks'+
-        '</button>'+
       '</div>'
-    ) : '<div style="color:var(--text-muted);font-size:13px">No new curse to offer.</div>'+
-        '<button class="btn" onclick="ironCurseKeepAll()">Continue</button>')+
+    ) : (
+      allOwned ? (
+        '<div class="iron-gameover-box" style="border-color:#c0392b;max-width:420px;width:100%;text-align:center">'+
+          '<div style="font-size:13px;color:#c0392b;font-weight:700">☠️ You already bear all of the Monster Lord\'s curses.</div>'+
+          '<div style="font-size:12px;color:var(--text-muted);margin-top:4px">Options 1-3 grant their reward with no new curse attached.</div>'+
+        '</div>'
+      ) : ''
+    ))+
+    '<div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:420px">'+
+      '<button class="btn btn-danger" onclick="ironCurseChoiceReset()">'+
+        '1️⃣ ☠️ Reset curse stacks' + gainSuffix +
+      '</button>'+
+      '<button class="btn btn-danger" onclick="ironCurseChoiceHeal()">'+
+        '2️⃣ ❤️ Heal 2 lives' + gainSuffix +
+      '</button>'+
+      '<button class="btn btn-danger" onclick="ironCurseChoiceConsumables()">'+
+        '3️⃣ 🎁 Get 6 random consumables' + gainSuffix +
+      '</button>'+
+      '<button class="btn" onclick="ironCurseChoiceMoons()">'+
+        '4️⃣ 🌙 Continue — +50 Moons, no new curse'+
+      '</button>'+
+    '</div>'+
   '</div>';
 }
 function curseHudHtml() {
@@ -5907,8 +6047,8 @@ function screenHome() {
       '<button class="dm-btn" title="Toggle dark mode" onclick="toggleDark()">'+(THEME_ICONS[S.theme]||'🌙')+'</button>'+
     '</div>'+
     '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px">'+
-      '<button class="btn" style="font-size:11px;padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.2" onclick="goTo(\'achievements\')"><span style="font-size:16px">🏆</span><span>Achievements</span></button>'+
       '<button class="btn" style="font-size:11px;padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.2" onclick="goTo(\'records\')"><span style="font-size:16px">📊</span><span>Records</span></button>'+
+      '<button class="btn" style="font-size:11px;padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.2" onclick="goTo(\'achievements\')"><span style="font-size:16px">🏆</span><span>Achievements</span></button>'+
       '<button class="btn" style="font-size:11px;padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.2" onclick="goTo(\'shop\')"><span style="font-size:16px">🛒</span><span>Shop</span></button>'+
       '<button class="btn" style="font-size:11px;padding:7px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.2" onclick="openFeedback()"><span style="font-size:16px">📝</span><span>Feedback</span></button>'+
     '</div>'+
@@ -7820,6 +7960,23 @@ function screenLunarCalendar() {
 /* ─────────────────────────────────────────────
    TALES OF THE AWAKENED
 ───────────────────────────────────────────── */
+// Groups of 3 classes whose Tales must all reach the final stage (4) to
+// unlock the matching non-secret achievement.
+var TALES_GROUPS = [
+  { id: 'house_bloodmighty',         classes: ['knight', 'rogue', 'thief'] },
+  { id: 'followers_of_the_evertree', classes: ['monk', 'elf', 'paladin'] },
+  { id: 'the_ophelia_brigade',       classes: ['assassin', 'necromancer', 'medium'] },
+  { id: 'the_cursed_ones',           classes: ['beastman', 'scout', 'fairy'] },
+  { id: 'guilds_of_land_origo',      classes: ['mage', 'bomber', 'alchemist'] }
+];
+function checkTalesAchievements(pr) {
+  var talesMap = (pr && pr.talesUnlocked) || {};
+  TALES_GROUPS.forEach(function(g) {
+    var allRead = g.classes.every(function(k){ return (talesMap[k] || 0) >= 4; });
+    if (allRead) unlockAchievement(g.id);
+  });
+}
+
 function talesStagesUnlocked(key) {
   var pr = prLoad();
   return (pr.talesUnlocked && pr.talesUnlocked[key]) || 0;
@@ -7841,6 +7998,7 @@ function talesUnlockStage(key) {
   pr.moons -= cost;
   pr.talesUnlocked[key] = nextStage;
   prSave(pr);
+  checkTalesAchievements(pr);
   var mc = document.getElementById('moonCount');
   if (mc) mc.textContent = (pr.moons || 0).toLocaleString();
   render();
@@ -8275,7 +8433,7 @@ function screenAchievements() {
   prMigrateAchievements(pr);
   var unlockedCount = ACHIEVEMENTS.filter(function(a){ return !!state[a.id]; }).length;
 
-  var catIcons = { 'Study Mode':'📖', 'Redemption':'👻', 'Iron Man':'⚔️', 'Class':'🎭', 'Misc':'🌙' };
+  var catIcons = { 'Study Mode':'📖', 'Redemption':'👻', 'Iron Man':'⚔️', 'Class':'🎭', 'Tales of the Awakened':'📜', 'Misc':'🌙' };
   var cats = [];
   ACHIEVEMENTS.forEach(function(a){ if (cats.indexOf(a.cat) === -1) cats.push(a.cat); });
 
@@ -8327,6 +8485,14 @@ function screenAchievements() {
           var totalClasses2 = Object.keys(upgradeMap2).length || 1;
           var upgradedCount2 = Object.keys(upgradeMap2).filter(function(k){ return upgradeMap2[k]; }).length;
           progressHtml = progressBar(upgradedCount2, totalClasses2);
+        } else {
+          var talesGroup = null;
+          for (var _tg = 0; _tg < TALES_GROUPS.length; _tg++) { if (TALES_GROUPS[_tg].id === a.id) { talesGroup = TALES_GROUPS[_tg]; break; } }
+          if (talesGroup) {
+            var talesMap = pr.talesUnlocked || {};
+            var readCount = talesGroup.classes.filter(function(k){ return (talesMap[k] || 0) >= 4; }).length;
+            progressHtml = progressBar(readCount, talesGroup.classes.length);
+          }
         }
       }
       return '<div class="achv-card'+(unlocked ? ' unlocked' : ' locked')+'">'+
@@ -9210,6 +9376,7 @@ function render() {
     case 'ironmastery':     app.innerHTML = screenIronMastery();     break;
     case 'ironupgrade':     app.innerHTML = screenIronUpgrade();     break;
     case 'ironcursechoice': app.innerHTML = screenIronCurseChoice(); break;
+    case 'ironcursereveal': app.innerHTML = screenIronCurseReveal();  break;
     case 'necrocoinflip': app.innerHTML = screenNecroCoinFlip(); break;
   }
   // ── Auto-save: Study Mode progress persists silently, no manual save button ──
