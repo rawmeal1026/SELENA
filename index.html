@@ -833,7 +833,7 @@ html.dark .cache-badge { background:#0a2018; }
 .achv-card.locked { opacity:.55; }
 .achv-card.unlocked { border-color:var(--gold-glow); background:var(--gold-bg); }
 .achv-card-icon { font-size:24px;line-height:1;flex-shrink:0;margin-top:1px; }
-.achv-card-body { display:flex;flex-direction:column;gap:2px;min-width:0; }
+.achv-card-body { display:flex;flex-direction:column;gap:2px;min-width:0;flex:1; }
 .achv-card-title { font-size:14px;font-weight:700;color:var(--text); }
 .achv-card-desc  { font-size:12px;color:var(--muted);line-height:1.5; }
 .achv-card-date  { font-size:11px;color:var(--gold);margin-top:2px;font-weight:600; }
@@ -1746,6 +1746,9 @@ var PR_DEFAULTS = {
   lunarCalendar: {},
   // Star Coins — earned monthly by converting the previous month's Moon Marks
   starCoins: 0,
+  // Lifetime total of days answered ("Moon Marks") in the Lunar Calendar — tracked
+  // separately since lunarConvertPastMonths() deletes past-month entries after conversion.
+  lunarTotalMarks: 0,
   // Tales of the Awakened — keyed by class, stores highest lore stage unlocked (0-4)
   talesUnlocked: {},
 };
@@ -1794,6 +1797,7 @@ function prMigrateAchievements(pr) {
     Object.keys(upgradeMap).every(function(k){ return upgradeMap[k]; });
   if (allUpgraded) unlockAchievement('violet_sky_upgrade_all');
   checkTalesAchievements(pr);
+  checkLunarAchievements(pr);
 }
 
 function prSave(pr) {
@@ -1986,6 +1990,16 @@ var ACHIEVEMENTS = [
     desc:'Read all the Tales of Beastman, Scout, and Fairy.' },
   { id:'guilds_of_land_origo',       icon:'🏰', cat:'Tales of the Awakened', title:'Guilds of Land Origo',
     desc:'Read all the Tales of Mage, Bomber, and Alchemist.' },
+
+  // ── Lunar Calendar ──
+  { id:'waxing_crescent',    icon:'🌒', cat:'Lunar Calendar', title:'Waxing Crescent',
+    desc:'Moon Mark 7 days total in the Lunar Calendar.' },
+  { id:'full_moon_rising',   icon:'🌕', cat:'Lunar Calendar', title:'Full Moon Rising',
+    desc:'Moon Mark 14 days total in the Lunar Calendar.' },
+  { id:'waning_gibbous',     icon:'🌖', cat:'Lunar Calendar', title:'Waning Gibbous',
+    desc:'Moon Mark 21 days total in the Lunar Calendar.' },
+  { id:'full_lunar_cycle',   icon:'🌗', cat:'Lunar Calendar', title:'A Full Lunar Cycle',
+    desc:'Moon Mark every single day of one calendar month in the Lunar Calendar.' },
 
   // ── Misc ──
   { id:'no_touch_move_rule', icon:'✏️', cat:'Misc', title:'No Touch Move Rule',
@@ -7748,6 +7762,49 @@ function openFeedback() {
 ───────────────────────────────────────────── */
 function lunarPad(n) { return n < 10 ? '0'+n : ''+n; }
 
+// Lifetime "Moon Mark" total thresholds → matching achievement id.
+// (full_lunar_cycle is NOT cumulative — it requires every single day of one
+// calendar month to be marked, so it's checked separately; see
+// lunarMonthFullyMarked() / lunarAnswer() / lunarConvertPastMonths().)
+var LUNAR_MARK_TIERS = [
+  { days: 7,  id: 'waxing_crescent' },
+  { days: 14, id: 'full_moon_rising' },
+  { days: 21, id: 'waning_gibbous' }
+];
+function checkLunarAchievements(pr) {
+  var total = (pr && pr.lunarTotalMarks) || 0;
+  LUNAR_MARK_TIERS.forEach(function(t) {
+    if (total >= t.days) unlockAchievement(t.id);
+  });
+}
+function lunarDaysInMonth(year, month) { // month is 0-indexed
+  return new Date(year, month + 1, 0).getDate();
+}
+// True only if every day of the given calendar month has an answered entry.
+function lunarMonthFullyMarked(pr, year, month) {
+  var cal = (pr && pr.lunarCalendar) || {};
+  var total = lunarDaysInMonth(year, month);
+  for (var day = 1; day <= total; day++) {
+    var key = year + '-' + lunarPad(month + 1) + '-' + lunarPad(day);
+    var entry = cal[key];
+    if (!entry || !entry.answered) return false;
+  }
+  return true;
+}
+// Marked-days / total-days for the current calendar month (for the progress bar).
+function lunarCurrentMonthProgress(pr) {
+  var today = new Date();
+  var year = today.getFullYear(), month = today.getMonth();
+  var total = lunarDaysInMonth(year, month);
+  var cal = (pr && pr.lunarCalendar) || {};
+  var marked = 0;
+  for (var day = 1; day <= total; day++) {
+    var key = year + '-' + lunarPad(month + 1) + '-' + lunarPad(day);
+    if (cal[key] && cal[key].answered) marked++;
+  }
+  return { marked: marked, total: total };
+}
+
 function lunarDateKey(d) {
   return d.getFullYear()+'-'+lunarPad(d.getMonth()+1)+'-'+lunarPad(d.getDate());
 }
@@ -7765,13 +7822,23 @@ function lunarConvertPastMonths() {
   var currentMonthKey = lunarMonthKey(new Date());
   var marksCount = 0;
   var toDelete = [];
+  var pastMonthKeys = [];
   Object.keys(pr.lunarCalendar).forEach(function(dateKey) {
-    if (dateKey.slice(0, 7) < currentMonthKey) {
+    var mKey = dateKey.slice(0, 7);
+    if (mKey < currentMonthKey) {
       if (pr.lunarCalendar[dateKey] && pr.lunarCalendar[dateKey].answered) marksCount++;
       toDelete.push(dateKey);
+      if (pastMonthKeys.indexOf(mKey) === -1) pastMonthKeys.push(mKey);
     }
   });
   if (toDelete.length) {
+    // Safety net: lunarAnswer() already checks this in real time, but verify
+    // here too, before this month's entries are discarded for good.
+    pastMonthKeys.forEach(function(mKey) {
+      var parts = mKey.split('-');
+      var y = parseInt(parts[0], 10), m = parseInt(parts[1], 10) - 1;
+      if (lunarMonthFullyMarked(pr, y, m)) unlockAchievement('full_lunar_cycle');
+    });
     toDelete.forEach(function(k) { delete pr.lunarCalendar[k]; });
     if (marksCount > 0) pr.starCoins = (pr.starCoins || 0) + marksCount;
     prSave(pr);
@@ -7858,7 +7925,13 @@ function lunarAnswer(idx) {
   entry.correct = isCorrect;
   entry.chosen = idx;
   pr.moons = (pr.moons || 0) + (isCorrect ? 50 : 25);
+  pr.lunarTotalMarks = (pr.lunarTotalMarks || 0) + 1;
   prSave(pr);
+  checkLunarAchievements(pr);
+  var todayD = new Date();
+  if (lunarMonthFullyMarked(pr, todayD.getFullYear(), todayD.getMonth())) {
+    unlockAchievement('full_lunar_cycle');
+  }
   var mc = document.getElementById('moonCount');
   if (mc) mc.textContent = (pr.moons || 0).toLocaleString();
   render();
@@ -8433,7 +8506,7 @@ function screenAchievements() {
   prMigrateAchievements(pr);
   var unlockedCount = ACHIEVEMENTS.filter(function(a){ return !!state[a.id]; }).length;
 
-  var catIcons = { 'Study Mode':'📖', 'Redemption':'👻', 'Iron Man':'⚔️', 'Class':'🎭', 'Tales of the Awakened':'📜', 'Misc':'🌙' };
+  var catIcons = { 'Study Mode':'📖', 'Redemption':'👻', 'Iron Man':'⚔️', 'Class':'🎭', 'Tales of the Awakened':'📜', 'Lunar Calendar':'🌙', 'Misc':'🌙' };
   var cats = [];
   ACHIEVEMENTS.forEach(function(a){ if (cats.indexOf(a.cat) === -1) cats.push(a.cat); });
 
@@ -8492,6 +8565,16 @@ function screenAchievements() {
             var talesMap = pr.talesUnlocked || {};
             var readCount = talesGroup.classes.filter(function(k){ return (talesMap[k] || 0) >= 4; }).length;
             progressHtml = progressBar(readCount, talesGroup.classes.length);
+          } else if (a.id === 'full_lunar_cycle') {
+            var monthProg = lunarCurrentMonthProgress(pr);
+            progressHtml = progressBar(monthProg.marked, monthProg.total);
+          } else {
+            var lunarTier = null;
+            for (var _lt = 0; _lt < LUNAR_MARK_TIERS.length; _lt++) { if (LUNAR_MARK_TIERS[_lt].id === a.id) { lunarTier = LUNAR_MARK_TIERS[_lt]; break; } }
+            if (lunarTier) {
+              var totalMarks = pr.lunarTotalMarks || 0;
+              progressHtml = progressBar(Math.min(totalMarks, lunarTier.days), lunarTier.days);
+            }
           }
         }
       }
