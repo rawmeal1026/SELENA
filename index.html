@@ -2051,6 +2051,15 @@ var _achvMoonBatchPending = false;
 function unlockAchievement(id) {
   var state = achvLoad();
   if (state[id]) return false;
+  // Jester masquerades as a secret class once its passive/skill unlocks (S.ironClass gets
+  // temporarily swapped to that class's id), which would otherwise let a Jester run silently
+  // trigger that class's dedicated "Class" achievements. Block those specifically — Jester
+  // still earns Iron Man / Misc / other non-class achievements normally.
+  if (S.ironMode && S.ironIsJester) {
+    var _jesterDef = null;
+    for (var _ji = 0; _ji < ACHIEVEMENTS.length; _ji++) { if (ACHIEVEMENTS[_ji].id === id) { _jesterDef = ACHIEVEMENTS[_ji]; break; } }
+    if (_jesterDef && _jesterDef.cat === 'Class') return false;
+  }
   state[id] = { unlockedAt: Date.now() };
   achvSaveState(state);
   // Only award 20 Moons once per synchronous batch (handles simultaneous unlocks)
@@ -2621,6 +2630,7 @@ function startQuiz() {
     S.ironScoutReadyUpBonus = false;   // true when this question was the Ready Up target (for UI feedback)
     S.ironScoutCalculatedBonus = false; // true when mastery bonus fired this question (for UI feedback)
     S.ironScoutSkillMasteryPoints = 0; // total points from Ready Up + Calculated this run
+    S.ironScoutEagleEyeAnswer = null;  // display-index of revealed answer via Eagle Eye (Bullet Marker upgrade)
     // Mage state
     S.ironMageMana = 0;                // current mana pool
     S.ironMageLuminaStreak = 0;        // consecutive Lumina incantation count
@@ -3570,6 +3580,19 @@ function advanceQuestion() {
     } else {
       S.ironMageUmbraRevealAnswer = null;
     }
+    // Scout: Eagle Eye (Bullet Marker upgrade) — while Ready Up is armed, reveal the
+    // correct answer of the question it's armed for (i.e. this next question).
+    if (S.ironClass === 'scout' && S.ironUpgradeActive && S.ironScoutReadyUpActive) {
+      var _scoutQ = S.shuffled[S.cur];
+      S.ironScoutEagleEyeAnswer = null;
+      if (_scoutQ) {
+        for (var _si = 0; _si < _scoutQ._order.length; _si++) {
+          if (_scoutQ._order[_si] === _scoutQ.answer) { S.ironScoutEagleEyeAnswer = _si; break; }
+        }
+      }
+    } else {
+      S.ironScoutEagleEyeAnswer = null;
+    }
     // Mage: Umbra tier-5 — auto-remove one wrong choice per round
     if (S.ironClass === 'mage' && S.ironMageUmbraWrongRemoveRoundsLeft > 0) {
       var _umbraQ = S.shuffled[S.cur];
@@ -3810,7 +3833,7 @@ function jesterOnStreakReset() {
   S.ironElfSpiritLove = 0;
   S.ironMageMana = 0; S.ironMageLuminaImmune = false;
   S.ironMediumPossession = 0; S.ironMediumPossessing = false; S.ironMediumPeekedPos = null;
-  S.ironScoutReadyUpActive = false; S.ironScoutReadyUpBonus = false;
+  S.ironScoutReadyUpActive = false; S.ironScoutReadyUpBonus = false; S.ironScoutEagleEyeAnswer = null;
   S.ironSkillCooldown = 0; S.ironSkillUsedThisQ = false;
   S.necroGraveyard = []; S.necroRedemptionActive = false; S.necroCoinFlipPending = false;
 }
@@ -6321,9 +6344,14 @@ function screenQuiz() {
       ? ' style="outline:2px solid #8e44ad;outline-offset:2px"' : '';
     var umbraRevealLabel = (S.ironMode && S.ironClass === 'mage' && (S.theme||'dark') === 'dark' && S.ironMageUmbraRevealAnswer === pos && !S.done)
       ? ' <span style="font-size:10px;color:#8e44ad;font-weight:700">✨ Umbra</span>' : '';
-    var combinedGlow = mediumPeekedGlow || spiritGlow || umbraRevealGlow;
+    // Scout: Eagle Eye (Bullet Marker upgrade) — highlight the correct choice while Ready Up is armed
+    var eagleEyeGlow = (S.ironMode && S.ironClass === 'scout' && S.ironScoutEagleEyeAnswer === pos && !S.done)
+      ? ' style="outline:2px solid #27ae60;outline-offset:2px"' : '';
+    var eagleEyeLabel = (S.ironMode && S.ironClass === 'scout' && S.ironScoutEagleEyeAnswer === pos && !S.done)
+      ? ' <span style="font-size:10px;color:#27ae60;font-weight:700">🎯 Eagle Eye</span>' : '';
+    var combinedGlow = mediumPeekedGlow || spiritGlow || umbraRevealGlow || eagleEyeGlow;
     return '<button class="cbtn'+gyCbtnClass+' '+cls+'"'+combinedGlow+' onclick="pick('+pos+')" '+((S.done||removed)?'disabled':'')+'>'+
-      '<span class="cltr">'+L[pos]+'.</span><span>'+esc(q.choices[origIdx])+(removed?' <span style="font-size:11px;opacity:.7">(removed)</span>':'')+spiritLabel+umbraRevealLabel+mediumPeekedLabel+'</span></button>';
+      '<span class="cltr">'+L[pos]+'.</span><span>'+esc(q.choices[origIdx])+(removed?' <span style="font-size:11px;opacity:.7">(removed)</span>':'')+spiritLabel+umbraRevealLabel+mediumPeekedLabel+eagleEyeLabel+'</span></button>';
   }).join('');
 
   var nxBtn = '';
